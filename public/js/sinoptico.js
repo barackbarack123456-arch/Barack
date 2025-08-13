@@ -253,11 +253,10 @@ export const sinopticoModule = {
 
         // Renderizar la estructura HTML básica de la vista
         this.renderLayout(container);
-        this._updateSortVisuals();
 
         // Limpiar el contenido del arbol inicial
-        const treeContainer = document.getElementById('sinoptico-tree-container').querySelector('tbody');
-        treeContainer.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-500">Por favor, selecciona un producto para ver su sinóptico.</td></tr>';
+        const treeContainer = document.getElementById('sinoptico-tree-container');
+        treeContainer.innerHTML = '<p class="p-8 text-center text-slate-500">Por favor, selecciona un producto para ver su sinóptico.</p>';
 
         // Configurar el event listener para el selector de producto
         const productSelect = document.getElementById('product-select');
