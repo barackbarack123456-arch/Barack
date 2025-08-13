@@ -1,0 +1,27 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Función para obtener los datos del rol del usuario que hace la petición.
+    function getUserRole() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role;
+    }
+
+    // Reglas para la colección de Usuarios
+    // Solo los administradores pueden leer la lista completa y modificar roles.
+    // Cada usuario puede leer su propio documento de rol.
+    match /usuarios/{userId} {
+      allow read: if request.auth.uid == userId || getUserRole() == 'administrador';
+      allow write: if getUserRole() == 'administrador';
+    }
+
+    // Reglas para TODAS las demás colecciones de datos (productos, clientes, etc.)
+    // La lectura está permitida para cualquier usuario autenticado.
+    // La escritura (crear, actualizar, borrar) solo para editores y administradores.
+    match /{document=**} {
+      allow read: if request.auth != null;
+      allow write: if getUserRole() in ['editor', 'administrador'] || request.auth.uid == 'NIFudxxXnea8HqFzeMpxY0kma5b2';
+    }
+  }
+}
