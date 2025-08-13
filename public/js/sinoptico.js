@@ -81,29 +81,11 @@ export const sinopticoModule = {
                     </div>
                 </div>
 
-                <!-- Contenedor del Árbol/Tabla -->
-                <div id="sinoptico-tree-wrapper" class="bg-white rounded-xl shadow-sm border border-slate-200" style="height: calc(100vh - 350px); overflow: auto;">
-                    <table id="sinoptico-tree-container">
-                        <colgroup>
-                            <col width="*">
-                            <col width="120px">
-                            <col width="100px">
-                            <col width="180px">
-                            <col width="150px">
-                        </colgroup>
-                        <thead class="bg-slate-50">
-                            <tr>
-                                <th class="p-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer sortable-header" data-sort-key="title">Part Number / Description</th>
-                                <th class="p-4 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer sortable-header" data-sort-key="level">Level</th>
-                                <th class="p-4 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer sortable-header" data-sort-key="cantidad">Qty per Piece</th>
-                                <th class="p-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer sortable-header" data-sort-key="comentarios">Comments</th>
-                                <th class="p-4 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer sortable-header" data-sort-key="collection">Part Type</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td colspan="5" class="p-8 text-center text-slate-500">Seleccione un producto para comenzar.</td></tr>
-                        </tbody>
-                    </table>
+                <!-- Contenedor del Árbol -->
+                <div id="sinoptico-tree-wrapper" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4" style="height: calc(100vh - 280px); overflow: auto;">
+                    <div id="sinoptico-tree-container">
+                       <p class="p-8 text-center text-slate-500">Seleccione un producto para comenzar.</p>
+                    </div>
                 </div>
             </div>
         `;
@@ -130,12 +112,11 @@ export const sinopticoModule = {
         }
 
         jQuery(treeContainer).fancytree({
-            extensions: ["table", "dnd5", "edit", "filter"],
+            extensions: ["dnd5", "edit", "filter", "connectors"],
             source: treeData,
-            table: {
-                indentation: 20,
-                nodeColumnIdx: 0,
-                checkboxColumnIdx: null,
+            connectors: {
+                type: 'line',
+                style: 'dashed'
             },
             dnd5: {
                 preventRecursion: true,
@@ -155,43 +136,56 @@ export const sinopticoModule = {
                 // Render all icons after the tree is loaded
                 lucide.createIcons();
             },
-            renderColumns: (event, data) => {
+            renderNode: (event, data) => {
                 const node = data.node;
-                const $tdList = jQuery(node.tr).find(">td");
-
-                // Columna 0: Título (con icono)
-                const $iconSpan = $tdList.eq(0).find('.fancytree-icon');
+                const $span = $(node.span);
                 const iconMap = {
-                    'productos': 'package',
-                    'subproductos': 'box',
-                    'insumos': 'beaker'
+                    'productos': 'car-front',
+                    'subproductos': 'cog',
+                    'insumos': 'component'
                 };
                 const iconName = iconMap[node.data.collection] || 'file-text';
-                $iconSpan.html(`<i data-lucide="${iconName}" class="inline-block h-4 w-4 mr-2 text-slate-500 align-middle"></i>`);
 
-                const $title = $tdList.eq(0).find('.fancytree-title');
-                $title.addClass('text-slate-800 font-semibold align-middle');
+                // Clear the default icon and title
+                $span.find('.fancytree-icon, .fancytree-title').remove();
 
-                // Columna 1: Nivel
-                $tdList.eq(1).text(node.getLevel()).addClass('text-center');
+                // Add custom rendering
+                $span.append(`<i data-lucide="${iconName}" class="inline-block h-5 w-5 mr-2 text-slate-600 align-middle"></i>`);
+                $span.append(`<span class="fancytree-title text-slate-800 font-semibold align-middle">${node.title}</span>`);
 
-                // Columna 2: Cantidad por pieza
-                const $qtyTd = $tdList.eq(2).text(node.data.cantidad || 1).addClass('text-center');
+                // Add additional info
+                 const infoText = this._getNodeInfoText(node);
+                 if (infoText) {
+                    $span.append(`<span class="ml-4 text-sm text-slate-500">${infoText}</span>`);
+                 }
 
-                // Columna 3: Comentarios
-                const $commentsTd = $tdList.eq(3).text(node.data.comentarios || '');
-
-                // Columna 4: Tipo de Parte
-                const partType = node.data.collection.replace(/s$/, ''); // 'productos' -> 'producto'
-                $tdList.eq(4).html(`<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-slate-100 text-slate-800">${partType}</span>`).addClass('text-center');
-
-                // Hacer columnas editables si estamos en modo edición
                 if (this.state.isEditMode) {
-                    this._setupEditable($qtyTd, node, 'cantidad', true);
-                    this._setupEditable($commentsTd, node, 'comentarios', false);
+                    const $qtySpan = $(`<span class="ml-4 px-2 py-0.5 bg-blue-100 rounded-full text-xs cursor-pointer hover:bg-blue-200">Qty: ${node.data.cantidad || 1}</span>`);
+                    $span.append($qtySpan);
+                    this._setupEditable($qtySpan, node, 'cantidad', true);
                 }
             }
         });
+    },
+
+    _getNodeInfoText(node) {
+        const data = node.data;
+        switch (data.collection) {
+            case 'productos':
+                return `(Versión: ${data.version || 'N/A'})`;
+            case 'subproductos':
+                 return `(Proceso: ${this._getRelatedDesc(this.COLLECTIONS.PROCESOS, data.procesoId) || 'N/A'})`;
+            case 'insumos':
+                return `(Proveedor: ${this._getRelatedDesc(this.COLLECTIONS.PROVEEDORES, data.proveedorId) || 'N/A'})`;
+            default:
+                return '';
+        }
+    },
+
+    _getRelatedDesc(collectionName, docId) {
+        if (!docId) return null;
+        const doc = this.app.collectionsById[collectionName]?.get(docId);
+        return doc ? doc.descripcion : docId;
     },
 
     /**
@@ -246,69 +240,6 @@ export const sinopticoModule = {
         });
     },
 
-    _handleSort(newSortKey) {
-        if (this.state.sortKey === newSortKey) {
-            this.state.sortDir = this.state.sortDir === 'asc' ? 'desc' : 'asc';
-        } else {
-            this.state.sortKey = newSortKey;
-            this.state.sortDir = 'asc';
-        }
-
-        const tree = $.ui.fancytree.getTree('#sinoptico-tree-container');
-        if (!tree || !tree.rootNode) return;
-
-        const cmp = (a, b) => {
-            let valA, valB;
-
-            switch (this.state.sortKey) {
-                case 'level':
-                    valA = a.getLevel();
-                    valB = b.getLevel();
-                    break;
-                case 'title':
-                    valA = a.title;
-                    valB = b.title;
-                    break;
-                default:
-                    valA = a.data[this.state.sortKey];
-                    valB = b.data[this.state.sortKey];
-            }
-
-            if (typeof valA === 'string') valA = valA.toLowerCase();
-            if (typeof valB === 'string') valB = valB.toLowerCase();
-
-            if (valA < valB) return -1;
-            if (valA > valB) return 1;
-            return 0;
-        };
-
-        tree.rootNode.sortChildren(cmp, true);
-
-        if (this.state.sortDir === 'desc') {
-            const topLevelNodes = tree.rootNode.children.slice(0);
-            topLevelNodes.reverse();
-            tree.rootNode.children = topLevelNodes;
-            tree.render();
-        }
-
-
-        this._updateSortVisuals();
-    },
-
-    _updateSortVisuals() {
-        const headers = document.querySelectorAll('#sinoptico-tree-container .sortable-header');
-        headers.forEach(th => {
-            const indicator = th.querySelector('.sort-indicator');
-            if (indicator) indicator.remove();
-
-            if (th.dataset.sortKey === this.state.sortKey) {
-                const iconName = this.state.sortDir === 'asc' ? 'arrow-up' : 'arrow-down';
-                th.insertAdjacentHTML('beforeend', ` <span class="sort-indicator"><i data-lucide="${iconName}" class="h-4 w-4 inline-block ml-1 text-blue-600"></i></span>`);
-            }
-        });
-        lucide.createIcons();
-    },
-
     /**
      * Punto de entrada principal para la vista del sinóptico.
      * Se llama cada vez que se navega a esta vista.
@@ -336,7 +267,6 @@ export const sinopticoModule = {
         const searchInput = document.getElementById('sinoptico-search');
         const exportPdfBtn = document.getElementById('export-pdf-btn');
         const toggleEditBtn = document.getElementById('toggle-edit-mode-btn');
-        const tableHeaders = document.querySelectorAll('#sinoptico-tree-container .sortable-header');
 
         const changeHandler = () => {
             const productId = productSelect.value;
@@ -344,7 +274,7 @@ export const sinopticoModule = {
                 this._loadTreeForProduct(productId);
             } else {
                 this._initTree([]);
-                treeContainer.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-500">Por favor, selecciona un producto para ver su sinóptico.</td></tr>';
+                treeContainer.innerHTML = '<p class="p-8 text-center text-slate-500">Por favor, selecciona un producto para ver su sinóptico.</p>';
                 saveBtn.disabled = true;
             }
         };
@@ -365,10 +295,6 @@ export const sinopticoModule = {
                 tree.render(true, true);
             }
         };
-        const sortHandler = (e) => {
-            const sortKey = e.currentTarget.dataset.sortKey;
-            if (sortKey) this._handleSort(sortKey);
-        };
 
         productSelect.addEventListener('change', changeHandler);
         saveBtn.addEventListener('click', saveHandler);
@@ -377,7 +303,6 @@ export const sinopticoModule = {
         searchInput.addEventListener('input', searchHandler);
         exportPdfBtn.addEventListener('click', exportHandler);
         toggleEditBtn.addEventListener('click', toggleEditHandler);
-        tableHeaders.forEach(th => th.addEventListener('click', sortHandler));
 
         this.state.cleanupFunctions.push(() => {
             productSelect.removeEventListener('change', changeHandler);
@@ -387,7 +312,6 @@ export const sinopticoModule = {
             searchInput.removeEventListener('input', searchHandler);
             exportPdfBtn.removeEventListener('click', exportHandler);
             toggleEditBtn.removeEventListener('click', toggleEditHandler);
-            tableHeaders.forEach(th => th.removeEventListener('click', sortHandler));
         });
 
         // Devolver la función de limpieza
@@ -453,10 +377,16 @@ export const sinopticoModule = {
         return nodes.map(node => {
             const doc = this.app.collectionsById[node.collection]?.get(node.key);
 
-            // Importante: no crear un `richNode` separado, modificar el original
-            // para que la referencia se mantenga en this.state.currentTree
-            node.title = doc ? (doc.descripcion || doc.id) : `Elemento no encontrado (ID: ${node.key})`;
-            if (!doc) {
+            node.title = doc ? `${doc.id} - ${doc.descripcion}` : `Elemento no encontrado (ID: ${node.key})`;
+
+            if (doc) {
+                // Copiar datos relevantes del documento al nodo para acceso en renderColumns
+                node.data.version = doc.version || '';
+                node.data.materialComponente = doc.materialComponente || '';
+                node.data.color = doc.color || '';
+                node.data.proveedorId = doc.proveedorId || '';
+                node.data.procesoId = doc.procesoId || '';
+            } else {
                 node.extraClasses = "fancytree-error"; // Clase para estilizar nodos rotos
             }
 
