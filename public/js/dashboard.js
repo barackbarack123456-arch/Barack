@@ -74,10 +74,14 @@ export const dashboardModule = (() => {
     function render() {
         if (!containerElement) return;
 
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
         containerElement.innerHTML = `
             <div class="animate-fade-in-up space-y-8">
                 <div>
-                    <h2 class="text-3xl font-extrabold text-slate-800">Bienvenido, ${appState.currentUser.name}</h2>
+                <p class="text-sm font-medium text-slate-500 capitalize">${formattedDate}</p>
+                <h2 class="text-3xl font-extrabold text-slate-800 mt-1">Bienvenido, ${appState.currentUser.name}</h2>
                     <p class="text-slate-500 mt-1">Aquí tienes un resumen de la actividad reciente y el estado del sistema.</p>
                 </div>
 
@@ -203,20 +207,21 @@ export const dashboardModule = (() => {
 
     function renderQuickActionsSection() {
         const actions = [
-            { label: 'Agregar Producto', view: 'productos', icon: 'package-plus' },
-            { label: 'Agregar Cliente', view: 'clientes', icon: 'user-plus' },
-            { label: 'Ver Flujogramas', view: 'flujograma', icon: 'git-branch-plus' },
-            { label: 'Ver Actividad Completa', view: 'actividad', icon: 'history' },
+        { label: 'Agregar Producto', view: 'productos', icon: 'package-plus', color: 'blue' },
+        { label: 'Agregar Cliente', view: 'clientes', icon: 'user-plus', color: 'indigo' },
+        { label: 'Nuevo Flujograma', view: 'flujograma', icon: 'git-branch-plus', color: 'green' },
+        { label: 'Ver Actividad', view: 'actividad', icon: 'history', color: 'slate' },
         ];
 
         return `
             <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-full">
                 <h3 class="text-lg font-bold text-slate-800 mb-4">Accesos Directos</h3>
-                <div class="space-y-3">
+            <div class="grid grid-cols-2 gap-4">
                     ${actions.map(action => `
-                        <a href="#" data-action="navigate" data-view="${action.view}" class="flex items-center gap-3 p-3 rounded-lg bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 transition-colors">
-                            <i data-lucide="${action.icon}" class="w-5 h-5 text-blue-600"></i>
-                            <span class="font-semibold text-slate-700">${action.label}</span>
+                    <a href="#" data-action="navigate" data-view="${action.view}"
+                       class="flex flex-col items-center justify-center p-4 rounded-lg bg-${action.color}-50 text-${action.color}-600 hover:bg-${action.color}-100 hover:text-${action.color}-700 border border-${action.color}-200 transition-all duration-200 transform hover:scale-105">
+                        <i data-lucide="${action.icon}" class="w-8 h-8 mb-2"></i>
+                        <span class="font-semibold text-sm text-center">${action.label}</span>
                         </a>
                     `).join('')}
                 </div>

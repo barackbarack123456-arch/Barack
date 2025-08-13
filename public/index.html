@@ -103,28 +103,103 @@
         <p class="mt-4 text-slate-600 font-semibold">Cargando Workspace...</p>
     </div>
 
-    <div id="auth-container" class="fixed inset-0 bg-slate-50 flex items-center justify-center z-50 hidden p-4">
-        <div class="w-full max-w-sm mx-auto">
-            <div id="login-panel" class="auth-panel bg-white p-8 rounded-xl shadow-lg border border-slate-200">
-                <h2 class="text-2xl font-bold text-center mb-1">Bienvenido</h2>
-                <p class="text-center text-slate-500 mb-6">Inicia sesión para continuar.</p>
-                <form id="login-form" class="space-y-4">
-                    <div>
-                        <label for="login-email" class="block text-sm font-medium text-slate-700">Email</label>
-                        <input type="email" id="login-email" class="w-full mt-1 p-2 border rounded-md" required>
+<div id="auth-container" class="fixed inset-0 bg-white z-50 hidden">
+    <div class="flex h-full">
+        <!-- Columna Izquierda (Branding) -->
+        <div class="hidden lg:flex lg:w-1/2 bg-slate-900 text-white p-12 flex-col justify-between">
+            <div>
+                <img src="./logo.png" alt="Logo Barack" class="h-12 w-auto brightness-0 invert">
+                <h1 class="text-4xl font-bold mt-8">Executive Workspace</h1>
+                <p class="text-slate-300 mt-4">Una plataforma centralizada para la gestión de datos y procesos de Barack Mercosul.</p>
+            </div>
+            <footer class="text-sm text-slate-400">
+                &copy; 2024 Barack Mercosul. Todos los derechos reservados.
+            </footer>
+        </div>
+
+        <!-- Columna Derecha (Formularios) -->
+        <div class="w-full lg:w-1/2 bg-slate-50 flex items-center justify-center p-8 overflow-y-auto">
+            <div class="w-full max-w-sm mx-auto">
+
+                <!-- Panel de Login -->
+                <div id="login-panel" class="auth-panel bg-white p-8 rounded-xl shadow-lg border border-slate-200">
+                    <h2 class="text-2xl font-bold text-center mb-1">Bienvenido de Vuelta</h2>
+                    <p class="text-center text-slate-500 mb-6">Inicia sesión para acceder a tu workspace.</p>
+                    <form id="login-form" class="space-y-4">
+                        <div>
+                            <label for="login-email" class="block text-sm font-medium text-slate-700">Email</label>
+                            <input type="email" id="login-email" class="w-full mt-1 p-3 border rounded-lg" required placeholder="tu@email.com">
+                        </div>
+                        <div>
+                            <label for="login-password" class="block text-sm font-medium text-slate-700">Contraseña</label>
+                            <input type="password" id="login-password" class="w-full mt-1 p-3 border rounded-lg" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-full !py-3 !text-base">Entrar</button>
+                    </form>
+                    <div class="text-center mt-4 text-sm">
+                        <a href="#" data-auth-screen="reset" class="font-medium text-blue-600 hover:text-blue-500">¿Olvidaste tu contraseña?</a>
                     </div>
-                    <div>
-                        <label for="login-password" class="block text-sm font-medium text-slate-700">Contraseña</label>
-                        <input type="password" id="login-password" class="w-full mt-1 p-2 border rounded-md" required>
+                    <hr class="my-4">
+                    <div class="text-center text-sm">
+                        <span>¿No tienes una cuenta?</span>
+                        <a href="#" data-auth-screen="register" class="font-medium text-blue-600 hover:text-blue-500"> Regístrate aquí</a>
                     </div>
-                    <button type="submit" class="btn btn-primary w-full !py-3">Entrar</button>
-                </form>
-                <div class="text-center mt-4 text-sm">
-                    <a href="#" data-auth-screen="reset" class="font-medium text-blue-600 hover:text-blue-500">¿Olvidaste tu contraseña?</a>
                 </div>
-                <div class="text-center mt-2 text-sm">
-                    <span>¿No tienes cuenta?</span>
-                    <a href="#" data-auth-screen="register" class="font-medium text-blue-600 hover:text-blue-500"> Regístrate</a>
+
+                <!-- Panel de Registro -->
+                <div id="register-panel" class="auth-panel hidden bg-white p-8 rounded-xl shadow-lg border border-slate-200">
+                    <h2 class="text-2xl font-bold text-center mb-1">Crea tu Cuenta</h2>
+                    <p class="text-center text-slate-500 mb-6">Únete a la plataforma de Barack Mercosul.</p>
+                    <form id="register-form" class="space-y-4">
+                        <div>
+                            <label for="register-name" class="block text-sm font-medium text-slate-700">Nombre Completo</label>
+                            <input type="text" id="register-name" class="w-full mt-1 p-3 border rounded-lg" required>
+                        </div>
+                        <div>
+                            <label for="register-email" class="block text-sm font-medium text-slate-700">Email</label>
+                            <input type="email" id="register-email" class="w-full mt-1 p-3 border rounded-lg" required placeholder="tu@email.com">
+                        </div>
+                        <div>
+                            <label for="register-password" class="block text-sm font-medium text-slate-700">Contraseña</label>
+                            <input type="password" id="register-password" class="w-full mt-1 p-3 border rounded-lg" required placeholder="Mínimo 6 caracteres">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-full !py-3 !text-base">Crear Cuenta</button>
+                    </form>
+                    <hr class="my-4">
+                    <div class="text-center text-sm">
+                        <span>¿Ya tienes una cuenta?</span>
+                        <a href="#" data-auth-screen="login" class="font-medium text-blue-600 hover:text-blue-500"> Inicia sesión</a>
+                    </div>
+                </div>
+
+                <!-- Panel de Reseteo de Contraseña -->
+                <div id="reset-panel" class="auth-panel hidden bg-white p-8 rounded-xl shadow-lg border border-slate-200">
+                    <h2 class="text-2xl font-bold text-center mb-1">Restablecer Contraseña</h2>
+                    <p class="text-center text-slate-500 mb-6">Ingresa tu email y te enviaremos un enlace para restablecerla.</p>
+                    <form id="reset-form" class="space-y-4">
+                        <div>
+                            <label for="reset-email" class="block text-sm font-medium text-slate-700">Email</label>
+                            <input type="email" id="reset-email" class="w-full mt-1 p-3 border rounded-lg" required placeholder="tu@email.com">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-full !py-3 !text-base">Enviar Enlace</button>
+                    </form>
+                     <hr class="my-4">
+                    <div class="text-center text-sm">
+                        <a href="#" data-auth-screen="login" class="font-medium text-blue-600 hover:text-blue-500">Volver a inicio de sesión</a>
+                    </div>
+                    </div>
+
+                <!-- Panel de Verificación de Email -->
+                <div id="verify-email-panel" class="auth-panel hidden bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center">
+                    <h2 class="text-2xl font-bold mb-2">Verifica tu Correo</h2>
+                    <p class="text-slate-500 mb-6">Hemos enviado un enlace de verificación a tu correo electrónico. Por favor, haz clic en él para activar tu cuenta.</p>
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                       <p class="text-sm text-blue-700">Si no has recibido el correo, revisa tu carpeta de spam o <a href="#" id="resend-verification" class="font-bold underline">solicita uno nuevo</a>.</p>
+                    </div>
+                     <hr class="my-6">
+                     <p class="text-sm text-slate-600">Una vez verificado, puedes <a href="#" data-auth-screen="reload-verify" class="font-bold text-blue-600">refrescar esta página</a> para continuar.</p>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -188,6 +263,9 @@
     <link href="https://cdn.jsdelivr.net/npm/jquery.fancytree@2.38.1/dist/skin-win8/ui.fancytree.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/jquery.fancytree@2.38.1/dist/jquery.fancytree-all-deps.min.js"></script>
     
+    <!-- CONFIGURACIÓN AUTOMÁTICA DE FIREBASE HOSTING -->
+    <script src="/__/firebase/init.js"></script>
+
     <!-- SCRIPT PRINCIPAL DE LA APLICACIÓN (se carga último) -->
     <script type="module" src="js/main.js"></script>
 </body>
