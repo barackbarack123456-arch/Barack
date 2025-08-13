@@ -309,6 +309,7 @@ export const sinopticoModule = {
                     unidad: 'unidad'
                 }];
                 this.state.currentTree = rawTreeData;
+                this._markAsDirty(); // Habilitar el guardado para la nueva estructura
             }
 
             const richTreeData = this._enrichTreeData(rawTreeData);
