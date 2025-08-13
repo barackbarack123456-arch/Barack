@@ -386,10 +386,9 @@ export const sinopticoModule = {
                 node.color = doc.color || '';
                 node.proveedorId = doc.proveedorId || '';
                 node.procesoId = doc.procesoId || '';
-                node.collection = node.collection; // Asegurarse de que la colección esté disponible
-                node.cantidad = node.cantidad;
+                // No es necesario reasignar node.collection y node.cantidad, ya están en el objeto.
             } else {
-                node.extraClasses = "fancytree-error"; // Clase para estilizar nodos rotos
+                node.extraClasses = "fancytree-error";
             }
 
             if (node.children && node.children.length > 0) {

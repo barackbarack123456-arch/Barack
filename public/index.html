@@ -94,6 +94,18 @@
             color: #ef4444; /* red-500 */
             font-style: italic;
         }
+
+        /* --- Estilos para Fancytree Connectors --- */
+        .fancytree-ext-connectors .fancytree-container {
+            border: none;
+        }
+        .fancytree-ext-connectors .fancytree-node,
+        .fancytree-ext-connectors .fancytree-expander {
+            background-image: url(https://cdn.jsdelivr.net/npm/jquery.fancytree@2.38.1/dist/skin-win8/icons.gif);
+        }
+        .fancytree-ext-connectors .fancytree-expander {
+            background-position: 0 0;
+        }
     </style>
 </head>
 <body class="bg-slate-50">
@@ -258,10 +270,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.6.0/tinycolor.min.js"></script>
 
-    <!-- Fancytree (para el sinóptico) -->
+    <!-- Fancytree (para el sinópico) -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <link href="https://cdn.jsdelivr.net/npm/jquery.fancytree@2.38.1/dist/skin-win8/ui.fancytree.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/jquery.fancytree@2.38.1/dist/modules/jquery.fancytree.connectors.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/jquery.fancytree@2.38.1/dist/jquery.fancytree-all-deps.min.js"></script>
     
     <!-- SCRIPT PRINCIPAL DE LA APLICACIÓN (se carga último) -->
