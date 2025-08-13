@@ -571,6 +571,23 @@ const dataService = {
         }
     },
 
+    getDocById: async (collectionName, docId) => {
+        try {
+            const docRef = doc(db, collectionName, docId);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                return { docId: docSnap.id, ...docSnap.data() };
+            } else {
+                console.warn(`Document with id ${docId} not found in ${collectionName}`);
+                return null;
+            }
+        } catch (error) {
+            console.error(`Error fetching document ${docId} from ${collectionName}:`, error);
+            uiService.showToast('Error al obtener el documento.', 'error');
+            return null;
+        }
+    },
+
     getData: async (collectionName, { filters = {}, sortColumn = 'id', sortDirection = 'asc', page = 1, itemsPerPage = 10, startAfterDoc = null }) => {
         const collRef = collection(db, collectionName);
         const schema = schemas[collectionName] || schemas.default;
