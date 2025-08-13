@@ -380,11 +380,14 @@ export const sinopticoModule = {
 
             if (doc) {
                 // Copiar datos relevantes del documento al nodo para acceso en renderColumns
-                node.data.version = doc.version || '';
-                node.data.materialComponente = doc.materialComponente || '';
-                node.data.color = doc.color || '';
-                node.data.proveedorId = doc.proveedorId || '';
-                node.data.procesoId = doc.procesoId || '';
+                // Fancytree moverá estas propiedades a `node.data` automáticamente.
+                node.version = doc.version || '';
+                node.materialComponente = doc.materialComponente || '';
+                node.color = doc.color || '';
+                node.proveedorId = doc.proveedorId || '';
+                node.procesoId = doc.procesoId || '';
+                node.collection = node.collection; // Asegurarse de que la colección esté disponible
+                node.cantidad = node.cantidad;
             } else {
                 node.extraClasses = "fancytree-error"; // Clase para estilizar nodos rotos
             }
