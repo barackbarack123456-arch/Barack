@@ -56,9 +56,16 @@ import {
 // --- 1. CONFIGURACIÓN E INICIALIZACIÓN ---
 // =================================================================================
 
-// La configuración de Firebase ahora se carga a través de /__/firebase/init.js
-// Esto es más seguro y utiliza la configuración del proyecto de Firebase enlazado.
-const app = initializeApp(window.firebaseConfig);
+const firebaseConfig = {
+    apiKey: "AIzaSyDxSXFD1WJkpS8aVfSDXyzQ0bsdPqWCgk0", // Reemplaza con tu API Key
+    authDomain: "barack2-0-f81a6.firebaseapp.com",
+    projectId: "barack2-0-f81a6",
+    storageBucket: "barack2-0-f81a6.appspot.com",
+    messagingSenderId: "879433250962",
+    appId: "1:879433250962:web:ae73b31bacb1c4db094e4b",
+};
+
+const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
