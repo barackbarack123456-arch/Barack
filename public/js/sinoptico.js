@@ -85,7 +85,7 @@ export const sinopticoModule = {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <!-- Fancytree llenará este tbody -->
+                                    <tr style="display:none;"><td colspan="4"></td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -98,10 +98,10 @@ export const sinopticoModule = {
                              <div class="flex items-center space-x-2">
                                 <span class="text-sm font-medium text-slate-700">Filtrar Nivel:</span>
                                 <div id="level-filter-container" class="flex items-center space-x-2">
-                                    <label class="inline-flex items-center"><input type="checkbox" class="level-filter" value="1" checked> <span class="ml-1 text-xs">1</span></label>
-                                    <label class="inline-flex items-center"><input type="checkbox" class="level-filter" value="2" checked> <span class="ml-1 text-xs">2</span></label>
-                                    <label class="inline-flex items-center"><input type="checkbox" class="level-filter" value="3" checked> <span class="ml-1 text-xs">3</span></label>
-                                    <label class="inline-flex items-center"><input type="checkbox" class="level-filter" value="4" checked> <span class="ml-1 text-xs">4+</span></label>
+                                    <label class="inline-flex items-center"><input type="checkbox" name="level-filter" class="level-filter" value="1" checked> <span class="ml-1 text-xs">1</span></label>
+                                    <label class="inline-flex items-center"><input type="checkbox" name="level-filter" class="level-filter" value="2" checked> <span class="ml-1 text-xs">2</span></label>
+                                    <label class="inline-flex items-center"><input type="checkbox" name="level-filter" class="level-filter" value="3" checked> <span class="ml-1 text-xs">3</span></label>
+                                    <label class="inline-flex items-center"><input type="checkbox" name="level-filter" class="level-filter" value="4" checked> <span class="ml-1 text-xs">4+</span></label>
                                 </div>
                             </div>
                         </div>
@@ -633,7 +633,7 @@ export const sinopticoModule = {
         saveBtn.innerHTML = `<i data-lucide="loader" class="animate-spin h-5 w-5 mx-auto"></i> Guardando...`;
         lucide.createIcons();
 
-        const tree = jQuery('#sinoptico-tree-container').fancytree('getTree');
+        const tree = $.ui.fancytree.getTree('#sinoptico-tree-container');
         const treeData = tree.toDict(true, (nodeDict) => {
             const cleanNode = {
                 key: nodeDict.key,
@@ -674,7 +674,7 @@ export const sinopticoModule = {
      * Abre un modal para añadir un nuevo componente al nodo activo.
      */
     _addNode() {
-        const tree = jQuery('#sinoptico-tree-container').fancytree('getTree');
+        const tree = $.ui.fancytree.getTree('#sinoptico-tree-container');
         const activeNode = tree.getActiveNode();
 
         if (!activeNode) {
@@ -715,7 +715,7 @@ export const sinopticoModule = {
      * Elimina el nodo activo del árbol.
      */
     _removeNode() {
-        const tree = jQuery('#sinoptico-tree-container').fancytree('getTree');
+        const tree = $.ui.fancytree.getTree('#sinoptico-tree-container');
         const activeNode = tree.getActiveNode();
 
         if (!activeNode) {
@@ -741,7 +741,7 @@ export const sinopticoModule = {
      * Aplica el filtro de nivel al árbol.
      */
     _applyFilter() {
-        const tree = jQuery('#sinoptico-tree-container').fancytree('getTree');
+        const tree = $.ui.fancytree.getTree('#sinoptico-tree-container');
         if (!tree || !tree.filterNodes) return;
 
         const checkedLevels = Array.from(document.querySelectorAll('.level-filter:checked')).map(cb => parseInt(cb.value, 10));
@@ -794,7 +794,7 @@ export const sinopticoModule = {
 
         const historyTab = contentContainer.querySelector('[data-tab="history"]');
         historyTab.addEventListener('click', async () => {
-            contentContainer.querySelector('.tab-content-container').innerHTML = `<div classp-6"><div class="loading-spinner mx-auto"></div></div>`;
+            contentContainer.querySelector('.tab-content-container').innerHTML = `<div class="p-6"><div class="loading-spinner mx-auto"></div></div>`;
             const history = await this.dataService.getVersionHistory(collectionName, docId);
             contentContainer.querySelector('.tab-content-container').innerHTML = this._generateHistoryTabContent(history);
             lucide.createIcons();
