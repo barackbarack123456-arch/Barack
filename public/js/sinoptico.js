@@ -328,8 +328,8 @@ export const sinopticoModule = {
             return;
         }
 
-        const treeContainer = document.getElementById('sinoptico-tree-container').querySelector('tbody');
-        treeContainer.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-500"><div class="loading-spinner mx-auto"></div><p class="mt-2">Cargando estructura...</p></div></td></tr>';
+        const treeContainer = document.getElementById('sinoptico-tree-container');
+        treeContainer.innerHTML = '<div class="p-8 text-center text-slate-500"><div class="loading-spinner mx-auto"></div><p class="mt-2">Cargando estructura...</p></div>';
 
         try {
             const treeDocRef = this.firestore.doc(this.db, this.COLLECTIONS.ARBOLES, productId);
