@@ -58,7 +58,7 @@ function Layout() {
               </div>
 
               <NavLink to="/sinoptico" className={navLinkClasses}>Sinóptico</NavLink>
-              <NavLink to="/flowchart" className={navLinkClasses}>Flujogramas</NavLink>
+              {/* <NavLink to="/flowchart" className={navLinkClasses}>Flujogramas</NavLink> */}
             </div>
 
             {currentUser && (

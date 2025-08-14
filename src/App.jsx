@@ -20,7 +20,7 @@ function App() {
 
       {/* Protected Routes */}
       <Route
-        path="/*"
+        path="/"
         element={
           <PrivateRoute>
             <Layout />
@@ -29,9 +29,8 @@ function App() {
       >
         {/* All routes inside Layout will be protected */}
         <Route index element={<DashboardPage />} />
-        <Route path="/clientes" element={<ClientesPage />} />
-        <Route path="/sinoptico" element={<SinopticoPage />} /> {/* Add the new route */}
-        {/* Other protected routes like /flowchart will be added here */}
+        <Route path="clientes" element={<ClientesPage />} />
+        <Route path="sinoptico" element={<SinopticoPage />} /> {/* Add the new route */}
       </Route>
     </Routes>
   );
