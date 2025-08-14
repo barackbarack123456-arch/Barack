@@ -20,8 +20,8 @@ ModuleRegistry.registerModules([
   ColumnsToolPanelModule,
 ]);
 
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
+import '@ag-grid-community/styles/ag-grid.css';
+import '@ag-grid-community/styles/ag-theme-alpine.css';
 
 // Helper function to calculate the level of each node
 const calculateLevels = (items) => {
