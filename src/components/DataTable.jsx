@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { collection, onSnapshot, query, orderBy as firestoreOrderBy } from 'firebase/firestore';
 import { db } from '../services/firebase';
-import { useAuth } from '../contexts/AuthContext';
-import { useToast } from '../contexts/ToastContext';
+import { useAuth } from '../hooks/useAuth';
+import { useToast } from '../hooks/useToast';
 import { deleteDocument } from '../services/dataService';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 

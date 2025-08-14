@@ -11,11 +11,7 @@ import {
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../services/firebase';
 
-const AuthContext = React.createContext();
-
-export function useAuth() {
-  return useContext(AuthContext);
-}
+export const AuthContext = React.createContext();
 
 function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);

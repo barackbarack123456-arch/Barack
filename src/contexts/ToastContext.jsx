@@ -1,11 +1,7 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import Toast from '../components/Toast'; // Import the new component
+import React, { createContext, useContext, useState, useCallback } from 'react';
+import Toast from '../components/Toast';
 
-const ToastContext = createContext();
-
-export const useToast = () => useContext(ToastContext);
-
-let idCounter = 0;
+export const ToastContext = createContext();
 
 const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
@@ -15,13 +11,13 @@ const ToastProvider = ({ children }) => {
   }, []);
 
   const addToast = useCallback((message, type = 'info', duration = 4000) => {
-    const id = idCounter++;
+    const id = Date.now(); // Using timestamp for a simple unique ID
     setToasts(currentToasts => [...currentToasts, { id, message, type }]);
 
     setTimeout(() => {
       removeToast(id);
     }, duration);
-  }, [removeToast]); // Added missing dependency
+  }, [removeToast]);
 
   return (
     <ToastContext.Provider value={{ addToast }}>
@@ -35,4 +31,4 @@ const ToastProvider = ({ children }) => {
   );
 };
 
-export default ToastProvider; // Use default export to solve Fast Refresh issue
+export default ToastProvider;
