@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -10,7 +10,6 @@ function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const { register } = useAuth();
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
