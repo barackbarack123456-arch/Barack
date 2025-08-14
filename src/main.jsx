@@ -1,19 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import App from './App.jsx';
+import App from './App';
+import { AuthProvider } from './contexts/AuthContext';
 import './index.css';
-import AuthProvider from './contexts/AuthProvider.jsx';
-import ToastProvider from './contexts/ToastProvider.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <ToastProvider>
-          <App />
-        </ToastProvider>
-      </AuthProvider>
-    </BrowserRouter>
-  </React.StrictMode>,
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </React.StrictMode>
 );

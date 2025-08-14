@@ -1,27 +1,9 @@
+// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import {
-    getFirestore,
-    collection,
-    onSnapshot,
-    doc,
-    setDoc,
-    getDoc,
-    deleteDoc,
-    query,
-    where,
-    getDocs,
-    addDoc,
-    updateDoc,
-    orderBy,
-    limit,
-    startAfter,
-    getCountFromServer,
-    serverTimestamp,
-    deleteField
-} from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
 
-// Import Firebase config from .env file
+// Your web app's Firebase configuration, loaded from environment variables
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -33,14 +15,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
 
-// Exporting firestore functions to be used in other services,
-// keeping a similar structure to the original main.js for easier migration.
-const firestoreFunctions = {
-    collection, onSnapshot, doc, setDoc, getDoc, deleteDoc, query, where, getDocs,
-    addDoc, updateDoc, orderBy, limit, startAfter, getCountFromServer, serverTimestamp, deleteField
-};
-
-export { app, auth, db, firestoreFunctions };
+// Initialize and export Firebase services
+export const auth = getAuth(app);
+export const db = getFirestore(app);
