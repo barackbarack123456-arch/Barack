@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 function ProtectedRoute({ children }) {
   const { currentUser, loading } = useAuth();
@@ -15,7 +15,12 @@ function ProtectedRoute({ children }) {
     return <Navigate to="/login" />;
   }
 
-  // User is logged in, render the child components
+  if (!currentUser.emailVerified) {
+    // User's email is not verified, redirect to verification page
+    return <Navigate to="/verify-email" />;
+  }
+
+  // User is logged in and email is verified, render the child components
   return children;
 }
 
