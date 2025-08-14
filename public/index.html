@@ -49,52 +49,6 @@
         .dropdown-menu { transition: opacity 0.2s ease-out, transform 0.2s ease-out; }
         .dropdown-menu.hidden { opacity: 0; transform: translateY(-10px); pointer-events: none; }
 
-        /* --- Estilos para Fancytree --- */
-        #sinoptico-tree-container.fancytree-plain {
-            font-size: 0.875rem; /* text-sm */
-        }
-        #sinoptico-tree-container.fancytree-plain tbody tr:hover {
-            background-color: #f1f5f9; /* slate-100 */
-        }
-        #sinoptico-tree-container.fancytree-plain .fancytree-active {
-            background-color: #eef2ff !important; /* indigo-50 */
-        }
-        #sinoptico-tree-container.fancytree-plain .fancytree-active .fancytree-title {
-            color: #3730a3; /* indigo-900 */
-            font-weight: 600;
-        }
-        #sinoptico-tree-container .fancytree-node td {
-            border-top: 1px solid #e2e8f0; /* slate-200 */
-            padding: 0.5rem 0.75rem;
-            vertical-align: middle;
-        }
-        #sinoptico-tree-container thead th {
-            padding: 0.75rem;
-            text-align: left;
-            background-color: #f8fafc; /* slate-50 */
-            font-weight: 600;
-            color: #475569; /* slate-600 */
-            border-bottom: 2px solid #e2e8f0; /* slate-200 */
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        #sinoptico-tree-container td[contenteditable="true"] {
-            transition: all 0.2s ease-in-out;
-            border-radius: 4px;
-            cursor: text;
-        }
-        #sinoptico-tree-container td[contenteditable="true"]:hover,
-        #sinoptico-tree-container td[contenteditable="true"]:focus {
-            background-color: #ffffff;
-            box-shadow: 0 0 0 2px #3b82f6; /* blue-500 ring */
-            outline: none;
-        }
-        #sinoptico-tree-container .fancytree-error > td {
-            color: #ef4444; /* red-500 */
-            font-style: italic;
-        }
-
     </style>
 </head>
 <body class="bg-slate-50">
@@ -259,11 +213,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.6.0/tinycolor.min.js"></script>
 
-    <!-- Fancytree (para el sinópico) -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-    <link href="https://cdn.jsdelivr.net/npm/jquery.fancytree@2.38.1/dist/skin-win8/ui.fancytree.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/jquery.fancytree@2.38.1/dist/jquery.fancytree-all-deps.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery.fancytree@2.38.1/dist/modules/jquery.fancytree.connectors.js"></script>
+    <!-- Mermaid JS (para diagramas) -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.js';
+        mermaid.initialize({ startOnLoad: false });
+        window.mermaid = mermaid;
+    </script>
     
     <!-- SCRIPT PRINCIPAL DE LA APLICACIÓN (se carga último) -->
     <script type="module" src="js/main.js"></script>
