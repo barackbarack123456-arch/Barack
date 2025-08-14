@@ -34,7 +34,7 @@ function AuthProvider({ children }) {
     });
   }
 
-  function login(email, password) {
+  function signIn(email, password) {
     return signInWithEmailAndPassword(auth, email, password);
   }
 
@@ -58,7 +58,7 @@ function AuthProvider({ children }) {
   const value = {
     currentUser,
     register,
-    login,
+    signIn,
     logout,
     resetPassword,
   };

@@ -7,7 +7,7 @@ function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
 
@@ -16,7 +16,7 @@ function LoginPage() {
     setLoading(true);
 
     try {
-      await login(email, password);
+      await signIn(email, password);
       showToast('Login successful!', 'success');
       navigate('/');
     } catch (error) {
@@ -46,6 +46,7 @@ function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-slate-700 leading-tight focus:outline-none focus:shadow-outline"
               required
+              autoComplete="email"
             />
           </div>
           <div className="mb-6">
@@ -62,6 +63,7 @@ function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-slate-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
               required
+              autoComplete="current-password"
             />
           </div>
           <div className="flex items-center justify-between">
