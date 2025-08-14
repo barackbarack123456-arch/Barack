@@ -3,7 +3,9 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
-  sendEmailVerification
+  sendEmailVerification,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
 } from 'firebase/auth';
 import { auth } from '../services/firebase';
 import { AuthContext } from './AuthContextDef';
@@ -12,6 +14,17 @@ import { AuthContext } from './AuthContextDef';
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Register function
+  async function register(email, password) {
+    if (!email.endsWith('@barackmercosul.com')) {
+      throw new Error("El correo debe ser del dominio @barackmercosul.com");
+    }
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    await sendEmailVerification(userCredential.user);
+    await firebaseSignOut(auth);
+    return userCredential;
+  }
 
   // Login function
   async function login(email, password) {
@@ -26,6 +39,11 @@ export function AuthProvider({ children }) {
       throw new Error("Por favor verifica tu correo electrónico. Se ha enviado un enlace de verificación a tu bandeja de entrada.");
     }
     return userCredential;
+  }
+
+  // Password reset function
+  async function sendPasswordReset(email) {
+    return sendPasswordResetEmail(auth, email);
   }
 
   // Logout function
@@ -54,7 +72,9 @@ export function AuthProvider({ children }) {
   const value = {
     currentUser,
     login,
+    register,
     logout,
+    sendPasswordReset,
     sendVerificationEmail,
     loading
   };
