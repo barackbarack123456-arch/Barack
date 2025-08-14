@@ -1,7 +1,6 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import Toast from '../components/Toast';
-
-export const ToastContext = createContext();
+import { ToastContext } from './ToastContext'; // Import the context
 
 const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
@@ -11,7 +10,7 @@ const ToastProvider = ({ children }) => {
   }, []);
 
   const addToast = useCallback((message, type = 'info', duration = 4000) => {
-    const id = Date.now(); // Using timestamp for a simple unique ID
+    const id = Date.now();
     setToasts(currentToasts => [...currentToasts, { id, message, type }]);
 
     setTimeout(() => {
