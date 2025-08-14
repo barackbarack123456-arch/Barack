@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import { Navigate } from 'react-router-dom';
 import { Container, Box, TextField, Button, Typography, Alert } from '@mui/material';
 
 function LoginPage() {
@@ -9,7 +9,6 @@ function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login, currentUser } = useAuth();
-  const navigate = useNavigate();
 
   if (currentUser) {
     return <Navigate to="/" />;
@@ -21,9 +20,10 @@ function LoginPage() {
     setLoading(true);
     try {
       await login(email, password);
-      // navigate('/dashboard'); // Navigate to dashboard on successful login
+      // On successful login, onAuthStateChanged in AuthContext will handle the user state
+      // and ProtectedRoute will navigate to the dashboard.
     } catch (err) {
-      setError('Failed to log in. Please check your credentials.');
+      setError(err.message); // Display specific error message from AuthContext
       console.error(err);
     }
     setLoading(false);

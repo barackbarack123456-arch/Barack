@@ -1,10 +1,10 @@
-import React from 'react';
-import { Box, AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Box, AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemButton, ListItemText, IconButton, Menu, MenuItem } from '@mui/material';
+import { useNavigate, Outlet } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import AccountCircle from '@mui/icons-material/AccountCircle';
 
 const drawerWidth = 240;
-
-import { Outlet } from 'react-router-dom';
 
 const navItems = [
   { text: 'Dashboard', path: '/' },
@@ -17,6 +17,26 @@ const navItems = [
 
 function Layout() {
   const navigate = useNavigate();
+  const { currentUser, logout } = useAuth();
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = async () => {
+    handleClose();
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Failed to log out', error);
+    }
+  };
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -25,9 +45,41 @@ function Layout() {
         sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px` }}
       >
         <Toolbar>
-          <Typography variant="h6" noWrap component="div">
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             Gestión PRO
           </Typography>
+          {currentUser && (
+            <div>
+              <IconButton
+                size="large"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleMenu}
+                color="inherit"
+              >
+                <AccountCircle />
+              </IconButton>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+              >
+                <MenuItem disabled>{currentUser.email}</MenuItem>
+                <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
+              </Menu>
+            </div>
+          )}
         </Toolbar>
       </AppBar>
       <Drawer

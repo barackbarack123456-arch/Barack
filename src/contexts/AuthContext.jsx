@@ -1,14 +1,12 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth';
+import React, { useState, useEffect } from 'react';
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  sendEmailVerification
+} from 'firebase/auth';
 import { auth } from '../services/firebase';
-
-// Create the Auth Context
-const AuthContext = createContext();
-
-// Create a custom hook to use the Auth Context
-export function useAuth() {
-  return useContext(AuthContext);
-}
+import { AuthContext } from './AuthContextDef';
 
 // Create the AuthProvider component
 export function AuthProvider({ children }) {
@@ -16,13 +14,31 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   // Login function
-  function login(email, password) {
-    return signInWithEmailAndPassword(auth, email, password);
+  async function login(email, password) {
+    if (!email.endsWith('@barackmercosul.com')) {
+      throw new Error("El correo debe ser del dominio @barackmercosul.com");
+    }
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    if (userCredential.user && !userCredential.user.emailVerified) {
+      await sendEmailVerification(userCredential.user);
+      // We sign out the user and let them know they need to verify
+      await firebaseSignOut(auth);
+      throw new Error("Por favor verifica tu correo electrónico. Se ha enviado un enlace de verificación a tu bandeja de entrada.");
+    }
+    return userCredential;
   }
 
   // Logout function
   function logout() {
     return firebaseSignOut(auth);
+  }
+
+  // Function to send verification email
+  function sendVerificationEmail() {
+    if (auth.currentUser) {
+      return sendEmailVerification(auth.currentUser);
+    }
+    throw new Error("No user is currently signed in.");
   }
 
   // Effect to listen for auth state changes
@@ -39,6 +55,7 @@ export function AuthProvider({ children }) {
     currentUser,
     login,
     logout,
+    sendVerificationEmail,
     loading
   };
 
