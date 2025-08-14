@@ -22,7 +22,7 @@ export function AuthProvider({ children }) {
     }
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     await sendEmailVerification(userCredential.user);
-    await firebaseSignOut(auth);
+    // Do not sign out, let the protected route handle the redirect.
     return userCredential;
   }
 
@@ -33,10 +33,9 @@ export function AuthProvider({ children }) {
     }
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     if (userCredential.user && !userCredential.user.emailVerified) {
+      // Don't throw an error here. The ProtectedRoute will handle redirection.
+      // We can still resend the email as a courtesy.
       await sendEmailVerification(userCredential.user);
-      // We sign out the user and let them know they need to verify
-      await firebaseSignOut(auth);
-      throw new Error("Por favor verifica tu correo electrónico. Se ha enviado un enlace de verificación a tu bandeja de entrada.");
     }
     return userCredential;
   }
