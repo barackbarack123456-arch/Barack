@@ -1,13 +1,13 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 
-function SinopticoPage() {
+function ProductosPage() {
   return (
     <Box>
-      <Typography variant="h4">Sinóptico</Typography>
+      <Typography variant="h4">Productos</Typography>
       <Typography>Página en construcción.</Typography>
     </Box>
   );
 }
 
-export default SinopticoPage;
+export default ProductosPage;
