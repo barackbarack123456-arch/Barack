@@ -1,12 +1,13 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
 
 function ProductosPage() {
   return (
-    <Box>
-      <Typography variant="h4">Productos</Typography>
-      <Typography>Página en construcción.</Typography>
-    </Box>
+    <div>
+      <h1 className="text-3xl font-bold text-gray-800 mb-4">Productos</h1>
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        <p className="text-gray-600">Página en construcción.</p>
+      </div>
+    </div>
   );
 }
 
