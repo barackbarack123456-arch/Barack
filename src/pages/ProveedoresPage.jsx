@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Box, Typography, Paper, Button, Toolbar,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { getProveedores, addProveedor, updateProveedor, deleteProveedor } from '../services/dataService';
 import ProveedorModal from '../components/ProveedorModal';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 function ProveedoresPage() {
   const [proveedores, setProveedores] = useState([]);
@@ -75,52 +69,58 @@ function ProveedoresPage() {
   };
 
   return (
-    <Paper sx={{ width: '100%', mb: 2 }}>
-      <Toolbar>
-        <Typography sx={{ flex: '1 1 100%' }} variant="h6" component="div">
-          Proveedores
-        </Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenModal()}>
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-3xl font-bold text-gray-800">Proveedores</h1>
+        <button
+          onClick={() => handleOpenModal()}
+          className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          <PlusIcon className="h-5 w-5 mr-2" />
           Añadir Proveedor
-        </Button>
-      </Toolbar>
-      <TableContainer>
-        <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
-          <TableHead>
-            <TableRow>
-              <TableCell>Código</TableCell>
-              <TableCell>Descripción</TableCell>
-              <TableCell align="right">Acciones</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+        </button>
+      </div>
+
+      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
+              <th scope="col" className="relative px-6 py-3">
+                <span className="sr-only">Acciones</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={3} align="center">Cargando...</TableCell>
-              </TableRow>
+              <tr>
+                <td colSpan="3" className="px-6 py-4 text-center text-gray-500">Cargando...</td>
+              </tr>
             ) : proveedores.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={3} align="center">No hay proveedores para mostrar.</TableCell>
-              </TableRow>
+              <tr>
+                <td colSpan="3" className="px-6 py-4 text-center text-gray-500">No hay proveedores para mostrar.</td>
+              </tr>
             ) : (
-              proveedores.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell component="th" scope="row">{row.codigo}</TableCell>
-                  <TableCell>{row.descripcion}</TableCell>
-                  <TableCell align="right">
-                    <IconButton aria-label="edit" onClick={() => handleOpenModal(row)}>
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton aria-label="delete" onClick={() => handleDeleteClick(row.id)}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
+              proveedores.map((proveedor) => (
+                <tr key={proveedor.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{proveedor.codigo}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{proveedor.descripcion}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button onClick={() => handleOpenModal(proveedor)} className="text-indigo-600 hover:text-indigo-900">
+                      <PencilIcon className="h-5 w-5" />
+                    </button>
+                    <button onClick={() => handleDeleteClick(proveedor.id)} className="text-red-600 hover:text-red-900 ml-4">
+                      <TrashIcon className="h-5 w-5" />
+                    </button>
+                  </td>
+                </tr>
               ))
             )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+          </tbody>
+        </table>
+      </div>
+
       <ProveedorModal
         open={modalOpen}
         onClose={handleCloseModal}
@@ -134,7 +134,7 @@ function ProveedoresPage() {
         title="Confirmar Eliminación"
         message="¿Estás seguro de que quieres eliminar este proveedor? Esta acción no se puede deshacer."
       />
-    </Paper>
+    </div>
   );
 }
 
