@@ -3,7 +3,7 @@ import { collection, onSnapshot, query, orderBy as firestoreOrderBy } from 'fire
 import { db } from '../services/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-import { saveDocument, deleteDocument } from '../services/dataService';
+import { deleteDocument } from '../services/dataService';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 
 function DataTable({ collectionName, schema }) {

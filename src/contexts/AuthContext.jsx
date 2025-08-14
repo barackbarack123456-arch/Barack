@@ -17,7 +17,7 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
-export function AuthProvider({ children }) {
+function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -26,7 +26,6 @@ export function AuthProvider({ children }) {
         await updateProfile(userCred.user, { displayName: name });
         await sendEmailVerification(userCred.user);
 
-        // Create user document in Firestore
         const userDocRef = doc(db, "usuarios", userCred.user.uid);
         await setDoc(userDocRef, {
             uid: userCred.user.uid,
@@ -54,12 +53,11 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, user => {
-      // Here you could fetch the user's role from Firestore to add it to the currentUser object
       setCurrentUser(user);
       setLoading(false);
     });
 
-    return unsubscribe; // Cleanup subscription on unmount
+    return unsubscribe;
   }, []);
 
   const value = {
@@ -76,3 +74,5 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
+
+export default AuthProvider;
