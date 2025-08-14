@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
-import { Box, AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemButton, ListItemText, IconButton, Menu, MenuItem } from '@mui/material';
+import { Box, AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, IconButton, Menu, MenuItem } from '@mui/material';
 import { useNavigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import PeopleIcon from '@mui/icons-material/People';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import BubbleChartIcon from '@mui/icons-material/BubbleChart';
 
 const drawerWidth = 240;
 
 const navItems = [
-  { text: 'Dashboard', path: '/' },
-  { text: 'Proveedores', path: '/proveedores' },
-  { text: 'Clientes', path: '/clientes' },
-  { text: 'Productos', path: '/productos' },
-  { text: 'Insumos', path: '/insumos' },
-  { text: 'Sinóptico', path: '/sinoptico' },
+  { text: 'Dashboard', path: '/', icon: <DashboardIcon /> },
+  { text: 'Proveedores', path: '/proveedores', icon: <PeopleIcon /> },
+  { text: 'Clientes', path: '/clientes', icon: <PeopleIcon /> },
+  { text: 'Productos', path: '/productos', icon: <ShoppingCartIcon /> },
+  { text: 'Insumos', path: '/insumos', icon: <InventoryIcon /> },
+  { text: 'Sinóptico', path: '/sinoptico', icon: <BubbleChartIcon /> },
 ];
 
 function Layout() {
@@ -42,11 +48,15 @@ function Layout() {
     <Box sx={{ display: 'flex' }}>
       <AppBar
         position="fixed"
-        sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px` }}
+        sx={{
+          width: `calc(100% - ${drawerWidth}px)`,
+          ml: `${drawerWidth}px`,
+          backgroundColor: '#1a237e', // A more modern dark blue
+        }}
       >
         <Toolbar>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Gestión PRO
+            barack - ingenieria
           </Typography>
           {currentUser && (
             <div>
@@ -89,6 +99,7 @@ function Layout() {
           '& .MuiDrawer-paper': {
             width: drawerWidth,
             boxSizing: 'border-box',
+            backgroundColor: '#f5f5f5', // A slightly off-white background
           },
         }}
         variant="permanent"
@@ -99,6 +110,9 @@ function Layout() {
           {navItems.map((item) => (
             <ListItem key={item.text} disablePadding>
               <ListItemButton onClick={() => navigate(item.path)}>
+                <ListItemIcon sx={{ color: '#1a237e' }}>
+                  {item.icon}
+                </ListItemIcon>
                 <ListItemText primary={item.text} />
               </ListItemButton>
             </ListItem>
