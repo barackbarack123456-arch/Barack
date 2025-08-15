@@ -1,5 +1,6 @@
 import React, { useState, Fragment } from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 import {
   HomeIcon,
@@ -39,6 +40,22 @@ function Layout() {
 
   return (
     <div className="flex h-screen bg-gray-100">
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+        toastOptions={{
+          success: {
+            duration: 3000,
+          },
+          error: {
+            duration: 5000,
+          },
+          style: {
+            fontSize: '16px',
+            padding: '16px',
+          },
+        }}
+      />
       {/* Sidebar */}
       <div className="hidden md:flex flex-col w-64 bg-gray-800">
         <div className="flex items-center justify-center h-16 bg-gray-900">

@@ -1,34 +1,71 @@
 import { db } from './firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 
-const PROVEEDORES_COLLECTION = 'proveedores';
+/**
+ * Creates a CRUD service for a specific Firestore collection.
+ * @param {string} collectionName The name of the collection.
+ * @returns {object} An object with getAll, add, update, and delete functions.
+ */
+const createCrudService = (collectionName) => {
+  const dataCollection = collection(db, collectionName);
 
-// Function to get all suppliers
-export const getProveedores = async () => {
-  const proveedoresCollection = collection(db, PROVEEDORES_COLLECTION);
-  const snapshot = await getDocs(proveedoresCollection);
-  const proveedoresList = snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }));
-  return proveedoresList;
+  const getAll = async () => {
+    const snapshot = await getDocs(dataCollection);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  };
+
+  const add = async (data) => {
+    const docRef = await addDoc(dataCollection, data);
+    return docRef.id;
+  };
+
+  const update = async (id, data) => {
+    const dataDoc = doc(db, collectionName, id);
+    await updateDoc(dataDoc, data);
+  };
+
+  const remove = async (id) => {
+    const dataDoc = doc(db, collectionName, id);
+    await deleteDoc(dataDoc);
+  };
+
+  return {
+    getAll,
+    add,
+    update,
+    remove,
+  };
 };
 
-// Function to add a new supplier
-export const addProveedor = async (proveedorData) => {
-  const proveedoresCollection = collection(db, PROVEEDORES_COLLECTION);
-  const docRef = await addDoc(proveedoresCollection, proveedorData);
-  return docRef.id;
-};
+// --- Services ---
 
-// Function to update a supplier
-export const updateProveedor = async (id, proveedorData) => {
-  const proveedorDoc = doc(db, PROVEEDORES_COLLECTION, id);
-  await updateDoc(proveedorDoc, proveedorData);
-};
+// Proveedores Service
+const proveedoresService = createCrudService('proveedores');
+export const getProveedores = proveedoresService.getAll;
+export const addProveedor = proveedoresService.add;
+export const updateProveedor = proveedoresService.update;
+export const deleteProveedor = proveedoresService.remove;
 
-// Function to delete a supplier
-export const deleteProveedor = async (id) => {
-  const proveedorDoc = doc(db, PROVEEDORES_COLLECTION, id);
-  await deleteDoc(proveedorDoc);
-};
+// Clientes Service
+const clientesService = createCrudService('clientes');
+export const getClientes = clientesService.getAll;
+export const addCliente = clientesService.add;
+export const updateCliente = clientesService.update;
+export const deleteCliente = clientesService.remove;
+
+// Productos Service
+const productosService = createCrudService('productos');
+export const getProductos = productosService.getAll;
+export const addProducto = productosService.add;
+export const updateProducto = productosService.update;
+export const deleteProducto = productosService.remove;
+
+// Insumos Service
+const insumosService = createCrudService('insumos');
+export const getInsumos = insumosService.getAll;
+export const addInsumo = insumosService.add;
+export const updateInsumo = insumosService.update;
+export const deleteInsumo = insumosService.remove;
