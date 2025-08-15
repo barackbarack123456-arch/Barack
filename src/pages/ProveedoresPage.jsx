@@ -19,23 +19,23 @@ const ActionsCellRenderer = ({ data, onEdit, onDelete }) => (
 
 function ProveedoresPage() {
   const [proveedores, setProveedores] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProveedor, setEditingProveedor] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deletingProveedorId, setDeletingProveedorId] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
 
   const fetchProveedores = useCallback(async () => {
+    setLoading(true);
     try {
-      if (gridApi) gridApi.showLoadingOverlay();
       const data = await getProveedores();
       setProveedores(data);
     } catch (error) {
       console.error("Error fetching suppliers:", error);
     } finally {
-      if (gridApi) gridApi.hideOverlay();
+      setLoading(false);
     }
-  }, [gridApi]);
+  }, []);
 
   useEffect(() => {
     fetchProveedores();
@@ -81,13 +81,9 @@ function ProveedoresPage() {
     }
   };
 
-  const onGridReady = (params) => {
-    setGridApi(params.api);
-  };
-
   const columnDefs = useMemo(() => [
     { headerName: "Código", field: "codigo", flex: 1, sortable: true, filter: true },
-    { headerName: "Descripción", field: "descripcion", flex: 2, sortable: true, filter: true },
+    { headerName: "Nombre", field: "nombre", flex: 2, sortable: true, filter: true },
     {
       headerName: "Acciones",
       cellRenderer: 'actionsCellRenderer',
@@ -120,7 +116,7 @@ function ProveedoresPage() {
         <DataGrid
           rowData={proveedores}
           columnDefs={columnDefs}
-          onGridReady={onGridReady}
+          loading={loading}
           frameworkComponents={{
             actionsCellRenderer: ActionsCellRenderer,
           }}

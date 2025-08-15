@@ -32,3 +32,9 @@ export const deleteProveedor = async (id) => {
   const proveedorDoc = doc(db, PROVEEDORES_COLLECTION, id);
   await deleteDoc(proveedorDoc);
 };
+
+export const getProveedoresCount = async () => {
+  const proveedoresCollection = collection(db, PROVEEDORES_COLLECTION);
+  const snapshot = await getDocs(proveedoresCollection);
+  return snapshot.size;
+};

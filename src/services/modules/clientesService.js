@@ -24,3 +24,9 @@ export const deleteCliente = async (id) => {
   const clienteDoc = doc(db, CLIENTES_COLLECTION, id);
   await deleteDoc(clienteDoc);
 };
+
+export const getClientesCount = async () => {
+  const clientesCollection = collection(db, CLIENTES_COLLECTION);
+  const snapshot = await getDocs(clientesCollection);
+  return snapshot.size;
+};

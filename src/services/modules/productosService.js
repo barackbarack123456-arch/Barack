@@ -24,3 +24,9 @@ export const deleteProducto = async (id) => {
   const productoDoc = doc(db, PRODUCTOS_COLLECTION, id);
   await deleteDoc(productoDoc);
 };
+
+export const getProductosCount = async () => {
+  const productosCollection = collection(db, PRODUCTOS_COLLECTION);
+  const snapshot = await getDocs(productosCollection);
+  return snapshot.size;
+};

@@ -19,23 +19,23 @@ const ActionsCellRenderer = ({ data, onEdit, onDelete }) => (
 
 function InsumosPage() {
   const [insumos, setInsumos] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingInsumo, setEditingInsumo] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deletingInsumoId, setDeletingInsumoId] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
 
   const fetchInsumos = useCallback(async () => {
+    setLoading(true);
     try {
-      if (gridApi) gridApi.showLoadingOverlay();
       const data = await getInsumos();
       setInsumos(data);
     } catch (error) {
       console.error("Error fetching supplies:", error);
     } finally {
-      if (gridApi) gridApi.hideOverlay();
+      setLoading(false);
     }
-  }, [gridApi]);
+  }, []);
 
   useEffect(() => {
     fetchInsumos();
@@ -81,13 +81,11 @@ function InsumosPage() {
     }
   };
 
-  const onGridReady = (params) => {
-    setGridApi(params.api);
-  };
-
   const columnDefs = useMemo(() => [
-    { headerName: "Código", field: "codigo", flex: 1, sortable: true, filter: true },
     { headerName: "Descripción", field: "descripcion", flex: 2, sortable: true, filter: true },
+    { headerName: "Material", field: "material", flex: 1, sortable: true, filter: true },
+    { headerName: "Costo", field: "costo", flex: 1, sortable: true, filter: true, valueFormatter: params => `$${params.value}` },
+    { headerName: "Unidad", field: "unidadMedidaId", flex: 0.5, sortable: true, filter: true },
     {
       headerName: "Acciones",
       cellRenderer: 'actionsCellRenderer',
@@ -120,7 +118,7 @@ function InsumosPage() {
         <DataGrid
           rowData={insumos}
           columnDefs={columnDefs}
-          onGridReady={onGridReady}
+          loading={loading}
           frameworkComponents={{
             actionsCellRenderer: ActionsCellRenderer,
           }}

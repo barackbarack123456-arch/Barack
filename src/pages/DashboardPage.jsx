@@ -2,23 +2,58 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Transition } from '@headlessui/react';
 import { UsersIcon, ShoppingCartIcon, ArchiveBoxIcon, TruckIcon } from '@heroicons/react/24/outline';
-
-const summaryCards = [
-  { title: "Proveedores Activos", value: "12", icon: TruckIcon, color: "bg-blue-500" },
-  { title: "Clientes Registrados", value: "87", icon: UsersIcon, color: "bg-green-500" },
-  { title: "Productos en Stock", value: "452", icon: ShoppingCartIcon, color: "bg-yellow-500" },
-  { title: "Insumos Disponibles", value: "73", icon: ArchiveBoxIcon, color: "bg-red-500" },
-];
+import { getProveedoresCount } from '../services/modules/proveedoresService';
+import { getClientesCount } from '../services/modules/clientesService';
+import { getProductosCount } from '../services/modules/productosService';
+import { getInsumosCount } from '../services/modules/insumosService';
 
 function DashboardPage() {
   const { currentUser } = useAuth();
   const [showCards, setShowCards] = useState(false);
+  const [stats, setStats] = useState({
+    proveedores: '...',
+    clientes: '...',
+    productos: '...',
+    insumos: '...',
+  });
 
   useEffect(() => {
-    // Trigger animations after component mounts
+    const fetchStats = async () => {
+      try {
+        const [proveedoresCount, clientesCount, productosCount, insumosCount] = await Promise.all([
+          getProveedoresCount(),
+          getClientesCount(),
+          getProductosCount(),
+          getInsumosCount(),
+        ]);
+        setStats({
+          proveedores: proveedoresCount,
+          clientes: clientesCount,
+          productos: productosCount,
+          insumos: insumosCount,
+        });
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats:", error);
+        setStats({
+          proveedores: 'N/A',
+          clientes: 'N/A',
+          productos: 'N/A',
+          insumos: 'N/A',
+        });
+      }
+    };
+
+    fetchStats();
     const timer = setTimeout(() => setShowCards(true), 100);
     return () => clearTimeout(timer);
   }, []);
+
+  const summaryCards = [
+    { title: "Proveedores Activos", value: stats.proveedores, icon: TruckIcon, color: "bg-blue-500" },
+    { title: "Clientes Registrados", value: stats.clientes, icon: UsersIcon, color: "bg-green-500" },
+    { title: "Productos en Stock", value: stats.productos, icon: ShoppingCartIcon, color: "bg-yellow-500" },
+    { title: "Insumos Disponibles", value: stats.insumos, icon: ArchiveBoxIcon, color: "bg-red-500" },
+  ];
 
   return (
     <div className="space-y-8">

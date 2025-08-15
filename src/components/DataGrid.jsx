@@ -9,6 +9,8 @@ function DataGrid({
   columnDefs,
   onGridReady,
   onSelectionChanged,
+  loading,
+  frameworkComponents,
 }) {
   const defaultColDef = {
     sortable: true,
@@ -18,15 +20,16 @@ function DataGrid({
   };
 
   return (
-    <div className="ag-theme-alpine" style={{ height: '600px', width: '100%' }}>
+    <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' }}>
       <AgGridReact
         rowData={rowData}
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
         onGridReady={onGridReady}
         onSelectionChanged={onSelectionChanged}
-        rowSelection="single"
         getRowId={params => params.data.id}
+        loading={loading}
+        frameworkComponents={frameworkComponents}
         overlayLoadingTemplate='<span class="ag-overlay-loading-center">Cargando...</span>'
         overlayNoRowsTemplate='<span class="ag-overlay-no-rows-center">No hay datos para mostrar.</span>'
         domLayout='autoHeight'
