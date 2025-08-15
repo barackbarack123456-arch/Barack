@@ -2,26 +2,26 @@ import React, { useState, useEffect, Fragment, forwardRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
 const ProveedorModal = forwardRef(({ open, onClose, onSave, proveedor }, ref) => {
-  const [codigo, setCodigo] = useState('');
-  const [nombre, setNombre] = useState('');
+  const [id, setId] = useState('');
+  const [descripcion, setDescripcion] = useState('');
 
   useEffect(() => {
     if (proveedor) {
-      setCodigo(proveedor.codigo || '');
-      setNombre(proveedor.nombre || '');
+      setId(proveedor.id || '');
+      setDescripcion(proveedor.descripcion || '');
     } else {
-      setCodigo('');
-      setNombre('');
+      setId('');
+      setDescripcion('');
     }
   }, [proveedor, open]);
 
   const handleSave = () => {
-    if (!codigo || !nombre) {
+    if (!id || !descripcion) {
       // A more modern way to show alerts could be implemented later
-      alert('Código y Nombre son obligatorios.');
+      alert('Código y Descripción son obligatorios.');
       return;
     }
-    onSave({ codigo, nombre });
+    onSave({ id, descripcion });
   };
 
   return (
@@ -61,29 +61,29 @@ const ProveedorModal = forwardRef(({ open, onClose, onSave, proveedor }, ref) =>
                     </p>
                     <div className="space-y-4">
                       <div>
-                        <label htmlFor="codigo" className="block text-sm font-medium text-gray-700">
+                        <label htmlFor="id" className="block text-sm font-medium text-gray-700">
                           Código
                         </label>
                         <input
                           type="text"
-                          name="codigo"
-                          id="codigo"
-                          value={codigo}
-                          onChange={(e) => setCodigo(e.target.value)}
+                          name="id"
+                          id="id"
+                          value={id}
+                          onChange={(e) => setId(e.target.value)}
                           readOnly={!!proveedor}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm read-only:bg-gray-100"
                         />
                       </div>
                       <div>
-                        <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
-                          Nombre
+                        <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700">
+                          Descripción
                         </label>
                         <input
                           type="text"
-                          name="nombre"
-                          id="nombre"
-                          value={nombre}
-                          onChange={(e) => setNombre(e.target.value)}
+                          name="descripcion"
+                          id="descripcion"
+                          value={descripcion}
+                          onChange={(e) => setDescripcion(e.target.value)}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                       </div>
