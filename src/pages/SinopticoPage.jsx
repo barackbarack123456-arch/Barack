@@ -199,7 +199,7 @@ function SinopticoPage() {
       </div>
 
       <SinopticoItemModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSaveItem} item={null} />
-      <ConfirmDialog isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)} onConfirm={handleDeleteItem} title="Confirmar Eliminación" message={`¿Estás seguro de que quieres eliminar "${selectedItem?.nombre}"? Esta acción no se puede deshacer.`}/>
+      <ConfirmDialog open={isConfirmOpen} onClose={() => setIsConfirmOpen(false)} onConfirm={handleDeleteItem} title="Confirmar Eliminación" message={`¿Estás seguro de que quieres eliminar "${selectedItem?.nombre}"? Esta acción no se puede deshacer.`}/>
     </div>
   );
 }
