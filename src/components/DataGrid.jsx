@@ -5,38 +5,31 @@ import '@ag-grid-community/styles/ag-grid.css';
 import '@ag-grid-community/styles/ag-theme-alpine.css';
 
 function DataGrid({
-  view,
   rowData,
-  config,
-  autoGroupColumnDef,
+  columnDefs,
   onGridReady,
   onSelectionChanged,
-  onCellValueChanged,
-  handleRowDragEnd,
-  getDataPath,
-  isExternalFilterPresent,
-  doesExternalFilterPass,
 }) {
+  const defaultColDef = {
+    sortable: true,
+    filter: true,
+    resizable: true,
+    flex: 1,
+  };
+
   return (
     <div className="ag-theme-alpine" style={{ height: '600px', width: '100%' }}>
       <AgGridReact
-        key={view} // Add key to force re-render on view change
         rowData={rowData}
-        columnDefs={config.colDefs}
-        treeData={config.isTree}
-        getDataPath={config.isTree ? getDataPath : undefined}
-        autoGroupColumnDef={autoGroupColumnDef}
-        groupDefaultExpanded={-1}
-        onCellValueChanged={onCellValueChanged}
-        onSelectionChanged={onSelectionChanged}
+        columnDefs={columnDefs}
+        defaultColDef={defaultColDef}
         onGridReady={onGridReady}
+        onSelectionChanged={onSelectionChanged}
         rowSelection="single"
-        onRowDragEnd={config.isTree ? handleRowDragEnd : undefined}
-        isExternalFilterPresent={config.isTree ? isExternalFilterPresent : () => false}
-        doesExternalFilterPass={config.isTree ? doesExternalFilterPass : undefined}
-        getRowId={params => params.data.id} // Important for data updates
+        getRowId={params => params.data.id}
         overlayLoadingTemplate='<span class="ag-overlay-loading-center">Cargando...</span>'
         overlayNoRowsTemplate='<span class="ag-overlay-no-rows-center">No hay datos para mostrar.</span>'
+        domLayout='autoHeight'
       />
     </div>
   );
