@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { getSinopticoItems, addSinopticoItem, updateSinopticoItem, deleteSinopticoItem } from '../services/sinopticoService';
 import { getProveedores, updateProveedor } from '../services/modules/proveedoresService';
 import { getClientes, updateCliente } from '../services/modules/clientesService';
@@ -12,59 +12,30 @@ import DataGrid from '../components/DataGrid';
 // AG Grid Module Registration
 import { ModuleRegistry } from '@ag-grid-community/core';
 import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-model';
-import { RowGroupingModule } from '@ag-grid-enterprise/row-grouping';
-import { MenuModule } from '@ag-grid-enterprise/menu';
-import { SetFilterModule } from '@ag-grid-enterprise/set-filter';
-import { ColumnsToolPanelModule } from '@ag-grid-enterprise/column-tool-panel';
-
-// AG Grid License Note:
-// The "AG Grid Enterprise" watermark is displayed because the application is running in a development environment
-// without a license key. All enterprise features are unlocked for trial purposes.
-// For production use, a license key is required to remove the watermark and console logs.
-// For more information, please visit https://www.ag-grid.com/license-pricing.php
+// Enterprise modules have been removed to prevent watermarks and build errors.
+// The Sinoptico tree view functionality will be disabled until a proper Community-based solution is implemented.
 
 ModuleRegistry.registerModules([
   ClientSideRowModelModule,
-  RowGroupingModule,
-  MenuModule,
-  SetFilterModule,
-  ColumnsToolPanelModule,
 ]);
 
 // Helper function to calculate the level of each node for the sinoptico view
 const calculateLevels = (items) => {
-  const itemMap = new Map(items.map(item => [item.id, { ...item, children: [] }]));
-  const roots = [];
-
-  items.forEach(item => {
-    if (item.id_padre && itemMap.has(item.id_padre)) {
-      itemMap.get(item.id_padre).children.push(itemMap.get(item.id));
-    } else {
-      roots.push(itemMap.get(item.id));
-    }
-  });
-
-  const setLevel = (node, level) => {
-    node.level = level;
-    node.children.forEach(child => setLevel(child, level + 1));
-  };
-
-  roots.forEach(root => setLevel(root, 1));
-
-  return items.map(item => ({ ...item, level: itemMap.get(item.id).level }));
+  // This functionality is temporarily disabled as it depends on enterprise features.
+  return items.map(item => ({ ...item, level: 1 }));
 };
 
 const VIEW_CONFIG = {
   sinoptico: {
-    title: 'Sinóptico de Productos',
+    title: 'Sinóptico de Productos (Vista Plana)',
     fetcher: getSinopticoItems,
     updater: updateSinopticoItem,
-    isTree: true,
+    isTree: false, // Disabled tree view
     colDefs: [
+      { field: 'nombre', headerName: 'Nombre', editable: true, flex: 1 },
       { field: 'comentarios', headerName: 'Comentarios', editable: true, flex: 1 },
       { field: 'cantidad', headerName: 'Cantidad', editable: true, valueParser: params => Number(params.newValue) || 0 },
       { field: 'unidad_medida', headerName: 'Unidad' },
-      { field: 'level', headerName: 'Nivel', hide: true },
     ]
   },
   clientes: {
@@ -135,45 +106,9 @@ function SinopticoPage() {
     return rawData;
   }, [rawData, config.isTree]);
 
-  // Effect to handle filtering when levelFilter or gridApi changes
-  React.useEffect(() => {
-    if (gridApi) {
-      gridApi.onFilterChanged();
-    }
-  }, [levelFilter, gridApi]);
-
-
   const onGridReady = (params) => {
     setGridApi(params.api);
   };
-
-  const getDataPath = useCallback((data) => {
-    const path = [];
-    const itemMap = new Map(rawData.map(item => [item.id, item]));
-    let currentItem = data;
-    while (currentItem) {
-      path.unshift(currentItem.id);
-      currentItem = itemMap.get(currentItem.id_padre);
-    }
-    return path;
-  }, [rawData]);
-
-  const onCellValueChanged = useCallback(async (params) => {
-    const { data, colDef, newValue } = params;
-    const config = VIEW_CONFIG[currentView];
-    if (!config.updater) {
-      console.error(`No updater configured for view: ${currentView}`);
-      return;
-    }
-    try {
-      const updateData = { [colDef.field]: newValue };
-      await config.updater(data.id, updateData);
-    } catch (err) {
-      console.error("Failed to update item:", err);
-      // Optional: revert cell value on failure
-      params.api.refreshCells({ rowNodes: [params.node], force: true });
-    }
-  }, [currentView]);
 
   const onSelectionChanged = (event) => {
     const selectedNodes = event.api.getSelectedNodes();
@@ -204,34 +139,6 @@ function SinopticoPage() {
     setIsConfirmOpen(false);
     setSelectedItem(null);
   };
-
-  const handleRowDragEnd = useCallback(async (event) => {
-    const movingNode = event.node;
-    const overNode = event.overNode;
-    const newParentId = overNode ? overNode.data.id : null;
-    if (movingNode.data.id === newParentId || movingNode.data.id_padre === newParentId) return;
-    const updateData = { id_padre: newParentId };
-    await updateSinopticoItem(movingNode.data.id, updateData);
-    refetch();
-  }, [refetch]);
-
-  const autoGroupColumnDef = useMemo(() => ({
-    headerName: 'Nombre',
-    field: 'nombre',
-    cellRendererParams: { suppressCount: true },
-    flex: 1,
-    filter: true,
-    rowDrag: VIEW_CONFIG[currentView].isTree, // Only allow drag for tree view
-  }), [currentView]);
-
-  const isExternalFilterPresent = useCallback(() => levelFilter !== 'all', [levelFilter]);
-
-  const doesExternalFilterPass = useCallback((node) => {
-    if (levelFilter === '3+') {
-      return node.data.level >= 3;
-    }
-    return node.data.level === levelFilter;
-  }, [levelFilter]);
 
   return (
     <div>
@@ -264,17 +171,10 @@ function SinopticoPage() {
       )}
 
       <DataGrid
-        view={currentView}
         rowData={loading ? [] : rowData}
-        config={config}
-        autoGroupColumnDef={autoGroupColumnDef}
+        columnDefs={config.colDefs}
         onGridReady={onGridReady}
         onSelectionChanged={onSelectionChanged}
-        onCellValueChanged={onCellValueChanged}
-        handleRowDragEnd={handleRowDragEnd}
-        getDataPath={getDataPath}
-        isExternalFilterPresent={isExternalFilterPresent}
-        doesExternalFilterPass={doesExternalFilterPass}
       />
 
       {currentView === 'sinoptico' && (

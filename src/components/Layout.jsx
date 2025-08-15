@@ -9,13 +9,14 @@ import {
   ChartBarIcon,
   ChevronDownIcon,
   ArrowRightOnRectangleIcon,
-  UserCircleIcon
+  UserCircleIcon,
+  TruckIcon,
 } from '@heroicons/react/24/outline';
 import { Transition } from '@headlessui/react';
 
 const navItems = [
   { text: 'Dashboard', path: '/', icon: HomeIcon },
-  { text: 'Proveedores', path: '/proveedores', icon: UsersIcon },
+  { text: 'Proveedores', path: '/proveedores', icon: TruckIcon },
   { text: 'Clientes', path: '/clientes', icon: UsersIcon },
   { text: 'Productos', path: '/productos', icon: ShoppingCartIcon },
   { text: 'Insumos', path: '/insumos', icon: ArchiveBoxIcon },
@@ -38,24 +39,24 @@ function Layout() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <div className="hidden md:flex flex-col w-64 bg-gray-800">
-        <div className="flex items-center justify-center h-16 bg-gray-900">
-          <span className="text-white font-bold uppercase">Barack Ingenieria</span>
+      <div className="hidden md:flex flex-col w-64 bg-gray-800 shadow-lg">
+        <div className="flex items-center justify-center h-20 border-b border-gray-700">
+          <span className="text-white font-bold text-2xl tracking-wider">INVICTUS</span>
         </div>
         <div className="flex flex-col flex-1 overflow-y-auto">
-          <nav className="flex-1 px-2 py-4 bg-gray-800">
+          <nav className="flex-1 px-4 py-4">
             {navItems.map((item) => (
               <Link
                 key={item.text}
                 to={item.path}
-                className={`flex items-center px-4 py-2 mt-2 text-gray-100 hover:bg-gray-700 rounded ${
-                  location.pathname === item.path ? 'bg-gray-700' : ''
+                className={`flex items-center px-4 py-3 my-1 text-gray-200 rounded-lg transition-all duration-200 ease-in-out transform hover:bg-gray-700 hover:text-white hover:scale-105 ${
+                  location.pathname === item.path ? 'bg-indigo-600 text-white shadow-inner' : 'hover:bg-gray-700'
                 }`}
               >
-                <item.icon className="h-6 w-6 mr-2" />
-                {item.text}
+                <item.icon className="h-6 w-6 mr-3" />
+                <span className="font-medium">{item.text}</span>
               </Link>
             ))}
           </nav>
@@ -64,18 +65,15 @@ function Layout() {
 
       {/* Main content */}
       <div className="flex flex-col flex-1">
-        <header className="flex justify-between items-center h-16 bg-white border-b-2">
-          <div className="flex items-center px-4">
-            {/* Can add a mobile menu button here if needed */}
-          </div>
-          <div className="flex items-center pr-4 relative">
+        <header className="flex justify-end items-center h-20 bg-white border-b">
+          <div className="flex items-center pr-6 relative">
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center space-x-2 focus:outline-none"
+              className="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 focus:outline-none"
             >
-              <UserCircleIcon className="h-8 w-8 text-gray-600" />
+              <UserCircleIcon className="h-9 w-9 text-gray-500" />
               <span className="text-gray-700 text-sm font-medium hidden md:block">{currentUser?.email}</span>
-              <ChevronDownIcon className="h-5 w-5 text-gray-500" />
+              <ChevronDownIcon className={`h-5 w-5 text-gray-500 transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : ''}`} />
             </button>
             <Transition
               as={Fragment}
@@ -87,15 +85,15 @@ function Layout() {
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <div className="absolute right-0 mt-2 w-56 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none top-full">
+              <div className="absolute right-0 mt-2 w-56 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none top-full z-10">
                 <div className="py-1">
-                  <div className="px-4 py-2 text-sm text-gray-700 border-b">
-                    <p className="font-medium">Signed in as</p>
-                    <p className="truncate">{currentUser?.email}</p>
+                  <div className="px-4 py-3 border-b">
+                    <p className="text-sm text-gray-500">Sesión iniciada como</p>
+                    <p className="font-medium text-gray-800 truncate">{currentUser?.email}</p>
                   </div>
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="w-full text-left flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-red-600 transition-colors duration-200"
                   >
                     <ArrowRightOnRectangleIcon className="h-5 w-5 mr-2" />
                     Cerrar Sesión
@@ -105,8 +103,10 @@ function Layout() {
             </Transition>
           </div>
         </header>
-        <main className="flex-1 p-6 overflow-y-auto">
-          <Outlet />
+        <main className="flex-1 p-8 overflow-y-auto">
+          <div className="max-w-7xl mx-auto">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
