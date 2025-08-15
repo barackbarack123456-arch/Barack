@@ -3,23 +3,17 @@ import { Dialog, Transition } from '@headlessui/react';
 
 const ProductoModal = forwardRef(({ open, onClose, onSave, producto }, ref) => {
   const [formData, setFormData] = useState({
-    nombre: '',
     descripcion: '',
-    precio: 0,
   });
 
   useEffect(() => {
     if (producto) {
       setFormData({
-        nombre: producto.nombre || '',
         descripcion: producto.descripcion || '',
-        precio: producto.precio || 0,
       });
     } else {
       setFormData({
-        nombre: '',
         descripcion: '',
-        precio: 0,
       });
     }
   }, [producto, open]);
@@ -30,8 +24,8 @@ const ProductoModal = forwardRef(({ open, onClose, onSave, producto }, ref) => {
   };
 
   const handleSave = () => {
-    if (!formData.nombre || !formData.descripcion) {
-      alert('Nombre y Descripción son obligatorios.');
+    if (!formData.descripcion) {
+      alert('Descripción es obligatoria.');
       return;
     }
     onSave(formData);
@@ -74,19 +68,6 @@ const ProductoModal = forwardRef(({ open, onClose, onSave, producto }, ref) => {
                     </p>
                     <div className="space-y-4">
                       <div>
-                        <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
-                          Nombre
-                        </label>
-                        <input
-                          type="text"
-                          name="nombre"
-                          id="nombre"
-                          value={formData.nombre}
-                          onChange={handleChange}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        />
-                      </div>
-                      <div>
                         <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700">
                           Descripción
                         </label>
@@ -95,19 +76,6 @@ const ProductoModal = forwardRef(({ open, onClose, onSave, producto }, ref) => {
                           id="descripcion"
                           rows={3}
                           value={formData.descripcion}
-                          onChange={handleChange}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="precio" className="block text-sm font-medium text-gray-700">
-                          Precio
-                        </label>
-                        <input
-                          type="number"
-                          name="precio"
-                          id="precio"
-                          value={formData.precio}
                           onChange={handleChange}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />

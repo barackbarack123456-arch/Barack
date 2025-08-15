@@ -3,11 +3,14 @@ import { getInsumos, addInsumo, updateInsumo, deleteInsumo } from '../services/m
 import InsumoModal from '../components/InsumoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataGrid from '../components/DataGrid';
-import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, TrashIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import { Transition } from '@headlessui/react';
 
-const ActionsCellRenderer = ({ data, onEdit, onDelete }) => (
+const ActionsCellRenderer = ({ data, onInfo, onEdit, onDelete }) => (
   <div className="flex items-center justify-end space-x-2">
+    <button onClick={() => onInfo(data)} className="text-blue-600 hover:text-blue-900 transition-colors duration-200">
+      <InformationCircleIcon className="h-5 w-5" />
+    </button>
     <button onClick={() => onEdit(data)} className="text-indigo-600 hover:text-indigo-900 transition-colors duration-200">
       <PencilIcon className="h-5 w-5" />
     </button>
@@ -81,6 +84,10 @@ function InsumosPage() {
     }
   };
 
+  const handleInfo = (insumo) => {
+    alert(`Información del Insumo:\n\nDescripción: ${insumo.descripcion}\nMaterial: ${insumo.material}\nCosto: $${insumo.costo}\nUnidad: ${insumo.unidadMedidaId}`);
+  };
+
   const columnDefs = useMemo(() => [
     { headerName: "Descripción", field: "descripcion", flex: 2, sortable: true, filter: true },
     { headerName: "Material", field: "material", flex: 1, sortable: true, filter: true },
@@ -90,6 +97,7 @@ function InsumosPage() {
       headerName: "Acciones",
       cellRenderer: 'actionsCellRenderer',
       cellRendererParams: {
+        onInfo: handleInfo,
         onEdit: handleOpenModal,
         onDelete: handleDeleteClick,
       },
