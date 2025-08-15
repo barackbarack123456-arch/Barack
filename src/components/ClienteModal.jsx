@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Fragment, forwardRef } from 'react';
+import PropTypes from 'prop-types';
 import { Dialog, Transition } from '@headlessui/react';
 
 const ClienteModal = forwardRef(({ open, onClose, onSave, cliente }, ref) => {
@@ -155,5 +156,14 @@ const ClienteModal = forwardRef(({ open, onClose, onSave, cliente }, ref) => {
     </Transition.Root>
   );
 });
+
+ClienteModal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+  cliente: PropTypes.object,
+};
+
+ClienteModal.displayName = 'ClienteModal';
 
 export default ClienteModal;
