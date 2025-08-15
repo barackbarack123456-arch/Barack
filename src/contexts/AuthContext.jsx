@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
   auth,
+  db,
+  doc,
+  getDoc,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
@@ -60,8 +63,18 @@ export function AuthProvider({ children }) {
 
   // Effect to listen for auth state changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, user => {
-      setCurrentUser(user);
+    const unsubscribe = onAuthStateChanged(auth, async user => {
+      if (user) {
+        const userDocRef = doc(db, 'usuarios', user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          setCurrentUser({ ...user, ...userDoc.data() });
+        } else {
+          setCurrentUser(user);
+        }
+      } else {
+        setCurrentUser(null);
+      }
       setLoading(false);
     });
 

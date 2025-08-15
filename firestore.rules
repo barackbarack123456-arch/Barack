@@ -3,25 +3,48 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Función para obtener los datos del rol del usuario que hace la petición.
     function getUserRole() {
       return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role;
     }
 
-    // Reglas para la colección de Usuarios
-    // Solo los administradores pueden leer la lista completa y modificar roles.
-    // Cada usuario puede leer su propio documento de rol.
-    match /usuarios/{userId} {
-      allow read: if request.auth.uid == userId || getUserRole() == 'administrador';
-      allow write: if getUserRole() == 'administrador';
+    function isAdmin() {
+      let adminUIDs = ['7M6XuPSQf0UHUvet5KnEISxiYBT2', 'NIFudxxXnea8HqFzeMpxY0kma5b2'];
+      return request.auth.uid in adminUIDs || getUserRole() == 'administrador';
     }
 
-    // Reglas para TODAS las demás colecciones de datos (productos, clientes, etc.)
-    // La lectura está permitida para cualquier usuario autenticado.
-    // La escritura (crear, actualizar, borrar) solo para editores y administradores.
-    match /{document=**} {
-      allow read: if request.auth != null;
-      allow write: if getUserRole() in ['editor', 'administrador'] || request.auth.uid == 'NIFudxxXnea8HqFzeMpxY0kma5b2';
+    // Reglas para la colección de Usuarios
+    // Los administradores pueden leer y escribir cualquier documento de usuario.
+    // Cada usuario puede leer su propio documento.
+    match /usuarios/{userId} {
+      allow read: if request.auth.uid == userId || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Reglas para colecciones específicas.
+    // Solo el creador del documento o un administrador puede leer o escribir.
+    // Asume que cada documento tiene un campo 'createdBy' con el UID del creador.
+    match /clientes/{clienteId} {
+      allow read, write: if request.resource.data.createdBy == request.auth.uid || isAdmin();
+    }
+
+    match /insumos/{insumoId} {
+      allow read, write: if request.resource.data.createdBy == request.auth.uid || isAdmin();
+    }
+
+    match /productos/{productoId} {
+      allow read, write: if request.resource.data.createdBy == request.auth.uid || isAdmin();
+    }
+
+    match /proveedores/{proveedorId} {
+      allow read, write: if request.resource.data.createdBy == request.auth.uid || isAdmin();
+    }
+
+    match /proyectos/{proyectoId} {
+      allow read, write: if request.resource.data.createdBy == request.auth.uid || isAdmin();
+    }
+
+    match /sinoptico/{sinopticoId} {
+      allow read, write: if request.resource.data.createdBy == request.auth.uid || isAdmin();
     }
   }
 }

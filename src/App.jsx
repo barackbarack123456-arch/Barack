@@ -16,6 +16,7 @@ const InsumosPage = lazy(() => import('./pages/InsumosPage'));
 const ProyectosPage = lazy(() => import('./pages/ProyectosPage'));
 const SinopticoPage = lazy(() => import('./pages/SinopticoPage'));
 const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
+const UsuariosPage = lazy(() => import('./pages/UsuariosPage'));
 
 function AppContent() {
   const { loading } = useAuth();
@@ -47,6 +48,14 @@ function AppContent() {
           <Route path="insumos" element={<InsumosPage />} />
           <Route path="proyectos" element={<ProyectosPage />} />
           <Route path="sinoptico" element={<SinopticoPage />} />
+          <Route
+            path="usuarios"
+            element={
+              <ProtectedRoute adminOnly={true}>
+                <UsuariosPage />
+              </ProtectedRoute>
+            }
+          />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
