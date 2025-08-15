@@ -1,26 +1,28 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
-function ProtectedRoute({ children }) {
+function ProtectedRoute({ children, adminOnly = false }) {
   const { currentUser, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
-    // You can add a spinner here if you want
-    return <div>Loading...</div>;
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</div>;
   }
 
   if (!currentUser) {
-    // User not logged in, redirect to login page
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   if (!currentUser.emailVerified) {
-    // User's email is not verified, redirect to verification page
-    return <Navigate to="/verify-email" />;
+    return <Navigate to="/verify-email" replace />;
   }
 
-  // User is logged in and email is verified, render the child components
+  if (adminOnly && currentUser.role !== 'administrador') {
+    // Redirect non-admins from admin-only routes
+    return <Navigate to="/" replace />;
+  }
+
   return children;
 }
 

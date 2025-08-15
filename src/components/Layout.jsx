@@ -1,4 +1,4 @@
-import React, { useState, Fragment } from 'react';
+import React, { useState, Fragment, useMemo } from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import {
@@ -12,6 +12,7 @@ import {
   UserCircleIcon,
   TruckIcon,
   BriefcaseIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import { Transition } from '@headlessui/react';
 
@@ -23,6 +24,7 @@ const navItems = [
   { text: 'Productos', path: '/productos', icon: ShoppingCartIcon },
   { text: 'Insumos', path: '/insumos', icon: ArchiveBoxIcon },
   { text: 'Sinóptico', path: '/sinoptico', icon: ChartBarIcon },
+  { text: 'Usuarios', path: '/usuarios', icon: UserGroupIcon, adminOnly: true },
 ];
 
 function Layout() {
@@ -40,6 +42,13 @@ function Layout() {
     }
   };
 
+  const visibleNavItems = useMemo(() => {
+    if (currentUser?.role === 'administrador') {
+      return navItems;
+    }
+    return navItems.filter(item => !item.adminOnly);
+  }, [currentUser]);
+
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
@@ -49,7 +58,7 @@ function Layout() {
         </div>
         <div className="flex flex-col flex-1 overflow-y-auto">
           <nav className="flex-1 px-4 py-4">
-            {navItems.map((item) => (
+            {visibleNavItems.map((item) => (
               <Link
                 key={item.text}
                 to={item.path}
