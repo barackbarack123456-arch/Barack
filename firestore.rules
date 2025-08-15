@@ -8,6 +8,11 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role;
     }
 
+    // Función para verificar si el usuario es el propietario del documento.
+    function isOwner(res) {
+      return request.auth.uid == res.data.userId;
+    }
+
     // Reglas para la colección de Usuarios
     // Solo los administradores pueden leer la lista completa y modificar roles.
     // Cada usuario puede leer su propio documento de rol.
@@ -16,12 +21,27 @@ service cloud.firestore {
       allow write: if getUserRole() == 'administrador';
     }
 
-    // Reglas para TODAS las demás colecciones de datos (productos, clientes, etc.)
-    // La lectura está permitida para cualquier usuario autenticado.
-    // La escritura (crear, actualizar, borrar) solo para editores y administradores.
-    match /{document=**} {
-      allow read: if request.auth != null;
-      allow write: if getUserRole() in ['editor', 'administrador'] || request.auth.uid == 'NIFudxxXnea8HqFzeMpxY0kma5b2';
+    // Reglas para las colecciones de datos principales.
+    // El acceso de lectura y escritura se concede si el usuario es el propietario
+    // del documento o si tiene el rol de 'administrador'.
+    match /clientes/{documentId} {
+      allow read, write: if isOwner(resource) || getUserRole() == 'administrador';
+    }
+
+    match /insumos/{documentId} {
+      allow read, write: if isOwner(resource) || getUserRole() == 'administrador';
+    }
+
+    match /productos/{documentId} {
+      allow read, write: if isOwner(resource) || getUserRole() == 'administrador';
+    }
+
+    match /proveedores/{documentId} {
+      allow read, write: if isOwner(resource) || getUserRole() == 'administrador';
+    }
+
+    match /proyectos/{documentId} {
+      allow read, write: if isOwner(resource) || getUserRole() == 'administrador';
     }
   }
 }

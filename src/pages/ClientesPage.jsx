@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { getClientes, addCliente, updateCliente, deleteCliente } from '../services/modules/clientesService';
+import { useAuth } from '../hooks/useAuth';
 import ClienteModal from '../components/ClienteModal';
 import InfoModal from '../components/InfoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -30,18 +31,20 @@ function ClientesPage() {
   const [selectedCliente, setSelectedCliente] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deletingClienteId, setDeletingClienteId] = useState(null);
+  const { currentUser } = useAuth();
 
   const fetchClientes = useCallback(async () => {
+    if (!currentUser) return;
     setLoading(true);
     try {
-      const data = await getClientes();
+      const data = await getClientes(currentUser.uid);
       setClientes(data);
     } catch (error) {
       console.error("Error fetching clients:", error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentUser]);
 
   useEffect(() => {
     fetchClientes();
@@ -58,11 +61,15 @@ function ClientesPage() {
   };
 
   const handleSaveCliente = async (clienteData) => {
+    if (!currentUser) {
+      console.error("No user logged in");
+      return;
+    }
     try {
       if (editingCliente) {
         await updateCliente(editingCliente.id, clienteData);
       } else {
-        await addCliente(clienteData);
+        await addCliente(clienteData, currentUser.uid);
       }
       handleCloseModal();
       fetchClientes();

@@ -1,12 +1,14 @@
 import { db } from '../firebase';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
 
 const PROVEEDORES_COLLECTION = 'proveedores';
 
 // Function to get all suppliers
-export const getProveedores = async () => {
+export const getProveedores = async (userId) => {
+  if (!userId) return [];
   const proveedoresCollection = collection(db, PROVEEDORES_COLLECTION);
-  const snapshot = await getDocs(proveedoresCollection);
+  const q = query(proveedoresCollection, where("userId", "==", userId));
+  const snapshot = await getDocs(q);
   const proveedoresList = snapshot.docs.map(doc => ({
     id: doc.id,
     ...doc.data()
@@ -15,9 +17,9 @@ export const getProveedores = async () => {
 };
 
 // Function to add a new supplier
-export const addProveedor = async (proveedorData) => {
+export const addProveedor = async (proveedorData, userId) => {
   const proveedoresCollection = collection(db, PROVEEDORES_COLLECTION);
-  const docRef = await addDoc(proveedoresCollection, proveedorData);
+  const docRef = await addDoc(proveedoresCollection, { ...proveedorData, userId });
   return docRef.id;
 };
 
@@ -33,8 +35,10 @@ export const deleteProveedor = async (id) => {
   await deleteDoc(proveedorDoc);
 };
 
-export const getProveedoresCount = async () => {
+export const getProveedoresCount = async (userId) => {
+  if (!userId) return 0;
   const proveedoresCollection = collection(db, PROVEEDORES_COLLECTION);
-  const snapshot = await getDocs(proveedoresCollection);
+  const q = query(proveedoresCollection, where("userId", "==", userId));
+  const snapshot = await getDocs(q);
   return snapshot.size;
 };

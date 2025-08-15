@@ -1,17 +1,19 @@
 import { db } from '../firebase';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
 
 const PRODUCTOS_COLLECTION = 'productos';
 
-export const getProductos = async () => {
+export const getProductos = async (userId) => {
+  if (!userId) return [];
   const productosCollection = collection(db, PRODUCTOS_COLLECTION);
-  const snapshot = await getDocs(productosCollection);
+  const q = query(productosCollection, where("userId", "==", userId));
+  const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
-export const addProducto = async (productoData) => {
+export const addProducto = async (productoData, userId) => {
   const productosCollection = collection(db, PRODUCTOS_COLLECTION);
-  const docRef = await addDoc(productosCollection, productoData);
+  const docRef = await addDoc(productosCollection, { ...productoData, userId });
   return docRef.id;
 };
 
@@ -25,8 +27,10 @@ export const deleteProducto = async (id) => {
   await deleteDoc(productoDoc);
 };
 
-export const getProductosCount = async () => {
+export const getProductosCount = async (userId) => {
+  if (!userId) return 0;
   const productosCollection = collection(db, PRODUCTOS_COLLECTION);
-  const snapshot = await getDocs(productosCollection);
+  const q = query(productosCollection, where("userId", "==", userId));
+  const snapshot = await getDocs(q);
   return snapshot.size;
 };

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { getProyectos, addProyecto, updateProyecto, deleteProyecto } from '../services/modules/proyectosService';
+import { useAuth } from '../hooks/useAuth';
 import ProyectoModal from '../components/ProyectoModal';
 import InfoModal from '../components/InfoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -30,18 +31,20 @@ function ProyectosPage() {
   const [selectedProyecto, setSelectedProyecto] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deletingProyectoId, setDeletingProyectoId] = useState(null);
+  const { currentUser } = useAuth();
 
   const fetchProyectos = useCallback(async () => {
+    if (!currentUser) return;
     setLoading(true);
     try {
-      const data = await getProyectos();
+      const data = await getProyectos(currentUser.uid);
       setProyectos(data);
     } catch (error) {
       console.error("Error fetching projects:", error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentUser]);
 
   useEffect(() => {
     fetchProyectos();
@@ -58,11 +61,15 @@ function ProyectosPage() {
   };
 
   const handleSaveProyecto = async (proyectoData) => {
+    if (!currentUser) {
+      console.error("No user logged in");
+      return;
+    }
     try {
       if (editingProyecto) {
         await updateProyecto(editingProyecto.id, proyectoData);
       } else {
-        await addProyecto(proyectoData);
+        await addProyecto(proyectoData, currentUser.uid);
       }
       handleCloseModal();
       fetchProyectos();

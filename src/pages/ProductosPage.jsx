@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { getProductos, addProducto, updateProducto, deleteProducto } from '../services/modules/productosService';
+import { useAuth } from '../hooks/useAuth';
 import ProductoModal from '../components/ProductoModal';
 import InfoModal from '../components/InfoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -30,18 +31,20 @@ function ProductosPage() {
   const [selectedProducto, setSelectedProducto] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deletingProductoId, setDeletingProductoId] = useState(null);
+  const { currentUser } = useAuth();
 
   const fetchProductos = useCallback(async () => {
+    if (!currentUser) return;
     setLoading(true);
     try {
-      const data = await getProductos();
+      const data = await getProductos(currentUser.uid);
       setProductos(data);
     } catch (error) {
       console.error("Error fetching products:", error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentUser]);
 
   useEffect(() => {
     fetchProductos();
@@ -58,11 +61,15 @@ function ProductosPage() {
   };
 
   const handleSaveProducto = async (productoData) => {
+    if (!currentUser) {
+      console.error("No user logged in");
+      return;
+    }
     try {
       if (editingProducto) {
         await updateProducto(editingProducto.id, productoData);
       } else {
-        await addProducto(productoData);
+        await addProducto(productoData, currentUser.uid);
       }
       handleCloseModal();
       fetchProductos();

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { getInsumos, addInsumo, updateInsumo, deleteInsumo } from '../services/modules/insumosService';
+import { useAuth } from '../hooks/useAuth';
 import InsumoModal from '../components/InsumoModal';
 import InfoModal from '../components/InfoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -30,18 +31,20 @@ function InsumosPage() {
   const [selectedInsumo, setSelectedInsumo] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deletingInsumoId, setDeletingInsumoId] = useState(null);
+  const { currentUser } = useAuth();
 
   const fetchInsumos = useCallback(async () => {
+    if (!currentUser) return;
     setLoading(true);
     try {
-      const data = await getInsumos();
+      const data = await getInsumos(currentUser.uid);
       setInsumos(data);
     } catch (error) {
       console.error("Error fetching supplies:", error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentUser]);
 
   useEffect(() => {
     fetchInsumos();
@@ -58,11 +61,15 @@ function InsumosPage() {
   };
 
   const handleSaveInsumo = async (insumoData) => {
+    if (!currentUser) {
+      console.error("No user logged in");
+      return;
+    }
     try {
       if (editingInsumo) {
         await updateInsumo(editingInsumo.id, insumoData);
       } else {
-        await addInsumo(insumoData);
+        await addInsumo(insumoData, currentUser.uid);
       }
       handleCloseModal();
       fetchInsumos();

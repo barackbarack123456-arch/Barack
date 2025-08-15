@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { getProveedores, addProveedor, updateProveedor, deleteProveedor } from '../services/modules/proveedoresService';
+import { useAuth } from '../hooks/useAuth';
 import ProveedorModal from '../components/ProveedorModal';
 import InfoModal from '../components/InfoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -30,18 +31,20 @@ function ProveedoresPage() {
   const [selectedProveedor, setSelectedProveedor] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deletingProveedorId, setDeletingProveedorId] = useState(null);
+  const { currentUser } = useAuth();
 
   const fetchProveedores = useCallback(async () => {
+    if (!currentUser) return;
     setLoading(true);
     try {
-      const data = await getProveedores();
+      const data = await getProveedores(currentUser.uid);
       setProveedores(data);
     } catch (error) {
       console.error("Error fetching suppliers:", error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentUser]);
 
   useEffect(() => {
     fetchProveedores();
@@ -58,11 +61,15 @@ function ProveedoresPage() {
   };
 
   const handleSaveProveedor = async (proveedorData) => {
+    if (!currentUser) {
+      console.error("No user logged in");
+      return;
+    }
     try {
       if (editingProveedor) {
         await updateProveedor(editingProveedor.id, proveedorData);
       } else {
-        await addProveedor(proveedorData);
+        await addProveedor(proveedorData, currentUser.uid);
       }
       handleCloseModal();
       fetchProveedores();

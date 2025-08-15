@@ -1,17 +1,19 @@
 import { db } from '../firebase';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
 
 const CLIENTES_COLLECTION = 'clientes';
 
-export const getClientes = async () => {
+export const getClientes = async (userId) => {
+  if (!userId) return [];
   const clientesCollection = collection(db, CLIENTES_COLLECTION);
-  const snapshot = await getDocs(clientesCollection);
+  const q = query(clientesCollection, where("userId", "==", userId));
+  const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
-export const addCliente = async (clienteData) => {
+export const addCliente = async (clienteData, userId) => {
   const clientesCollection = collection(db, CLIENTES_COLLECTION);
-  const docRef = await addDoc(clientesCollection, clienteData);
+  const docRef = await addDoc(clientesCollection, { ...clienteData, userId });
   return docRef.id;
 };
 
@@ -25,8 +27,10 @@ export const deleteCliente = async (id) => {
   await deleteDoc(clienteDoc);
 };
 
-export const getClientesCount = async () => {
+export const getClientesCount = async (userId) => {
+  if (!userId) return 0;
   const clientesCollection = collection(db, CLIENTES_COLLECTION);
-  const snapshot = await getDocs(clientesCollection);
+  const q = query(clientesCollection, where("userId", "==", userId));
+  const snapshot = await getDocs(q);
   return snapshot.size;
 };
