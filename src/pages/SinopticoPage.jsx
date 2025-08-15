@@ -1,9 +1,13 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { AgGridReact } from '@ag-grid-community/react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { getSinopticoItems, addSinopticoItem, updateSinopticoItem, deleteSinopticoItem } from '../services/sinopticoService';
-import { getProveedores, updateProveedor, getClientes, updateCliente, getInsumos, updateInsumo, getProductos, updateProducto } from '../services/dataService';
+import { getProveedores, updateProveedor } from '../services/modules/proveedoresService';
+import { getClientes, updateCliente } from '../services/modules/clientesService';
+import { getInsumos, updateInsumo } from '../services/modules/insumosService';
+import { getProductos, updateProducto } from '../services/modules/productosService';
+import useData from '../hooks/useData';
 import SinopticoItemModal from '../components/SinopticoItemModal';
 import ConfirmDialog from '../components/ConfirmDialog';
+import DataGrid from '../components/DataGrid';
 
 // AG Grid Module Registration
 import { ModuleRegistry } from '@ag-grid-community/core';
@@ -26,9 +30,6 @@ ModuleRegistry.registerModules([
   SetFilterModule,
   ColumnsToolPanelModule,
 ]);
-
-import '@ag-grid-community/styles/ag-grid.css';
-import '@ag-grid-community/styles/ag-theme-alpine.css';
 
 // Helper function to calculate the level of each node for the sinoptico view
 const calculateLevels = (items) => {
@@ -114,39 +115,28 @@ const VIEW_CONFIG = {
 
 
 function SinopticoPage() {
-  const [rowData, setRowData] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [gridApi, setGridApi] = useState(null);
   const [levelFilter, setLevelFilter] = useState('all');
   const [currentView, setCurrentView] = useState('sinoptico');
-  const [loading, setLoading] = useState(true);
 
-  // Suggestion for improvement: Centralize data fetching logic, perhaps in a custom hook (e.g., useData)
-  // to handle loading, error, and data states automatically for all views.
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const config = VIEW_CONFIG[currentView];
-      let items = await config.fetcher();
-      if (config.isTree) {
-        items = calculateLevels(items);
-      }
-      setRowData(items);
-    } catch (error) {
-      console.error(`Error fetching ${currentView} items:`, error);
-      setRowData([]); // Clear data on error
-    } finally {
-      setLoading(false);
+  const config = useMemo(() => VIEW_CONFIG[currentView], [currentView]);
+
+  // Use the custom hook for data fetching
+  const { data: rawData, loading, refetch } = useData(config.fetcher, [currentView]);
+
+  // Process data (e.g., calculate levels for tree view)
+  const rowData = useMemo(() => {
+    if (config.isTree) {
+      return calculateLevels(rawData);
     }
-  }, [currentView]);
+    return rawData;
+  }, [rawData, config.isTree]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  useEffect(() => {
+  // Effect to handle filtering when levelFilter or gridApi changes
+  React.useEffect(() => {
     if (gridApi) {
       gridApi.onFilterChanged();
     }
@@ -159,14 +149,14 @@ function SinopticoPage() {
 
   const getDataPath = useCallback((data) => {
     const path = [];
-    const itemMap = new Map(rowData.map(item => [item.id, item]));
+    const itemMap = new Map(rawData.map(item => [item.id, item]));
     let currentItem = data;
     while (currentItem) {
       path.unshift(currentItem.id);
       currentItem = itemMap.get(currentItem.id_padre);
     }
     return path;
-  }, [rowData]);
+  }, [rawData]);
 
   const onCellValueChanged = useCallback(async (params) => {
     const { data, colDef, newValue } = params;
@@ -203,14 +193,14 @@ function SinopticoPage() {
   const handleSaveItem = async (formData) => {
     const itemData = { ...formData, id_padre: selectedItem ? selectedItem.id : null };
     await addSinopticoItem(itemData).catch(err => console.error("Failed to add item:", err));
-    fetchData(); // Refetch data for the current view
+    refetch(); // Refetch data for the current view
     setIsModalOpen(false);
   };
 
   const handleDeleteItem = async () => {
     if (!selectedItem) return;
     await deleteSinopticoItem(selectedItem.id).catch(err => console.error("Failed to delete item:", err));
-    fetchData(); // Refetch data for the current view
+    refetch(); // Refetch data for the current view
     setIsConfirmOpen(false);
     setSelectedItem(null);
   };
@@ -222,8 +212,8 @@ function SinopticoPage() {
     if (movingNode.data.id === newParentId || movingNode.data.id_padre === newParentId) return;
     const updateData = { id_padre: newParentId };
     await updateSinopticoItem(movingNode.data.id, updateData);
-    fetchData();
-  }, [fetchData]);
+    refetch();
+  }, [refetch]);
 
   const autoGroupColumnDef = useMemo(() => ({
     headerName: 'Nombre',
@@ -242,8 +232,6 @@ function SinopticoPage() {
     }
     return node.data.level === levelFilter;
   }, [levelFilter]);
-
-  const config = VIEW_CONFIG[currentView];
 
   return (
     <div>
@@ -275,27 +263,19 @@ function SinopticoPage() {
         </div>
       )}
 
-      <div className="ag-theme-alpine" style={{ height: '600px', width: '100%' }}>
-        <AgGridReact
-          key={currentView} // Add key to force re-render on view change
-          rowData={rowData}
-          columnDefs={config.colDefs}
-          treeData={config.isTree}
-          getDataPath={config.isTree ? getDataPath : undefined}
-          autoGroupColumnDef={autoGroupColumnDef}
-          groupDefaultExpanded={-1}
-          onCellValueChanged={onCellValueChanged}
-          onSelectionChanged={onSelectionChanged}
-          onGridReady={onGridReady}
-          rowSelection="single"
-          onRowDragEnd={config.isTree ? handleRowDragEnd : undefined}
-          isExternalFilterPresent={config.isTree ? isExternalFilterPresent : () => false}
-          doesExternalFilterPass={config.isTree ? doesExternalFilterPass : undefined}
-          getRowId={params => params.data.id} // Important for data updates
-          overlayLoadingTemplate='<span class="ag-overlay-loading-center">Cargando...</span>'
-          overlayNoRowsTemplate='<span class="ag-overlay-no-rows-center">No hay datos para mostrar.</span>'
-        />
-      </div>
+      <DataGrid
+        view={currentView}
+        rowData={loading ? [] : rowData}
+        config={config}
+        autoGroupColumnDef={autoGroupColumnDef}
+        onGridReady={onGridReady}
+        onSelectionChanged={onSelectionChanged}
+        onCellValueChanged={onCellValueChanged}
+        handleRowDragEnd={handleRowDragEnd}
+        getDataPath={getDataPath}
+        isExternalFilterPresent={isExternalFilterPresent}
+        doesExternalFilterPass={doesExternalFilterPass}
+      />
 
       {currentView === 'sinoptico' && (
         <>
