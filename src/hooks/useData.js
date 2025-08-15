@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
  * Custom hook for fetching data from a service.
@@ -12,12 +12,17 @@ function useData(fetcher, deps = []) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const savedFetcher = useRef(fetcher);
+
+  useEffect(() => {
+    savedFetcher.current = fetcher;
+  }, [fetcher]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const result = await fetcher();
+      const result = await savedFetcher.current();
       setData(result);
     } catch (err) {
       console.error("Error fetching data:", err);
@@ -26,7 +31,7 @@ function useData(fetcher, deps = []) {
     } finally {
       setLoading(false);
     }
-  }, [fetcher, ...deps]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, deps); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     fetchData();
