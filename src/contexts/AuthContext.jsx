@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
+  auth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   sendEmailVerification,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
-} from 'firebase/auth';
-import { auth } from '../services/firebase';
+} from '../services/firebase';
 import { AuthContext } from './AuthContextDef';
 
 // Create the AuthProvider component

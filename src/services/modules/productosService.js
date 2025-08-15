@@ -1,5 +1,12 @@
-import { db } from '../firebase';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import {
+  db,
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc
+} from '../firebase';
 
 const PRODUCTOS_COLLECTION = 'productos';
 
