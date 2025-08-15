@@ -3,16 +3,19 @@ import { Dialog, Transition } from '@headlessui/react';
 
 const ProductoModal = forwardRef(({ open, onClose, onSave, producto }, ref) => {
   const [formData, setFormData] = useState({
+    codigo: '',
     descripcion: '',
   });
 
   useEffect(() => {
     if (producto) {
       setFormData({
+        codigo: producto.codigo || '',
         descripcion: producto.descripcion || '',
       });
     } else {
       setFormData({
+        codigo: '',
         descripcion: '',
       });
     }
@@ -24,8 +27,8 @@ const ProductoModal = forwardRef(({ open, onClose, onSave, producto }, ref) => {
   };
 
   const handleSave = () => {
-    if (!formData.descripcion) {
-      alert('Descripción es obligatoria.');
+    if (!formData.codigo || !formData.descripcion) {
+      alert('Código y Descripción son obligatorios.');
       return;
     }
     onSave(formData);
@@ -67,6 +70,19 @@ const ProductoModal = forwardRef(({ open, onClose, onSave, producto }, ref) => {
                       Por favor, complete los detalles del producto.
                     </p>
                     <div className="space-y-4">
+                      <div>
+                        <label htmlFor="codigo" className="block text-sm font-medium text-gray-700">
+                          Código
+                        </label>
+                        <input
+                          type="text"
+                          name="codigo"
+                          id="codigo"
+                          value={formData.codigo}
+                          onChange={handleChange}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
                       <div>
                         <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700">
                           Descripción

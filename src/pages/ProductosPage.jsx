@@ -85,10 +85,11 @@ function ProductosPage() {
   };
 
   const handleInfo = (producto) => {
-    alert(`Información del Producto:\n\nDescripción: ${producto.descripcion}`);
+    alert(`Información del Producto:\n\nCódigo: ${producto.codigo}\nDescripción: ${producto.descripcion}`);
   };
 
   const columnDefs = useMemo(() => [
+    { headerName: "Código", field: "codigo", flex: 1, sortable: true, filter: true },
     { headerName: "Descripción", field: "descripcion", flex: 2, sortable: true, filter: true },
     {
       headerName: "Acciones",
@@ -124,7 +125,7 @@ function ProductosPage() {
           rowData={productos}
           columnDefs={columnDefs}
           loading={loading}
-          frameworkComponents={{
+          components={{
             actionsCellRenderer: ActionsCellRenderer,
           }}
         />
