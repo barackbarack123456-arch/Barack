@@ -15,13 +15,20 @@ function DataGrid({
   onSelectionChanged,
   loading,
   components,
+  getRowIdKey = 'id',
+  overlayLoadingTemplate = '<span class="ag-overlay-loading-center">Cargando...</span>',
+  overlayNoRowsTemplate = '<span class="ag-overlay-no-rows-center">No hay datos para mostrar.</span>',
+  defaultColDef: customDefaultColDef,
 }) {
   const defaultColDef = {
     sortable: true,
     filter: true,
     resizable: true,
     flex: 1,
+    ...customDefaultColDef,
   };
+
+  const getRowId = params => params.data[getRowIdKey];
 
   return (
     <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' }}>
@@ -31,11 +38,11 @@ function DataGrid({
         defaultColDef={defaultColDef}
         onGridReady={onGridReady}
         onSelectionChanged={onSelectionChanged}
-        getRowId={params => params.data.id}
+        getRowId={getRowId}
         loading={loading}
         components={components}
-        overlayLoadingTemplate='<span class="ag-overlay-loading-center">Cargando...</span>'
-        overlayNoRowsTemplate='<span class="ag-overlay-no-rows-center">No hay datos para mostrar.</span>'
+        overlayLoadingTemplate={overlayLoadingTemplate}
+        overlayNoRowsTemplate={overlayNoRowsTemplate}
         domLayout='autoHeight'
       />
     </div>
