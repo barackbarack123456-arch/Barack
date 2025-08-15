@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
 function SinopticoItemModal({ isOpen, onClose, onSave, item }) {
@@ -42,7 +42,7 @@ function SinopticoItemModal({ isOpen, onClose, onSave, item }) {
   return (
     <Transition show={isOpen}>
       <Dialog className="relative z-10" onClose={onClose}>
-        <TransitionChild
+        <Transition.Child
           enter="ease-out duration-300"
           enterFrom="opacity-0"
           enterTo="opacity-100"
@@ -51,11 +51,11 @@ function SinopticoItemModal({ isOpen, onClose, onSave, item }) {
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </TransitionChild>
+        </Transition.Child>
 
         <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <TransitionChild
+            <Transition.Child
               enter="ease-out duration-300"
               enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
               enterTo="opacity-100 translate-y-0 sm:scale-100"
@@ -100,7 +100,7 @@ function SinopticoItemModal({ isOpen, onClose, onSave, item }) {
                   </button>
                 </div>
               </DialogPanel>
-            </TransitionChild>
+            </Transition.Child>
           </div>
         </div>
       </Dialog>
