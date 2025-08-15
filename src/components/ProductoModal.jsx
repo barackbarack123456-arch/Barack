@@ -1,22 +1,42 @@
 import React, { useState, useEffect, Fragment, forwardRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
+import { getProyectos } from '../services/modules/proyectosService';
 
 const ProductoModal = forwardRef(({ open, onClose, onSave, producto }, ref) => {
   const [formData, setFormData] = useState({
     codigo: '',
     descripcion: '',
+    unidad: '',
+    proyecto: '',
   });
+  const [proyectos, setProyectos] = useState([]);
+
+  useEffect(() => {
+    const fetchProyectos = async () => {
+      try {
+        const data = await getProyectos();
+        setProyectos(data);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      }
+    };
+    fetchProyectos();
+  }, []);
 
   useEffect(() => {
     if (producto) {
       setFormData({
         codigo: producto.codigo || '',
         descripcion: producto.descripcion || '',
+        unidad: producto.unidad || '',
+        proyecto: producto.proyecto || '',
       });
     } else {
       setFormData({
         codigo: '',
         descripcion: '',
+        unidad: '',
+        proyecto: '',
       });
     }
   }, [producto, open]);
@@ -27,8 +47,8 @@ const ProductoModal = forwardRef(({ open, onClose, onSave, producto }, ref) => {
   };
 
   const handleSave = () => {
-    if (!formData.codigo || !formData.descripcion) {
-      alert('Código y Descripción son obligatorios.');
+    if (!formData.codigo || !formData.descripcion || !formData.unidad || !formData.proyecto) {
+      alert('Todos los campos son obligatorios.');
       return;
     }
     onSave(formData);
@@ -95,6 +115,36 @@ const ProductoModal = forwardRef(({ open, onClose, onSave, producto }, ref) => {
                           onChange={handleChange}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
+                      </div>
+                      <div>
+                        <label htmlFor="unidad" className="block text-sm font-medium text-gray-700">
+                          Unidad
+                        </label>
+                        <input
+                          type="text"
+                          name="unidad"
+                          id="unidad"
+                          value={formData.unidad}
+                          onChange={handleChange}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="proyecto" className="block text-sm font-medium text-gray-700">
+                          Proyecto
+                        </label>
+                        <select
+                          id="proyecto"
+                          name="proyecto"
+                          value={formData.proyecto}
+                          onChange={handleChange}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        >
+                          <option value="">Seleccione un proyecto</option>
+                          {proyectos.map(p => (
+                            <option key={p.id} value={p.id}>{p.nombre}</option>
+                          ))}
+                        </select>
                       </div>
                     </div>
                   </div>

@@ -11,11 +11,13 @@ import {
   ArrowRightOnRectangleIcon,
   UserCircleIcon,
   TruckIcon,
+  BriefcaseIcon,
 } from '@heroicons/react/24/outline';
 import { Transition } from '@headlessui/react';
 
 const navItems = [
   { text: 'Dashboard', path: '/', icon: HomeIcon },
+  { text: 'Proyectos', path: '/proyectos', icon: BriefcaseIcon },
   { text: 'Proveedores', path: '/proveedores', icon: TruckIcon },
   { text: 'Clientes', path: '/clientes', icon: UsersIcon },
   { text: 'Productos', path: '/productos', icon: ShoppingCartIcon },

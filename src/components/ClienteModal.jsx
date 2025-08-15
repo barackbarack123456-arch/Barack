@@ -2,25 +2,42 @@ import React, { useState, useEffect, Fragment, forwardRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
 const ClienteModal = forwardRef(({ open, onClose, onSave, cliente }, ref) => {
-  const [id, setId] = useState('');
-  const [descripcion, setDescripcion] = useState('');
+  const [formData, setFormData] = useState({
+    nombre: '',
+    direccion: '',
+    telefono: '',
+    email: '',
+  });
 
   useEffect(() => {
     if (cliente) {
-      setId(cliente.id || '');
-      setDescripcion(cliente.descripcion || '');
+      setFormData({
+        nombre: cliente.nombre || '',
+        direccion: cliente.direccion || '',
+        telefono: cliente.telefono || '',
+        email: cliente.email || '',
+      });
     } else {
-      setId('');
-      setDescripcion('');
+      setFormData({
+        nombre: '',
+        direccion: '',
+        telefono: '',
+        email: '',
+      });
     }
   }, [cliente, open]);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   const handleSave = () => {
-    if (!id || !descripcion) {
-      alert('Código y Descripción son obligatorios.');
+    if (!formData.nombre) {
+      alert('Nombre es obligatorio.');
       return;
     }
-    onSave({ id, descripcion });
+    onSave(formData);
   };
 
   return (
@@ -60,29 +77,54 @@ const ClienteModal = forwardRef(({ open, onClose, onSave, cliente }, ref) => {
                     </p>
                     <div className="space-y-4">
                       <div>
-                        <label htmlFor="id" className="block text-sm font-medium text-gray-700">
-                          Código
+                        <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
+                          Nombre
                         </label>
                         <input
                           type="text"
-                          name="id"
-                          id="id"
-                          value={id}
-                          onChange={(e) => setId(e.target.value)}
-                          readOnly={!!cliente}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm read-only:bg-gray-100"
+                          name="nombre"
+                          id="nombre"
+                          value={formData.nombre}
+                          onChange={handleChange}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                       </div>
                       <div>
-                        <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700">
-                          Descripción
+                        <label htmlFor="direccion" className="block text-sm font-medium text-gray-700">
+                          Dirección
                         </label>
                         <input
                           type="text"
-                          name="descripcion"
-                          id="descripcion"
-                          value={descripcion}
-                          onChange={(e) => setDescripcion(e.target.value)}
+                          name="direccion"
+                          id="direccion"
+                          value={formData.direccion}
+                          onChange={handleChange}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="telefono" className="block text-sm font-medium text-gray-700">
+                          Teléfono
+                        </label>
+                        <input
+                          type="text"
+                          name="telefono"
+                          id="telefono"
+                          value={formData.telefono}
+                          onChange={handleChange}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          name="email"
+                          id="email"
+                          value={formData.email}
+                          onChange={handleChange}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                       </div>

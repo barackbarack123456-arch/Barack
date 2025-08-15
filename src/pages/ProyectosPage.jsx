@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { getProveedores, addProveedor, updateProveedor, deleteProveedor } from '../services/modules/proveedoresService';
-import ProveedorModal from '../components/ProveedorModal';
+import { getProyectos, addProyecto, updateProyecto, deleteProyecto } from '../services/modules/proyectosService';
+import ProyectoModal from '../components/ProyectoModal';
 import InfoModal from '../components/InfoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataGrid from '../components/DataGrid';
@@ -21,83 +21,80 @@ const ActionsCellRenderer = ({ data, onInfo, onEdit, onDelete }) => (
   </div>
 );
 
-function ProveedoresPage() {
-  const [proveedores, setProveedores] = useState([]);
+function ProyectosPage() {
+  const [proyectos, setProyectos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingProveedor, setEditingProveedor] = useState(null);
+  const [editingProyecto, setEditingProyecto] = useState(null);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
-  const [selectedProveedor, setSelectedProveedor] = useState(null);
+  const [selectedProyecto, setSelectedProyecto] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [deletingProveedorId, setDeletingProveedorId] = useState(null);
+  const [deletingProyectoId, setDeletingProyectoId] = useState(null);
 
-  const fetchProveedores = useCallback(async () => {
+  const fetchProyectos = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getProveedores();
-      setProveedores(data);
+      const data = await getProyectos();
+      setProyectos(data);
     } catch (error) {
-      console.error("Error fetching suppliers:", error);
+      console.error("Error fetching projects:", error);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchProveedores();
-  }, [fetchProveedores]);
+    fetchProyectos();
+  }, [fetchProyectos]);
 
-  const handleOpenModal = (proveedor = null) => {
-    setEditingProveedor(proveedor);
+  const handleOpenModal = (proyecto = null) => {
+    setEditingProyecto(proyecto);
     setModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
-    setEditingProveedor(null);
+    setEditingProyecto(null);
   };
 
-  const handleSaveProveedor = async (proveedorData) => {
+  const handleSaveProyecto = async (proyectoData) => {
     try {
-      if (editingProveedor) {
-        await updateProveedor(editingProveedor.id, proveedorData);
+      if (editingProyecto) {
+        await updateProyecto(editingProyecto.id, proyectoData);
       } else {
-        await addProveedor(proveedorData);
+        await addProyecto(proyectoData);
       }
       handleCloseModal();
-      fetchProveedores();
+      fetchProyectos();
     } catch (error) {
-      console.error("Error saving supplier:", error);
+      console.error("Error saving project:", error);
     }
   };
 
   const handleDeleteClick = (id) => {
-    setDeletingProveedorId(id);
+    setDeletingProyectoId(id);
     setConfirmOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
     try {
-      await deleteProveedor(deletingProveedorId);
+      await deleteProyecto(deletingProyectoId);
       setConfirmOpen(false);
-      setDeletingProveedorId(null);
-      fetchProveedores();
+      setDeletingProyectoId(null);
+      fetchProyectos();
     } catch (error) {
-      console.error("Error deleting supplier:", error);
+      console.error("Error deleting project:", error);
     }
   };
 
-  const handleInfo = (proveedor) => {
-    setSelectedProveedor(proveedor);
+  const handleInfo = (proyecto) => {
+    setSelectedProyecto(proyecto);
     setInfoModalOpen(true);
   };
 
   const columnDefs = useMemo(() => [
-    { headerName: "Razón Social", field: "razonSocial", flex: 2, sortable: true, filter: true },
-    { headerName: "Dirección", field: "direccion", flex: 2, sortable: true, filter: true },
-    { headerName: "Teléfono", field: "telefono", flex: 1, sortable: true, filter: true },
-    { headerName: "Email", field: "email", flex: 2, sortable: true, filter: true },
-    { headerName: "Contacto", field: "contacto", flex: 1, sortable: true, filter: true },
+    { headerName: "Código", field: "codigo", flex: 1, sortable: true, filter: true },
+    { headerName: "Nombre", field: "nombre", flex: 2, sortable: true, filter: true },
     {
       headerName: "Acciones",
       cellRenderer: 'actionsCellRenderer',
@@ -117,19 +114,19 @@ function ProveedoresPage() {
   return (
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Proveedores</h1>
+        <h1 className="text-3xl font-bold text-gray-800">Proyectos</h1>
         <button
           onClick={() => handleOpenModal()}
           className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-sm transition-all duration-200 ease-in-out transform hover:scale-105"
         >
           <PlusIcon className="h-5 w-5 mr-2" />
-          Añadir Proveedor
+          Añadir Proyecto
         </button>
       </div>
 
       <div className="flex-grow bg-white shadow-lg rounded-lg overflow-hidden">
         <DataGrid
-          rowData={proveedores}
+          rowData={proyectos}
           columnDefs={columnDefs}
           loading={loading}
           components={{
@@ -148,11 +145,11 @@ function ProveedoresPage() {
         leaveFrom="opacity-100"
         leaveTo="opacity-0"
       >
-        <ProveedorModal
+        <ProyectoModal
           open={modalOpen}
           onClose={handleCloseModal}
-          onSave={handleSaveProveedor}
-          proveedor={editingProveedor}
+          onSave={handleSaveProyecto}
+          proyecto={editingProyecto}
         />
       </Transition>
 
@@ -161,17 +158,17 @@ function ProveedoresPage() {
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleDeleteConfirm}
         title="Confirmar Eliminación"
-        message="¿Estás seguro de que quieres eliminar este proveedor? Esta acción no se puede deshacer."
+        message="¿Estás seguro de que quieres eliminar este proyecto? Esta acción no se puede deshacer."
       />
 
       <InfoModal
         open={infoModalOpen}
         onClose={() => setInfoModalOpen(false)}
-        item={selectedProveedor}
-        title="Información del Proveedor"
+        item={selectedProyecto}
+        title="Información del Proyecto"
       />
     </div>
   );
 }
 
-export default ProveedoresPage;
+export default ProyectosPage;

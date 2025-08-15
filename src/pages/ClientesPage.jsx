@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { getClientes, addCliente, updateCliente, deleteCliente } from '../services/modules/clientesService';
 import ClienteModal from '../components/ClienteModal';
+import InfoModal from '../components/InfoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataGrid from '../components/DataGrid';
 import { PlusIcon, PencilIcon, TrashIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
@@ -8,13 +9,13 @@ import { Transition } from '@headlessui/react';
 
 const ActionsCellRenderer = ({ data, onInfo, onEdit, onDelete }) => (
   <div className="flex items-center justify-end space-x-2">
-    <button onClick={() => onInfo(data)} className="text-blue-600 hover:text-blue-900 transition-colors duration-200">
+    <button data-testid="info-button" onClick={() => onInfo(data)} className="text-blue-600 hover:text-blue-900 transition-colors duration-200">
       <InformationCircleIcon className="h-5 w-5" />
     </button>
-    <button onClick={() => onEdit(data)} className="text-indigo-600 hover:text-indigo-900 transition-colors duration-200">
+    <button data-testid="edit-button" onClick={() => onEdit(data)} className="text-indigo-600 hover:text-indigo-900 transition-colors duration-200">
       <PencilIcon className="h-5 w-5" />
     </button>
-    <button onClick={() => onDelete(data.id)} className="text-red-600 hover:text-red-900 transition-colors duration-200">
+    <button data-testid="delete-button" onClick={() => onDelete(data.id)} className="text-red-600 hover:text-red-900 transition-colors duration-200">
       <TrashIcon className="h-5 w-5" />
     </button>
   </div>
@@ -25,6 +26,8 @@ function ClientesPage() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCliente, setEditingCliente] = useState(null);
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [selectedCliente, setSelectedCliente] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deletingClienteId, setDeletingClienteId] = useState(null);
 
@@ -85,12 +88,15 @@ function ClientesPage() {
   };
 
   const handleInfo = (cliente) => {
-    alert(`Información del Cliente:\n\nCódigo: ${cliente.id}\nDescripción: ${cliente.descripcion}`);
+    setSelectedCliente(cliente);
+    setInfoModalOpen(true);
   };
 
   const columnDefs = useMemo(() => [
-    { headerName: "Código", field: "id", flex: 1, sortable: true, filter: true },
-    { headerName: "Descripción", field: "descripcion", flex: 2, sortable: true, filter: true },
+    { headerName: "Nombre", field: "nombre", flex: 2, sortable: true, filter: true },
+    { headerName: "Dirección", field: "direccion", flex: 2, sortable: true, filter: true },
+    { headerName: "Teléfono", field: "telefono", flex: 1, sortable: true, filter: true },
+    { headerName: "Email", field: "email", flex: 2, sortable: true, filter: true },
     {
       headerName: "Acciones",
       cellRenderer: 'actionsCellRenderer',
@@ -125,7 +131,7 @@ function ClientesPage() {
           rowData={clientes}
           columnDefs={columnDefs}
           loading={loading}
-          frameworkComponents={{
+          components={{
             actionsCellRenderer: ActionsCellRenderer,
           }}
         />
@@ -155,6 +161,13 @@ function ClientesPage() {
         onConfirm={handleDeleteConfirm}
         title="Confirmar Eliminación"
         message="¿Estás seguro de que quieres eliminar este cliente? Esta acción no se puede deshacer."
+      />
+
+      <InfoModal
+        open={infoModalOpen}
+        onClose={() => setInfoModalOpen(false)}
+        item={selectedCliente}
+        title="Información del Cliente"
       />
     </div>
   );
