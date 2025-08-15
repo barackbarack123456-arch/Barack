@@ -9,6 +9,8 @@ function DataGrid({
   columnDefs,
   onGridReady,
   onSelectionChanged,
+  loading,
+  frameworkComponents,
 }) {
   const defaultColDef = {
     sortable: true,
@@ -25,11 +27,12 @@ function DataGrid({
         defaultColDef={defaultColDef}
         onGridReady={onGridReady}
         onSelectionChanged={onSelectionChanged}
-        rowSelection="single"
         getRowId={params => params.data.id}
         overlayLoadingTemplate='<span class="ag-overlay-loading-center">Cargando...</span>'
         overlayNoRowsTemplate='<span class="ag-overlay-no-rows-center">No hay datos para mostrar.</span>'
         domLayout='autoHeight'
+        loading={loading}
+        components={frameworkComponents}
       />
     </div>
   );

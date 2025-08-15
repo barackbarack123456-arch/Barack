@@ -4,7 +4,6 @@ import InsumoModal from '../components/InsumoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataGrid from '../components/DataGrid';
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { Transition } from '@headlessui/react';
 
 const ActionsCellRenderer = ({ data, onEdit, onDelete }) => (
   <div className="flex items-center justify-end space-x-2">
@@ -23,19 +22,19 @@ function InsumosPage() {
   const [editingInsumo, setEditingInsumo] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deletingInsumoId, setDeletingInsumoId] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const fetchInsumos = useCallback(async () => {
+    setLoading(true);
     try {
-      if (gridApi) gridApi.showLoadingOverlay();
       const data = await getInsumos();
       setInsumos(data);
     } catch (error) {
       console.error("Error fetching supplies:", error);
     } finally {
-      if (gridApi) gridApi.hideOverlay();
+      setLoading(false);
     }
-  }, [gridApi]);
+  }, []);
 
   useEffect(() => {
     fetchInsumos();
@@ -81,10 +80,6 @@ function InsumosPage() {
     }
   };
 
-  const onGridReady = (params) => {
-    setGridApi(params.api);
-  };
-
   const columnDefs = useMemo(() => [
     { headerName: "Código", field: "codigo", flex: 1, sortable: true, filter: true },
     { headerName: "Descripción", field: "descripcion", flex: 2, sortable: true, filter: true },
@@ -120,30 +115,19 @@ function InsumosPage() {
         <DataGrid
           rowData={insumos}
           columnDefs={columnDefs}
-          onGridReady={onGridReady}
           frameworkComponents={{
             actionsCellRenderer: ActionsCellRenderer,
           }}
+          loading={loading}
         />
       </div>
 
-      <Transition
-        show={modalOpen}
-        as={React.Fragment}
-        enter="transition-opacity duration-300"
-        enterFrom="opacity-0"
-        enterTo="opacity-100"
-        leave="transition-opacity duration-300"
-        leaveFrom="opacity-100"
-        leaveTo="opacity-0"
-      >
-        <InsumoModal
-          open={modalOpen}
-          onClose={handleCloseModal}
-          onSave={handleSaveInsumo}
-          insumo={editingInsumo}
-        />
-      </Transition>
+      <InsumoModal
+        open={modalOpen}
+        onClose={handleCloseModal}
+        onSave={handleSaveInsumo}
+        insumo={editingInsumo}
+      />
 
       <ConfirmDialog
         open={confirmOpen}
