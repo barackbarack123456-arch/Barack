@@ -19,23 +19,23 @@ const ActionsCellRenderer = ({ data, onEdit, onDelete }) => (
 
 function ClientesPage() {
   const [clientes, setClientes] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCliente, setEditingCliente] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deletingClienteId, setDeletingClienteId] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
 
   const fetchClientes = useCallback(async () => {
+    setLoading(true);
     try {
-      if (gridApi) gridApi.showLoadingOverlay();
       const data = await getClientes();
       setClientes(data);
     } catch (error) {
       console.error("Error fetching clients:", error);
     } finally {
-      if (gridApi) gridApi.hideOverlay();
+      setLoading(false);
     }
-  }, [gridApi]);
+  }, []);
 
   useEffect(() => {
     fetchClientes();
@@ -81,13 +81,9 @@ function ClientesPage() {
     }
   };
 
-  const onGridReady = (params) => {
-    setGridApi(params.api);
-  };
-
   const columnDefs = useMemo(() => [
     { headerName: "Código", field: "codigo", flex: 1, sortable: true, filter: true },
-    { headerName: "Descripción", field: "descripcion", flex: 2, sortable: true, filter: true },
+    { headerName: "Nombre", field: "nombre", flex: 2, sortable: true, filter: true },
     {
       headerName: "Acciones",
       cellRenderer: 'actionsCellRenderer',
@@ -120,7 +116,7 @@ function ClientesPage() {
         <DataGrid
           rowData={clientes}
           columnDefs={columnDefs}
-          onGridReady={onGridReady}
+          loading={loading}
           frameworkComponents={{
             actionsCellRenderer: ActionsCellRenderer,
           }}

@@ -24,3 +24,9 @@ export const deleteInsumo = async (id) => {
   const insumoDoc = doc(db, INSUMOS_COLLECTION, id);
   await deleteDoc(insumoDoc);
 };
+
+export const getInsumosCount = async () => {
+  const insumosCollection = collection(db, INSUMOS_COLLECTION);
+  const snapshot = await getDocs(insumosCollection);
+  return snapshot.size;
+};

@@ -19,23 +19,23 @@ const ActionsCellRenderer = ({ data, onEdit, onDelete }) => (
 
 function ProductosPage() {
   const [productos, setProductos] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProducto, setEditingProducto] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deletingProductoId, setDeletingProductoId] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
 
   const fetchProductos = useCallback(async () => {
+    setLoading(true);
     try {
-      if (gridApi) gridApi.showLoadingOverlay();
       const data = await getProductos();
       setProductos(data);
     } catch (error) {
       console.error("Error fetching products:", error);
     } finally {
-      if (gridApi) gridApi.hideOverlay();
+      setLoading(false);
     }
-  }, [gridApi]);
+  }, []);
 
   useEffect(() => {
     fetchProductos();
@@ -81,13 +81,10 @@ function ProductosPage() {
     }
   };
 
-  const onGridReady = (params) => {
-    setGridApi(params.api);
-  };
-
   const columnDefs = useMemo(() => [
-    { headerName: "Código", field: "codigo", flex: 1, sortable: true, filter: true },
+    { headerName: "Nombre", field: "nombre", flex: 1, sortable: true, filter: true },
     { headerName: "Descripción", field: "descripcion", flex: 2, sortable: true, filter: true },
+    { headerName: "Precio", field: "precio", flex: 1, sortable: true, filter: true, valueFormatter: params => `$${params.value}` },
     {
       headerName: "Acciones",
       cellRenderer: 'actionsCellRenderer',
@@ -120,7 +117,7 @@ function ProductosPage() {
         <DataGrid
           rowData={productos}
           columnDefs={columnDefs}
-          onGridReady={onGridReady}
+          loading={loading}
           frameworkComponents={{
             actionsCellRenderer: ActionsCellRenderer,
           }}

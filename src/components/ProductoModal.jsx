@@ -1,26 +1,40 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect, Fragment, forwardRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
-function ProductoModal({ open, onClose, onSave, producto }) {
-  const [codigo, setCodigo] = useState('');
-  const [descripcion, setDescripcion] = useState('');
+const ProductoModal = forwardRef(({ open, onClose, onSave, producto }, ref) => {
+  const [formData, setFormData] = useState({
+    nombre: '',
+    descripcion: '',
+    precio: 0,
+  });
 
   useEffect(() => {
     if (producto) {
-      setCodigo(producto.codigo || '');
-      setDescripcion(producto.descripcion || '');
+      setFormData({
+        nombre: producto.nombre || '',
+        descripcion: producto.descripcion || '',
+        precio: producto.precio || 0,
+      });
     } else {
-      setCodigo('');
-      setDescripcion('');
+      setFormData({
+        nombre: '',
+        descripcion: '',
+        precio: 0,
+      });
     }
   }, [producto, open]);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   const handleSave = () => {
-    if (!codigo || !descripcion) {
-      alert('Código y Descripción son obligatorios.');
+    if (!formData.nombre || !formData.descripcion) {
+      alert('Nombre y Descripción son obligatorios.');
       return;
     }
-    onSave({ codigo, descripcion });
+    onSave(formData);
   };
 
   return (
@@ -49,7 +63,7 @@ function ProductoModal({ open, onClose, onSave, producto }) {
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+              <Dialog.Panel ref={ref} className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                   <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
                     {producto ? 'Editar Producto' : 'Añadir Nuevo Producto'}
@@ -60,29 +74,41 @@ function ProductoModal({ open, onClose, onSave, producto }) {
                     </p>
                     <div className="space-y-4">
                       <div>
-                        <label htmlFor="codigo" className="block text-sm font-medium text-gray-700">
-                          Código
+                        <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
+                          Nombre
                         </label>
                         <input
                           type="text"
-                          name="codigo"
-                          id="codigo"
-                          value={codigo}
-                          onChange={(e) => setCodigo(e.target.value)}
-                          readOnly={!!producto}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm read-only:bg-gray-100"
+                          name="nombre"
+                          id="nombre"
+                          value={formData.nombre}
+                          onChange={handleChange}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                       </div>
                       <div>
                         <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700">
                           Descripción
                         </label>
-                        <input
-                          type="text"
+                        <textarea
                           name="descripcion"
                           id="descripcion"
-                          value={descripcion}
-                          onChange={(e) => setDescripcion(e.target.value)}
+                          rows={3}
+                          value={formData.descripcion}
+                          onChange={handleChange}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="precio" className="block text-sm font-medium text-gray-700">
+                          Precio
+                        </label>
+                        <input
+                          type="number"
+                          name="precio"
+                          id="precio"
+                          value={formData.precio}
+                          onChange={handleChange}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                       </div>
@@ -112,6 +138,6 @@ function ProductoModal({ open, onClose, onSave, producto }) {
       </Dialog>
     </Transition.Root>
   );
-}
+});
 
 export default ProductoModal;

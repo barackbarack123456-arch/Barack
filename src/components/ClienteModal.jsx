@@ -1,26 +1,26 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect, Fragment, forwardRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
-function ClienteModal({ open, onClose, onSave, cliente }) {
+const ClienteModal = forwardRef(({ open, onClose, onSave, cliente }, ref) => {
   const [codigo, setCodigo] = useState('');
-  const [descripcion, setDescripcion] = useState('');
+  const [nombre, setNombre] = useState('');
 
   useEffect(() => {
     if (cliente) {
       setCodigo(cliente.codigo || '');
-      setDescripcion(cliente.descripcion || '');
+      setNombre(cliente.nombre || '');
     } else {
       setCodigo('');
-      setDescripcion('');
+      setNombre('');
     }
   }, [cliente, open]);
 
   const handleSave = () => {
-    if (!codigo || !descripcion) {
-      alert('Código y Descripción son obligatorios.');
+    if (!codigo || !nombre) {
+      alert('Código y Nombre son obligatorios.');
       return;
     }
-    onSave({ codigo, descripcion });
+    onSave({ codigo, nombre });
   };
 
   return (
@@ -49,7 +49,7 @@ function ClienteModal({ open, onClose, onSave, cliente }) {
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+              <Dialog.Panel ref={ref} className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                   <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
                     {cliente ? 'Editar Cliente' : 'Añadir Nuevo Cliente'}
@@ -74,15 +74,15 @@ function ClienteModal({ open, onClose, onSave, cliente }) {
                         />
                       </div>
                       <div>
-                        <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700">
-                          Descripción
+                        <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
+                          Nombre
                         </label>
                         <input
                           type="text"
-                          name="descripcion"
-                          id="descripcion"
-                          value={descripcion}
-                          onChange={(e) => setDescripcion(e.target.value)}
+                          name="nombre"
+                          id="nombre"
+                          value={nombre}
+                          onChange={(e) => setNombre(e.target.value)}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                       </div>
@@ -112,6 +112,6 @@ function ClienteModal({ open, onClose, onSave, cliente }) {
       </Dialog>
     </Transition.Root>
   );
-}
+});
 
 export default ClienteModal;
