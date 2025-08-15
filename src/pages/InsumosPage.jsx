@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { getInsumos, addInsumo, updateInsumo, deleteInsumo } from '../services/modules/insumosService';
 import InsumoModal from '../components/InsumoModal';
+import InfoModal from '../components/InfoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataGrid from '../components/DataGrid';
 import { PlusIcon, PencilIcon, TrashIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
@@ -8,13 +9,13 @@ import { Transition } from '@headlessui/react';
 
 const ActionsCellRenderer = ({ data, onInfo, onEdit, onDelete }) => (
   <div className="flex items-center justify-end space-x-2">
-    <button onClick={() => onInfo(data)} className="text-blue-600 hover:text-blue-900 transition-colors duration-200">
+    <button data-testid="info-button" onClick={() => onInfo(data)} className="text-blue-600 hover:text-blue-900 transition-colors duration-200">
       <InformationCircleIcon className="h-5 w-5" />
     </button>
-    <button onClick={() => onEdit(data)} className="text-indigo-600 hover:text-indigo-900 transition-colors duration-200">
+    <button data-testid="edit-button" onClick={() => onEdit(data)} className="text-indigo-600 hover:text-indigo-900 transition-colors duration-200">
       <PencilIcon className="h-5 w-5" />
     </button>
-    <button onClick={() => onDelete(data.id)} className="text-red-600 hover:text-red-900 transition-colors duration-200">
+    <button data-testid="delete-button" onClick={() => onDelete(data.id)} className="text-red-600 hover:text-red-900 transition-colors duration-200">
       <TrashIcon className="h-5 w-5" />
     </button>
   </div>
@@ -25,6 +26,8 @@ function InsumosPage() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingInsumo, setEditingInsumo] = useState(null);
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [selectedInsumo, setSelectedInsumo] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deletingInsumoId, setDeletingInsumoId] = useState(null);
 
@@ -85,14 +88,15 @@ function InsumosPage() {
   };
 
   const handleInfo = (insumo) => {
-    alert(`Información del Insumo:\n\nDescripción: ${insumo.descripcion}\nMaterial: ${insumo.material}\nCosto: $${insumo.costo}\nUnidad: ${insumo.unidadMedidaId}`);
+    setSelectedInsumo(insumo);
+    setInfoModalOpen(true);
   };
 
   const columnDefs = useMemo(() => [
+    { headerName: "Código", field: "codigo", flex: 1, sortable: true, filter: true },
     { headerName: "Descripción", field: "descripcion", flex: 2, sortable: true, filter: true },
+    { headerName: "Unidad", field: "unidad", flex: 1, sortable: true, filter: true },
     { headerName: "Material", field: "material", flex: 1, sortable: true, filter: true },
-    { headerName: "Costo", field: "costo", flex: 1, sortable: true, filter: true, valueFormatter: params => `$${params.value}` },
-    { headerName: "Unidad", field: "unidadMedidaId", flex: 0.5, sortable: true, filter: true },
     {
       headerName: "Acciones",
       cellRenderer: 'actionsCellRenderer',
@@ -127,7 +131,7 @@ function InsumosPage() {
           rowData={insumos}
           columnDefs={columnDefs}
           loading={loading}
-          frameworkComponents={{
+          components={{
             actionsCellRenderer: ActionsCellRenderer,
           }}
         />
@@ -157,6 +161,13 @@ function InsumosPage() {
         onConfirm={handleDeleteConfirm}
         title="Confirmar Eliminación"
         message="¿Estás seguro de que quieres eliminar este insumo? Esta acción no se puede deshacer."
+      />
+
+      <InfoModal
+        open={infoModalOpen}
+        onClose={() => setInfoModalOpen(false)}
+        item={selectedInsumo}
+        title="Información del Insumo"
       />
     </div>
   );

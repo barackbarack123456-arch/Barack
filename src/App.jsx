@@ -11,6 +11,7 @@ import ProveedoresPage from './pages/ProveedoresPage';
 import ClientesPage from './pages/ClientesPage';
 import ProductosPage from './pages/ProductosPage';
 import InsumosPage from './pages/InsumosPage';
+import ProyectosPage from './pages/ProyectosPage';
 import SinopticoPage from './pages/SinopticoPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 
@@ -41,6 +42,7 @@ function AppContent() {
         <Route path="clientes" element={<ClientesPage />} />
         <Route path="productos" element={<ProductosPage />} />
         <Route path="insumos" element={<InsumosPage />} />
+        <Route path="proyectos" element={<ProyectosPage />} />
         <Route path="sinoptico" element={<SinopticoPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

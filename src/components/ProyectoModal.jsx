@@ -1,31 +1,25 @@
 import React, { useState, useEffect, Fragment, forwardRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
-const InsumoModal = forwardRef(({ open, onClose, onSave, insumo }, ref) => {
+const ProyectoModal = forwardRef(({ open, onClose, onSave, proyecto }, ref) => {
   const [formData, setFormData] = useState({
     codigo: '',
-    descripcion: '',
-    unidad: '',
-    material: '',
+    nombre: '',
   });
 
   useEffect(() => {
-    if (insumo) {
+    if (proyecto) {
       setFormData({
-        codigo: insumo.codigo || '',
-        descripcion: insumo.descripcion || '',
-        unidad: insumo.unidad || '',
-        material: insumo.material || '',
+        codigo: proyecto.codigo || '',
+        nombre: proyecto.nombre || '',
       });
     } else {
       setFormData({
         codigo: '',
-        descripcion: '',
-        unidad: '',
-        material: '',
+        nombre: '',
       });
     }
-  }, [insumo, open]);
+  }, [proyecto, open]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -33,8 +27,8 @@ const InsumoModal = forwardRef(({ open, onClose, onSave, insumo }, ref) => {
   };
 
   const handleSave = () => {
-    if (!formData.codigo || !formData.descripcion || !formData.unidad || !formData.material) {
-      alert('Todos los campos son obligatorios.');
+    if (!formData.codigo || !formData.nombre) {
+      alert('Código y Nombre son obligatorios.');
       return;
     }
     onSave(formData);
@@ -69,60 +63,39 @@ const InsumoModal = forwardRef(({ open, onClose, onSave, insumo }, ref) => {
               <Dialog.Panel ref={ref} className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                   <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
-                    {insumo ? 'Editar Insumo' : 'Añadir Nuevo Insumo'}
+                    {proyecto ? 'Editar Proyecto' : 'Añadir Nuevo Proyecto'}
                   </Dialog.Title>
-                  <div className="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-6">
-                    <div className="sm:col-span-2">
-                      <label htmlFor="codigo" className="block text-sm font-medium text-gray-700">
-                        Código
-                      </label>
-                      <input
-                        type="text"
-                        name="codigo"
-                        id="codigo"
-                        value={formData.codigo}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700">
-                        Descripción
-                      </label>
-                      <input
-                        type="text"
-                        name="descripcion"
-                        id="descripcion"
-                        value={formData.descripcion}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="unidad" className="block text-sm font-medium text-gray-700">
-                        Unidad
-                      </label>
-                      <input
-                        type="text"
-                        name="unidad"
-                        id="unidad"
-                        value={formData.unidad}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="material" className="block text-sm font-medium text-gray-700">
-                        Material
-                      </label>
-                      <input
-                        type="text"
-                        name="material"
-                        id="material"
-                        value={formData.material}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-500 mb-4">
+                      Por favor, complete los detalles del proyecto.
+                    </p>
+                    <div className="space-y-4">
+                      <div>
+                        <label htmlFor="codigo" className="block text-sm font-medium text-gray-700">
+                          Código
+                        </label>
+                        <input
+                          type="text"
+                          name="codigo"
+                          id="codigo"
+                          value={formData.codigo}
+                          onChange={handleChange}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
+                          Nombre
+                        </label>
+                        <input
+                          type="text"
+                          name="nombre"
+                          id="nombre"
+                          value={formData.nombre}
+                          onChange={handleChange}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -151,4 +124,4 @@ const InsumoModal = forwardRef(({ open, onClose, onSave, insumo }, ref) => {
   );
 });
 
-export default InsumoModal;
+export default ProyectoModal;
