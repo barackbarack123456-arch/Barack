@@ -1,19 +1,21 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import DashboardPage from './pages/DashboardPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
-import ProveedoresPage from './pages/ProveedoresPage';
-import ClientesPage from './pages/ClientesPage';
-import ProductosPage from './pages/ProductosPage';
-import InsumosPage from './pages/InsumosPage';
-import ProyectosPage from './pages/ProyectosPage';
-import SinopticoPage from './pages/SinopticoPage';
-import VerifyEmailPage from './pages/VerifyEmailPage';
+
+// Lazy load the page components
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const ProveedoresPage = lazy(() => import('./pages/ProveedoresPage'));
+const ClientesPage = lazy(() => import('./pages/ClientesPage'));
+const ProductosPage = lazy(() => import('./pages/ProductosPage'));
+const InsumosPage = lazy(() => import('./pages/InsumosPage'));
+const ProyectosPage = lazy(() => import('./pages/ProyectosPage'));
+const SinopticoPage = lazy(() => import('./pages/SinopticoPage'));
+const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
 
 function AppContent() {
   const { loading } = useAuth();
@@ -23,30 +25,32 @@ function AppContent() {
   }
 
   return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-      <Route path="/verify-email" element={<VerifyEmailPage />} />
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <Layout />
-          </ProtectedRoute>
-        }
-      >
-        {/* Routes that use the Layout go here */}
-        <Route index element={<DashboardPage />} />
-        <Route path="proveedores" element={<ProveedoresPage />} />
-        <Route path="clientes" element={<ClientesPage />} />
-        <Route path="productos" element={<ProductosPage />} />
-        <Route path="insumos" element={<InsumosPage />} />
-        <Route path="proyectos" element={<ProyectosPage />} />
-        <Route path="sinoptico" element={<SinopticoPage />} />
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading page...</div>}>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          {/* Routes that use the Layout go here */}
+          <Route index element={<DashboardPage />} />
+          <Route path="proveedores" element={<ProveedoresPage />} />
+          <Route path="clientes" element={<ClientesPage />} />
+          <Route path="productos" element={<ProductosPage />} />
+          <Route path="insumos" element={<InsumosPage />} />
+          <Route path="proyectos" element={<ProyectosPage />} />
+          <Route path="sinoptico" element={<SinopticoPage />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 }
 
