@@ -175,6 +175,7 @@ const SinopticoPage = () => {
                       level={0}
                       editMode={editMode}
                       onEdit={handleOpenModal}
+                      onUpdateComplete={fetchHierarchy}
                     />
                   ))}
                 </div>
