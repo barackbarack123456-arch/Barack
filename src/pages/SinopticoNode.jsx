@@ -2,7 +2,7 @@ import React, { useState, useEffect, memo } from 'react';
 import { ChevronRightIcon, ChevronDownIcon, PencilIcon, PlusCircleIcon, ClockIcon, ArrowPathIcon } from '@heroicons/react/24/solid';
 import { useQuickUpdate } from '../hooks/useQuickUpdate';
 
-const SinopticoNode = ({ node, level, isLastChild, editMode, onEdit, onQuickUpdate, onOpenAuditLog }) => {
+const SinopticoNode = ({ node, level, editMode, onEdit, onQuickUpdate, onOpenAuditLog }) => {
   const [editingField, setEditingField] = useState(null); // 'nombre', 'codigo', or null
   const [editValue, setEditValue] = useState('');
   const { updateField, loading: isUpdating } = useQuickUpdate();
