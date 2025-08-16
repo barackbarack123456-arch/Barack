@@ -4,7 +4,7 @@ import { Transition } from '@headlessui/react';
 import { UsersIcon, ShoppingCartIcon, ArchiveBoxIcon, TruckIcon } from '@heroicons/react/24/outline';
 import { getProveedoresCount } from '../services/modules/proveedoresService';
 import { getClientesCount } from '../services/modules/clientesService';
-import { getProductosCount } from '../services/modules/productosService';
+import { getSinopticoItemsCount as getProductosCount } from '../services/modules/sinopticoItemsService';
 import { getInsumosCount } from '../services/modules/insumosService';
 
 function DashboardPage() {

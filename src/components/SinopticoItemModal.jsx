@@ -1,33 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition } from '@headlessui/react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
 
-function SinopticoItemModal({ isOpen, onClose, onSave, item }) {
-  const [formData, setFormData] = useState({
-    nombre: '',
-    cantidad: 0,
-    unidad_medida: '',
-    comentarios: '',
-  });
+// Helper to get all descendant IDs to prevent circular dependencies
+const getDescendantIds = (itemId, allItemsMap) => {
+  let descendants = new Set();
+  let queue = [itemId];
+  while (queue.length > 0) {
+    const currentId = queue.shift();
+    descendants.add(currentId);
+    const children = Array.from(allItemsMap.values()).filter(i => i.parentId === currentId);
+    for (const child of children) {
+      queue.push(child.id);
+    }
+  }
+  return descendants;
+};
+
+function SinopticoItemModal({ isOpen, onClose, onSave, item, allItems, parentId: initialParentId, type: initialType, rootProductId: initialRootProductId }) {
+  const [formData, setFormData] = useState({});
 
   useEffect(() => {
-    if (item) {
+    if (isOpen) {
       setFormData({
-        nombre: item.nombre || '',
-        cantidad: item.cantidad || 0,
-        unidad_medida: item.unidad_medida || '',
-        comentarios: item.comentarios || '',
-      });
-    } else {
-      // Reset form when adding a new item
-      setFormData({
-        nombre: '',
-        cantidad: 0,
-        unidad_medida: '',
-        comentarios: '',
+        nombre: item?.nombre || '',
+        codigo: item?.codigo || '',
+        peso: item?.peso || '',
+        medidas: item?.medidas || '',
+        parentId: item?.parentId || initialParentId || null,
+        type: item?.type || initialType || 'subproducto',
+        rootProductId: item?.rootProductId || initialRootProductId || null,
       });
     }
-  }, [item, isOpen]);
+  }, [item, isOpen, initialParentId, initialType, initialRootProductId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,72 +39,72 @@ function SinopticoItemModal({ isOpen, onClose, onSave, item }) {
   };
 
   const handleSave = () => {
-    onSave(formData);
+    onSave(formData, item?.id);
     onClose();
   };
+
+  const allItemsMap = new Map(allItems.map(i => [i.id, i]));
+  const descendantIds = item ? getDescendantIds(item.id, allItemsMap) : new Set();
+
+  const possibleParents = allItems.filter(p => !descendantIds.has(p.id) && p.type !== 'insumo');
 
   return (
     <Transition show={isOpen}>
       <Dialog className="relative z-10" onClose={onClose}>
-        <Transition.Child
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </Transition.Child>
-
+        {/* ... (Transition and backdrop) ... */}
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
         <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <Transition.Child
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-              enterTo="opacity-100 translate-y-0 sm:scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-              leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            >
-              <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-                <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                  <div className="sm:flex sm:items-start">
-                    <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
-                      <DialogTitle as="h3" className="text-base font-semibold leading-6 text-gray-900">
-                        {item ? 'Editar Item' : 'Añadir Nuevo Item'}
-                      </DialogTitle>
-                      <div className="mt-4 space-y-4">
-                        <div>
-                          <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">Nombre</label>
-                          <input type="text" name="nombre" id="nombre" value={formData.nombre} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-                        </div>
-                        <div>
-                          <label htmlFor="cantidad" className="block text-sm font-medium text-gray-700">Cantidad</label>
-                          <input type="number" name="cantidad" id="cantidad" value={formData.cantidad} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-                        </div>
-                        <div>
-                          <label htmlFor="unidad_medida" className="block text-sm font-medium text-gray-700">Unidad de Medida</label>
-                          <input type="text" name="unidad_medida" id="unidad_medida" value={formData.unidad_medida} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-                        </div>
-                        <div>
-                          <label htmlFor="comentarios" className="block text-sm font-medium text-gray-700">Comentarios</label>
-                          <textarea name="comentarios" id="comentarios" value={formData.comentarios} onChange={handleChange} rows="3" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
-                        </div>
-                      </div>
-                    </div>
+            <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+              <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                <DialogTitle as="h3" className="text-lg font-semibold leading-6 text-gray-900">
+                  {item ? 'Editar Item' : 'Añadir Nuevo Item'}
+                </DialogTitle>
+                <div className="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-6">
+                  {/* Fields */}
+                  <div className="sm:col-span-2">
+                    <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">Nombre</label>
+                    <input type="text" name="nombre" id="nombre" value={formData.nombre || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+                  </div>
+                  <div>
+                    <label htmlFor="codigo" className="block text-sm font-medium text-gray-700">Código</label>
+                    <input type="text" name="codigo" id="codigo" value={formData.codigo || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+                  </div>
+                   <div>
+                    <label htmlFor="type" className="block text-sm font-medium text-gray-700">Tipo</label>
+                    <select name="type" id="type" value={formData.type || 'subproducto'} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" disabled={!!item}>
+                      <option value="subproducto">Subproducto</option>
+                      <option value="insumo">Insumo</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="peso" className="block text-sm font-medium text-gray-700">Peso</label>
+                    <input type="text" name="peso" id="peso" value={formData.peso || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+                  </div>
+                  <div>
+                    <label htmlFor="medidas" className="block text-sm font-medium text-gray-700">Medidas</label>
+                    <input type="text" name="medidas" id="medidas" value={formData.medidas || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+                  </div>
+                  <div className="sm:col-span-2">
+                     <label htmlFor="parentId" className="block text-sm font-medium text-gray-700">Padre</label>
+                     <select name="parentId" id="parentId" value={formData.parentId || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" disabled={!item}>
+                        <option value="">-- Sin Padre (Producto Principal) --</option>
+                        {possibleParents.map(p => (
+                          <option key={p.id} value={p.id}>{p.nombre}</option>
+                        ))}
+                     </select>
                   </div>
                 </div>
-                <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                  <button type="button" className="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto" onClick={handleSave}>
-                    Guardar
-                  </button>
-                  <button type="button" className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto" onClick={onClose}>
-                    Cancelar
-                  </button>
-                </div>
-              </DialogPanel>
-            </Transition.Child>
+              </div>
+              <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                <button type="button" className="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto" onClick={handleSave}>
+                  Guardar
+                </button>
+                <button type="button" className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto" onClick={onClose}>
+                  Cancelar
+                </button>
+              </div>
+            </DialogPanel>
           </div>
         </div>
       </Dialog>
