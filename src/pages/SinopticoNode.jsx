@@ -1,16 +1,81 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronRightIcon, ChevronDownIcon, PencilIcon, PlusCircleIcon } from '@heroicons/react/24/solid';
+import { useQuickUpdate } from '../hooks/useQuickUpdate';
 
-const SinopticoNode = ({ node, level, editMode, onEdit }) => {
+const SinopticoNode = ({ node, level, editMode, onEdit, onUpdateComplete }) => {
   const [isOpen, setIsOpen] = useState(true);
+  const [editingField, setEditingField] = useState(null); // 'nombre', 'codigo', or null
+  const [editValue, setEditValue] = useState('');
+  const { updateField, loading: isUpdating } = useQuickUpdate();
 
   const hasChildren = node.children && node.children.length > 0;
+
+  useEffect(() => {
+    if (!editMode) {
+      setEditingField(null);
+    }
+  }, [editMode]);
 
   const toggleOpen = () => {
     if (hasChildren) {
       setIsOpen(!isOpen);
     }
   };
+
+  const handleDoubleClick = (field, currentValue) => {
+    if (editMode) {
+      setEditingField(field);
+      setEditValue(currentValue);
+    }
+  };
+
+  const handleUpdate = async () => {
+    if (isUpdating) return;
+
+    const originalValue = node[editingField];
+    if (editValue.trim() === originalValue || editValue.trim() === '') {
+      setEditingField(null);
+      return;
+    }
+
+    const success = await updateField(node.id, editingField, editValue.trim());
+    if (success) {
+      onUpdateComplete(); // Refetch the hierarchy
+    }
+    setEditingField(null);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleUpdate();
+    } else if (e.key === 'Escape') {
+      setEditingField(null);
+      setEditValue('');
+    }
+  };
+
+  const renderEditableCell = (field, value) => {
+    if (editingField === field) {
+      return (
+        <input
+          type="text"
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onBlur={handleUpdate}
+          onKeyDown={handleKeyDown}
+          className="w-full px-1 py-0.5 border border-blue-400 rounded-md"
+          autoFocus
+          disabled={isUpdating}
+        />
+      );
+    }
+    return (
+      <div onDoubleClick={() => handleDoubleClick(field, value)} className="w-full h-full cursor-pointer">
+        {value || 'N/A'}
+      </div>
+    );
+  };
+
 
   const indentation = { paddingLeft: `${level * 2}rem` };
 
@@ -22,7 +87,7 @@ const SinopticoNode = ({ node, level, editMode, onEdit }) => {
 
   return (
     <div>
-      <div className="grid grid-cols-7 gap-4 px-4 py-3 items-center border-b border-gray-100 hover:bg-gray-50">
+      <div className={`grid grid-cols-7 gap-4 px-4 py-3 items-center border-b border-gray-100 ${editMode ? 'hover:bg-gray-50' : ''}`}>
         <div className="col-span-2 flex items-center" style={indentation}>
           {hasChildren ? (
             <button onClick={toggleOpen} className="mr-2 text-gray-500">
@@ -31,9 +96,9 @@ const SinopticoNode = ({ node, level, editMode, onEdit }) => {
           ) : (
             <span className="w-6 mr-2"></span> // Placeholder for alignment
           )}
-          <span className="font-medium text-gray-800">{node.nombre || 'N/A'}</span>
+          <div className="font-medium text-gray-800 w-full">{renderEditableCell('nombre', node.nombre)}</div>
         </div>
-        <div className="text-gray-600">{node.codigo || 'N/A'}</div>
+        <div className="text-gray-600 w-full">{renderEditableCell('codigo', node.codigo)}</div>
         <div>
           <span className={`px-2 py-1 text-xs font-semibold rounded-full ${typeColor[node.type] || 'bg-gray-100 text-gray-800'}`}>
             {node.type || 'N/A'}
@@ -43,7 +108,7 @@ const SinopticoNode = ({ node, level, editMode, onEdit }) => {
         <div className="text-gray-600">{node.medidas || 'N/A'}</div>
         {editMode && (
           <div className="flex items-center space-x-2">
-            <button onClick={() => onEdit(node)} className="text-blue-600 hover:text-blue-800" title="Editar Item">
+            <button onClick={() => onEdit(node)} className="text-blue-600 hover:text-blue-800" title="Editar Item Completo">
               <PencilIcon className="h-5 w-5" />
             </button>
             {node.type !== 'insumo' && (
@@ -67,6 +132,7 @@ const SinopticoNode = ({ node, level, editMode, onEdit }) => {
               level={level + 1}
               editMode={editMode}
               onEdit={onEdit}
+              onUpdateComplete={onUpdateComplete}
             />
           ))}
         </div>
