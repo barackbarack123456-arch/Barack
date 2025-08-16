@@ -175,8 +175,17 @@ const SinopticoPage = () => {
               <div className="border rounded-lg overflow-hidden">
                 {renderHeader()}
                 <div className="divide-y divide-gray-200">
-                  {hierarchy.map(node => (
-                    <SinopticoNode key={node.id} node={node} level={0} editMode={editMode} onEdit={handleOpenModal} onOpenAuditLog={handleOpenAuditLogModal} onQuickUpdate={handleQuickUpdate} />
+                  {hierarchy.map((node, index) => (
+                    <SinopticoNode
+                      key={node.id}
+                      node={node}
+                      level={0}
+                      isLastChild={index === hierarchy.length - 1}
+                      editMode={editMode}
+                      onEdit={handleOpenModal}
+                      onOpenAuditLog={handleOpenAuditLogModal}
+                      onQuickUpdate={handleQuickUpdate}
+                    />
                   ))}
                 </div>
               </div>

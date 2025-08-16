@@ -15,6 +15,13 @@ export const getCaratulaData = async () => {
       elaboradoPor: '',
       revisadoPor: '',
       proyectoId: '',
+      fechaEmision: '',
+      revision: '',
+      nombreParte: '',
+      fechaRevision: '',
+      numeroParte: '',
+      version: '',
+      autor: '',
     };
   }
 };
