@@ -16,6 +16,7 @@ const SubproductosPage = lazy(() => import('./pages/SubproductosPage'));
 const InsumosPage = lazy(() => import('./pages/InsumosPage'));
 const ProyectosPage = lazy(() => import('./pages/ProyectosPage'));
 const SinopticoPage = lazy(() => import('./pages/SinopticoPage'));
+const CaratulaPage = lazy(() => import('./pages/CaratulaPage'));
 const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
 const UsuariosPage = lazy(() => import('./pages/UsuariosPage'));
 
@@ -49,7 +50,8 @@ function AppContent() {
           <Route path="subproductos" element={<SubproductosPage />} />
           <Route path="insumos" element={<InsumosPage />} />
           <Route path="proyectos" element={<ProyectosPage />} />
-          <Route path="sinoptico" element={<SinopticoPage />} />
+          <Route path="sinoptico" element={<CaratulaPage />} />
+          <Route path="sinoptico/:productId" element={<SinopticoPage />} />
           <Route
             path="usuarios"
             element={

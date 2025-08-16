@@ -1,179 +1,172 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { getSinopticoItems } from '../services/sinopticoService';
-import useData from '../hooks/useData';
-import ConfirmDialog from '../components/ConfirmDialog';
-import DataGrid from '../components/DataGrid';
-import Caratula from '../components/Caratula';
-import ProductoModal from '../components/ProductoModal';
-import SubproductoModal from '../components/SubproductoModal';
-import InsumoModal from '../components/InsumoModal';
-import { addProducto, updateProducto, deleteProducto } from '../services/modules/productosService';
-import { addSubproducto, updateSubproducto, deleteSubproducto } from '../services/modules/subproductosService';
-import { addInsumo, updateInsumo, deleteInsumo } from '../services/modules/insumosService';
-import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { getHierarchyForProduct, createNewChildItem } from '../services/sinopticoService';
+import { updateSinopticoItem, getSinopticoItems } from '../services/modules/sinopticoItemsService';
+import EmptyState from '../components/EmptyState';
+import GridSkeletonLoader from '../components/GridSkeletonLoader';
+import SinopticoNode from './SinopticoNode';
+import SinopticoItemModal from '../components/SinopticoItemModal';
 
-// AG Grid Module Registration
-import { ModuleRegistry } from '@ag-grid-community/core';
-import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-model';
-import { RowGroupingModule } from 'ag-grid-enterprise';
-import 'ag-grid-community/styles/ag-theme-balham.css';
-
-ModuleRegistry.registerModules([
-  ClientSideRowModelModule,
-  RowGroupingModule,
-]);
-
-function SinopticoPage() {
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [editingItem, setEditingItem] = useState(null);
-  const [itemType, setItemType] = useState(null);
+const SinopticoPage = () => {
+  const { productId } = useParams();
+  const navigate = useNavigate();
+  const [hierarchy, setHierarchy] = useState(null);
+  const [allItems, setAllItems] = useState([]);
+  const [rootProduct, setRootProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [editMode, setEditMode] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [gridApi, setGridApi] = useState(null);
+  const [editingItem, setEditingItem] = useState(null);
+  const [modalInitialState, setModalInitialState] = useState({});
 
-  const { data: rowData, loading, refetch } = useData(getSinopticoItems);
 
-  const handleOpenModal = (item = null, type) => {
+  const fetchHierarchy = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [tree, allItemsData] = await Promise.all([
+        getHierarchyForProduct(productId),
+        getSinopticoItems() // For the parent dropdown
+      ]);
+
+      setHierarchy(tree);
+      setAllItems(allItemsData);
+
+      if (tree && tree.length > 0) {
+        setRootProduct(tree[0]);
+      } else {
+        // If there's no hierarchy, maybe the product exists as a top-level item
+        const rootItem = allItemsData.find(item => item.id === productId);
+        setRootProduct(rootItem);
+      }
+      setError(null);
+    } catch (err) {
+      setError('Error al cargar la jerarquía del producto. Por favor, inténtelo de nuevo.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [productId]);
+
+  useEffect(() => {
+    if (!productId) {
+      navigate('/sinoptico');
+      return;
+    }
+    fetchHierarchy();
+  }, [productId, navigate, fetchHierarchy]);
+
+  const handleOpenModal = (item = null, initialState = {}) => {
     setEditingItem(item);
-    setItemType(type);
+    setModalInitialState(initialState);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingItem(null);
-    setItemType(null);
+    setModalInitialState({});
   };
 
-  const handleSave = async (formData) => {
-    const data = { ...formData, id_padre: itemType !== 'producto' ? selectedItem?.id : null };
+  const handleSave = async (formData, itemId) => {
     try {
-      if (editingItem) {
-        switch (itemType) {
-          case 'producto': await updateProducto(editingItem.id, data); break;
-          case 'subproducto': await updateSubproducto(editingItem.id, data); break;
-          case 'insumo': await updateInsumo(editingItem.id, data); break;
-          default: break;
-        }
-      } else {
-        switch (itemType) {
-          case 'producto': await addProducto(data); break;
-          case 'subproducto': await addSubproducto(data); break;
-          case 'insumo': await addInsumo(data); break;
-          default: break;
-        }
+      if (itemId) { // Editing existing item
+        await updateSinopticoItem(itemId, formData);
+      } else { // Adding new item
+        await createNewChildItem(formData, formData.parentId, formData.rootProductId, formData.type, 'currentUserId'); // Replace with actual user ID
       }
-      handleCloseModal();
-      refetch();
+      fetchHierarchy(); // Refetch data
     } catch (error) {
-      console.error(`Error saving ${itemType}:`, error);
+      console.error("Error saving item", error);
+      setError("Error al guardar el item.");
     }
   };
 
-  const handleDeleteClick = (item) => {
-    setSelectedItem(item);
-    setIsConfirmOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!selectedItem) return;
-    try {
-      switch (selectedItem.type) {
-        case 'producto': await deleteProducto(selectedItem.id); break;
-        case 'subproducto': await deleteSubproducto(selectedItem.id); break;
-        case 'insumo': await deleteInsumo(selectedItem.id); break;
-        default: break;
-      }
-      setIsConfirmOpen(false);
-      setSelectedItem(null);
-      refetch();
-    } catch (error) {
-      console.error(`Error deleting ${selectedItem.type}:`, error);
-    }
-  };
-
-  const ActionsCellRenderer = ({ data }) => (
-    <div className="flex items-center justify-end space-x-2">
-      <button onClick={() => handleOpenModal(data, data.type)} className="text-indigo-600 hover:text-indigo-900">
-        <PencilIcon className="h-5 w-5" />
-      </button>
-      <button onClick={() => handleDeleteClick(data)} className="text-red-600 hover:text-red-900">
-        <TrashIcon className="h-5 w-5" />
-      </button>
+  const renderHeader = () => (
+    <div className="grid grid-cols-7 gap-4 px-4 py-2 bg-gray-200 text-gray-700 font-bold rounded-t-lg">
+      <div className="col-span-2">Nombre</div>
+      <div>Código</div>
+      <div>Tipo</div>
+      <div>Peso</div>
+      <div>Medidas</div>
+      {editMode && <div>Acciones</div>}
     </div>
   );
 
-  const columnDefs = useMemo(() => [
-    { field: 'codigo', headerName: 'Código', valueGetter: p => p.data.codigo || 'N/A' },
-    { field: 'descripcion', headerName: 'Descripción', valueGetter: p => p.data.descripcion || 'N/A' },
-    { field: 'peso', headerName: 'Peso', valueGetter: p => p.data.peso || 'N/A' },
-    { field: 'medidas', headerName: 'Medidas', valueGetter: p => p.data.medidas || 'N/A' },
-    { field: 'unidad_medida', headerName: 'Unidad', valueGetter: p => p.data.unidad_medida || 'N/A' },
-    {
-      headerName: "Acciones",
-      cellRenderer: ActionsCellRenderer,
-      pinned: 'right',
-      width: 100,
-    }
-  ], []);
-
-  const autoGroupColumnDef = useMemo(() => ({
-    headerName: 'Nombre',
-    minWidth: 300,
-    cellRendererParams: { suppressCount: true },
-    valueGetter: p => p.data.nombre,
-  }), []);
-
-  const getDataPath = useCallback((data) => data.dataPath, []);
-
-  const onGridReady = (params) => setGridApi(params.api);
-
-  const onSelectionChanged = (event) => {
-    const selectedNodes = event.api.getSelectedNodes();
-    setSelectedItem(selectedNodes.length > 0 ? selectedNodes[0].data : null);
-  };
-
-  const renderModal = () => {
-    if (!isModalOpen) return null;
-    switch (itemType) {
-      case 'producto': return <ProductoModal open={isModalOpen} onClose={handleCloseModal} onSave={handleSave} producto={editingItem} />;
-      case 'subproducto': return <SubproductoModal open={isModalOpen} onClose={handleCloseModal} onSave={handleSave} subproducto={editingItem} />;
-      case 'insumo': return <InsumoModal open={isModalOpen} onClose={handleCloseModal} onSave={handleSave} insumo={editingItem} />;
-      default: return null;
-    }
-  };
-
   return (
-    <div className="flex flex-col h-full">
-      <Caratula />
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <button onClick={() => handleOpenModal(null, 'producto')} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Añadir Producto</button>
-        <button onClick={() => handleOpenModal(null, 'subproducto')} disabled={!selectedItem || selectedItem.type === 'insumo'} className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400">Añadir Subproducto</button>
-        <button onClick={() => handleOpenModal(null, 'insumo')} disabled={!selectedItem || selectedItem.type === 'insumo'} className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 disabled:bg-gray-400">Añadir Insumo</button>
+    <div className="p-6 bg-gray-50 min-h-full">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-4">
+          <button onClick={() => navigate('/sinoptico')} className="text-blue-600 hover:underline">
+            &larr; Volver a la selección
+          </button>
+          <button
+            onClick={() => setEditMode(!editMode)}
+            className={`px-4 py-2 rounded-md text-white font-semibold ${editMode ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}
+          >
+            {editMode ? 'Salir del Modo Edición' : 'Editar Jerarquía'}
+          </button>
+        </div>
+
+        {loading && <GridSkeletonLoader count={10} />}
+
+        {error && <p className="text-red-500 text-center">{error}</p>}
+
+        {!loading && !error && (
+          !hierarchy || hierarchy.length === 0 ? (
+            <div className="text-center bg-white p-8 rounded-lg shadow-md">
+               <h1 className="text-2xl font-bold text-gray-800 mb-2">{rootProduct?.nombre || 'Producto'}</h1>
+              <EmptyState
+                title="Sin Jerarquía"
+                message="Este sinóptico aún no tiene una familia o jerarquía creada."
+              />
+              <button
+                onClick={() => handleOpenModal(null, { parentId: rootProduct.id, rootProductId: rootProduct.id, type: 'subproducto'})}
+                className="mt-4 px-6 py-2 text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none"
+              >
+                Añadir Primer Item
+              </button>
+            </div>
+          ) : (
+            <div className="bg-white p-8 rounded-lg shadow-md">
+              <div className="mb-6 border-b pb-4">
+                <h1 className="text-3xl font-bold text-gray-800">{rootProduct?.nombre}</h1>
+                <p className="text-sm text-gray-500">
+                  Creado por: <span className="font-semibold">{rootProduct?.createdBy || 'N/A'}</span> el {rootProduct?.createdAt ? new Date(rootProduct.createdAt).toLocaleDateString() : 'N/A'}
+                </p>
+                 <p className="text-sm text-gray-500">
+                  Revisado por: <span className="font-semibold">{rootProduct?.reviewedBy || 'N/A'}</span>
+                </p>
+              </div>
+
+              <div className="border rounded-lg overflow-hidden">
+                {renderHeader()}
+                <div className="divide-y divide-gray-200">
+                  {hierarchy.map(node => (
+                    <SinopticoNode
+                      key={node.id}
+                      node={node}
+                      level={0}
+                      editMode={editMode}
+                      onEdit={handleOpenModal}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          )
+        )}
       </div>
-      <div className="flex-grow bg-white shadow-lg rounded-lg overflow-hidden">
-        <DataGrid
-          rowData={rowData}
-          loading={loading}
-          columnDefs={columnDefs}
-          onGridReady={onGridReady}
-          onSelectionChanged={onSelectionChanged}
-          treeData={true}
-          getDataPath={getDataPath}
-          autoGroupColumnDef={autoGroupColumnDef}
-          components={{ ActionsCellRenderer }}
-        />
-      </div>
-      {renderModal()}
-      <ConfirmDialog
-        open={isConfirmOpen}
-        onClose={() => setIsConfirmOpen(false)}
-        onConfirm={confirmDelete}
-        title="Confirmar Eliminación"
-        message={`¿Estás seguro de que quieres eliminar "${selectedItem?.nombre}"? Esta acción no se puede deshacer.`}
+      <SinopticoItemModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSave={handleSave}
+        item={editingItem}
+        allItems={allItems}
+        {...modalInitialState}
       />
     </div>
   );
-}
+};
 
 export default SinopticoPage;
