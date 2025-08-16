@@ -1,11 +1,12 @@
 import React, { useState, useEffect, Fragment, forwardRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
+import { UNITS } from '../constants/units';
 
 const InsumoModal = forwardRef(({ open, onClose, onSave, insumo }, ref) => {
   const getInitialFormData = () => ({
     codigo: '',
     descripcion: '',
-    unidad: '',
+    unidad_medida: '',
     material: '',
     numero_de_parte: '',
     imagen: '',
@@ -24,7 +25,7 @@ const InsumoModal = forwardRef(({ open, onClose, onSave, insumo }, ref) => {
       setFormData({
         codigo: insumo.codigo || '',
         descripcion: insumo.descripcion || '',
-        unidad: insumo.unidad || '',
+        unidad_medida: insumo.unidad_medida || '',
         material: insumo.material || '',
         numero_de_parte: insumo.numero_de_parte || '',
         imagen: insumo.imagen || '',
@@ -108,7 +109,21 @@ const InsumoModal = forwardRef(({ open, onClose, onSave, insumo }, ref) => {
                     <div className="sm:col-span-3">
                       {renderInput("descripcion", "Descripción")}
                     </div>
-                    {renderInput("unidad", "Unidad")}
+                    <div>
+                      <label htmlFor="unidad_medida" className="block text-sm font-medium text-gray-700">Unidad de Medida</label>
+                      <select
+                        id="unidad_medida"
+                        name="unidad_medida"
+                        value={formData.unidad_medida}
+                        onChange={handleChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base p-2"
+                      >
+                        <option value="">Seleccione una unidad</option>
+                        {UNITS.map(unit => (
+                          <option key={unit.id} value={unit.id}>{unit.nombre} ({unit.abreviatura})</option>
+                        ))}
+                      </select>
+                    </div>
                     {renderInput("numero_de_parte", "Número de Parte")}
                     {renderInput("imagen", "Imagen (URL)")}
                     {renderInput("piezas_por_vehiculo", "Piezas/Vh", "number")}

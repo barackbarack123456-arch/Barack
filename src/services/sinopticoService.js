@@ -1,5 +1,8 @@
 import { db } from './firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { getProductos } from './modules/productosService';
+import { getSubproductos } from './modules/subproductosService';
+import { getInsumos } from './modules/insumosService';
 
 const SINOPTICO_COLLECTION = 'sinoptico';
 
@@ -7,50 +10,40 @@ const SINOPTICO_COLLECTION = 'sinoptico';
  * Fetches all items from the sinoptico collection.
  * Each item represents a node in the hierarchy (product, sub-product, or input).
  */
-export const getSinopticoItems = async () => {
-  const sinopticoCollection = collection(db, SINOPTICO_COLLECTION);
-  const snapshot = await getDocs(sinopticoCollection);
-  const itemsList = snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }));
-  return itemsList;
-};
+export const getSinopticoTreeData = async () => {
+  const [productos, subproductos, insumos] = await Promise.all([
+    getProductos(),
+    getSubproductos(),
+    getInsumos(),
+  ]);
 
-/**
- * Adds a new item to the sinoptico collection.
- * @param {object} itemData - The data for the new item.
- * Expected fields: nombre, id_padre, comentarios, cantidad, unidad_medida, orden.
- */
-export const addSinopticoItem = async (itemData) => {
-  const sinopticoCollection = collection(db, SINOPTICO_COLLECTION);
-  // Ensure default values for optional fields if they are not provided
-  const dataWithDefaults = {
-    comentarios: '',
-    cantidad: 0,
-    unidad_medida: '',
-    orden: 0,
-    ...itemData,
+  const allItems = [
+    ...productos.map(p => ({ ...p, type: 'producto', parentId: p.id_padre || null })),
+    ...subproductos.map(s => ({ ...s, type: 'subproducto', parentId: s.id_padre || null })),
+    ...insumos.map(i => ({ ...i, type: 'insumo', parentId: i.id_padre || null })),
+  ];
+
+  const itemsById = allItems.reduce((acc, item) => {
+    acc[item.id] = item;
+    return acc;
+  }, {});
+
+  const buildDataPath = (itemId) => {
+    const path = [];
+    let currentItem = itemsById[itemId];
+    while (currentItem) {
+      path.unshift(currentItem.nombre);
+      currentItem = itemsById[currentItem.parentId];
+    }
+    return path;
   };
-  const docRef = await addDoc(sinopticoCollection, dataWithDefaults);
-  return docRef.id;
+
+  return allItems.map(item => ({
+    ...item,
+    dataPath: buildDataPath(item.id),
+  }));
 };
 
-/**
- * Updates an existing item in the sinoptico collection.
- * @param {string} id - The document ID of the item to update.
- * @param {object} itemData - An object containing the fields to update.
- */
-export const updateSinopticoItem = async (id, itemData) => {
-  const itemDoc = doc(db, SINOPTICO_COLLECTION, id);
-  await updateDoc(itemDoc, itemData);
-};
-
-/**
- * Deletes an item from the sinoptico collection.
- * @param {string} id - The document ID of the item to delete.
- */
-export const deleteSinopticoItem = async (id) => {
-  const itemDoc = doc(db, SINOPTICO_COLLECTION, id);
-  await deleteDoc(itemDoc);
+export const getSinopticoItems = async () => {
+  return await getSinopticoTreeData();
 };

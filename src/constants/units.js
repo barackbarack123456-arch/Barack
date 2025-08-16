@@ -1,0 +1,17 @@
+export const UNITS = [
+  { id: 'm', nombre: 'Metros', abreviatura: 'm' },
+  { id: 'ml', nombre: 'Metros Lineales', abreviatura: 'ml' },
+  { id: 'm2', nombre: 'Metros Cuadrados', abreviatura: 'm²' },
+  { id: 'm3', nombre: 'Metros Cúbicos', abreviatura: 'm³' },
+  { id: 'kg', nombre: 'Kilogramos', abreviatura: 'kg' },
+  { id: 'g', nombre: 'Gramos', abreviatura: 'g' },
+  { id: 'l', nombre: 'Litros', abreviatura: 'l' },
+  { id: 'ml_liquid', nombre: 'Mililitros', abreviatura: 'ml' },
+  { id: 'un', nombre: 'Unidades', abreviatura: 'un' },
+  { id: 'cj', nombre: 'Cajas', abreviatura: 'cj' },
+  { id: 'pq', nombre: 'Paquetes', abreviatura: 'pq' },
+  { id: 'rl', nombre: 'Rollos', abreviatura: 'rl' },
+  { id: 'bd', nombre: 'Bidones', abreviatura: 'bd' },
+  { id: 'bt', nombre: 'Botellas', abreviatura: 'bt' },
+  { id: 'pz', nombre: 'Piezas', abreviatura: 'pz' },
+];

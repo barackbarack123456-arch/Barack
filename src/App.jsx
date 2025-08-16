@@ -12,6 +12,7 @@ const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const ProveedoresPage = lazy(() => import('./pages/ProveedoresPage'));
 const ClientesPage = lazy(() => import('./pages/ClientesPage'));
 const ProductosPage = lazy(() => import('./pages/ProductosPage'));
+const SubproductosPage = lazy(() => import('./pages/SubproductosPage'));
 const InsumosPage = lazy(() => import('./pages/InsumosPage'));
 const ProyectosPage = lazy(() => import('./pages/ProyectosPage'));
 const SinopticoPage = lazy(() => import('./pages/SinopticoPage'));
@@ -45,6 +46,7 @@ function AppContent() {
           <Route path="proveedores" element={<ProveedoresPage />} />
           <Route path="clientes" element={<ClientesPage />} />
           <Route path="productos" element={<ProductosPage />} />
+          <Route path="subproductos" element={<SubproductosPage />} />
           <Route path="insumos" element={<InsumosPage />} />
           <Route path="proyectos" element={<ProyectosPage />} />
           <Route path="sinoptico" element={<SinopticoPage />} />
