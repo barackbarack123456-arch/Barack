@@ -21,7 +21,11 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
-  doc
+  doc,
+  serverTimestamp,
+  query,
+  where,
+  orderBy
 } from "firebase/firestore";
 
 // Your web app's Firebase configuration, loaded from environment variables
@@ -59,5 +63,9 @@ export {
   addDoc,
   updateDoc,
   deleteDoc,
-  doc
+  doc,
+  serverTimestamp,
+  query,
+  where,
+  orderBy
 };

@@ -22,7 +22,7 @@ function SinopticoItemModal({ isOpen, onClose, onSave, item, allItems, parentId:
   useEffect(() => {
     if (isOpen) {
       setFormData({
-        nombre: item?.nombre || '',
+        nombre: item?.nombre || item?.descripcion || '',
         codigo: item?.codigo || '',
         peso: item?.peso || '',
         medidas: item?.medidas || '',
@@ -35,7 +35,16 @@ function SinopticoItemModal({ isOpen, onClose, onSave, item, allItems, parentId:
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => {
+      const newFormData = { ...prev, [name]: value };
+      // If the parent is changing, we must also update the rootProductId
+      if (name === 'parentId') {
+        const newParent = allItems.find(i => i.id === value);
+        // The new root is the parent's root, or the parent itself if it's a top-level product
+        newFormData.rootProductId = newParent ? (newParent.rootProductId || newParent.id) : null;
+      }
+      return newFormData;
+    });
   };
 
   const handleSave = () => {
@@ -47,6 +56,8 @@ function SinopticoItemModal({ isOpen, onClose, onSave, item, allItems, parentId:
   const descendantIds = item ? getDescendantIds(item.id, allItemsMap) : new Set();
 
   const possibleParents = allItems.filter(p => !descendantIds.has(p.id) && p.type !== 'insumo');
+
+  const hasChildren = item ? allItems.some(i => i.parentId === item.id) : false;
 
   return (
     <Transition show={isOpen}>
@@ -72,9 +83,9 @@ function SinopticoItemModal({ isOpen, onClose, onSave, item, allItems, parentId:
                   </div>
                    <div>
                     <label htmlFor="type" className="block text-sm font-medium text-gray-700">Tipo</label>
-                    <select name="type" id="type" value={formData.type || 'subproducto'} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" disabled={!!item}>
+                    <select name="type" id="type" value={formData.type || 'subproducto'} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                       <option value="subproducto">Subproducto</option>
-                      <option value="insumo">Insumo</option>
+                      <option value="insumo" disabled={hasChildren}>Insumo (no puede tener hijos)</option>
                     </select>
                   </div>
                   <div>

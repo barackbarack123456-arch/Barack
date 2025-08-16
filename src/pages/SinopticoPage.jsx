@@ -39,7 +39,6 @@ const SinopticoPage = () => {
       setRootProduct(rootItem);
 
       if (!tree || tree.length === 0) {
-        // If there is no hierarchy, we still want to show the root product info
         setHierarchy(null);
       }
 
@@ -54,7 +53,7 @@ const SinopticoPage = () => {
 
   useEffect(() => {
     if (!productId) {
-      navigate('/productos'); // Redirect to a more logical page if no ID
+      navigate('/productos');
       return;
     }
     fetchHierarchy();
@@ -96,14 +95,31 @@ const SinopticoPage = () => {
     }
   };
 
+  const handleQuickUpdate = useCallback((itemId, field, value) => {
+    const updateNodeRecursively = (nodes) => {
+      return nodes.map(node => {
+        if (node.id === itemId) {
+          return { ...node, [field]: value };
+        }
+        if (node.children && node.children.length > 0) {
+          return { ...node, children: updateNodeRecursively(node.children) };
+        }
+        return node;
+      });
+    };
+    setHierarchy(prevHierarchy => updateNodeRecursively(prevHierarchy));
+  }, []);
+
   const renderHeader = () => (
-    <div className="grid grid-cols-7 gap-4 px-4 py-2 bg-gray-200 text-gray-700 font-bold rounded-t-lg">
-      <div className="col-span-2">Nombre</div>
+    <div className="grid grid-cols-9 gap-4 px-4 py-2 bg-gray-200 text-gray-700 font-bold rounded-t-lg">
+      <div className="col-span-3">Nombre</div>
       <div>Código</div>
       <div>Tipo</div>
+      <div>Version</div>
+      <div>Cód. Cliente</div>
       <div>Peso</div>
       <div>Medidas</div>
-      {editMode && <div>Acciones</div>}
+      {editMode && <div className="col-span-1">Acciones</div>}
     </div>
   );
 
@@ -123,24 +139,13 @@ const SinopticoPage = () => {
             &larr; Volver a Productos
           </button>
           <div className="flex items-center space-x-2">
-            <button
-              onClick={handleExportCSV}
-              className="px-4 py-2 rounded-md text-white font-semibold bg-green-600 hover:bg-green-700"
-              disabled={!hierarchy || hierarchy.length === 0}
-            >
+            <button onClick={handleExportCSV} className="px-4 py-2 rounded-md text-white font-semibold bg-green-600 hover:bg-green-700">
               Exportar a CSV
             </button>
-            <button
-              onClick={handleExportPDF}
-              className="px-4 py-2 rounded-md text-white font-semibold bg-red-600 hover:bg-red-700"
-              disabled={!hierarchy || hierarchy.length === 0}
-            >
+            <button onClick={handleExportPDF} className="px-4 py-2 rounded-md text-white font-semibold bg-red-600 hover:bg-red-700">
               Exportar a PDF
             </button>
-            <button
-              onClick={() => setEditMode(!editMode)}
-              className={`px-4 py-2 rounded-md text-white font-semibold ${editMode ? 'bg-gray-600 hover:bg-gray-700' : 'bg-blue-600 hover:bg-blue-700'}`}
-            >
+            <button onClick={() => setEditMode(!editMode)} className={`px-4 py-2 rounded-md text-white font-semibold ${editMode ? 'bg-gray-600 hover:bg-gray-700' : 'bg-blue-600 hover:bg-blue-700'}`}>
               {editMode ? 'Salir del Modo Edición' : 'Editar Jerarquía'}
             </button>
           </div>
@@ -152,16 +157,10 @@ const SinopticoPage = () => {
         {!loading && !error && (
           !hierarchy || hierarchy.length === 0 ? (
             <div className="text-center bg-white p-8 rounded-lg shadow-md">
-              <h1 className="text-2xl font-bold text-gray-800 mb-2">{rootProduct?.nombre || 'Producto'}</h1>
-              <EmptyState
-                title="Sin Jerarquía"
-                message="Este sinóptico aún no tiene una familia o jerarquía creada."
-              />
+              <h1 className="text-2xl font-bold text-gray-800 mb-2">{rootProduct?.nombre || rootProduct?.descripcion || 'Producto'}</h1>
+              <EmptyState title="Sin Jerarquía" message="Este sinóptico aún no tiene una familia o jerarquía creada." />
               {rootProduct && (
-                <button
-                  onClick={() => handleOpenModal(null, { parentId: rootProduct.id, rootProductId: rootProduct.id, type: 'subproducto' })}
-                  className="mt-4 px-6 py-2 text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none"
-                >
+                <button onClick={() => handleOpenModal(null, { parentId: rootProduct.id, rootProductId: rootProduct.id, type: 'subproducto' })} className="mt-4 px-6 py-2 text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none">
                   Añadir Primer Item
                 </button>
               )}
@@ -169,28 +168,15 @@ const SinopticoPage = () => {
           ) : (
             <div className="bg-white p-8 rounded-lg shadow-md">
               <div className="mb-6 border-b pb-4">
-                <h1 className="text-3xl font-bold text-gray-800">{rootProduct?.nombre}</h1>
-                <p className="text-sm text-gray-500">
-                  Creado por: <span className="font-semibold">{rootProduct?.createdBy || 'N/A'}</span> el {rootProduct?.createdAt?.toDate().toLocaleDateString() || 'N/A'}
-                </p>
-                <p className="text-sm text-gray-500">
-                  Última mod.: <span className="font-semibold">{rootProduct?.lastModifiedBy || 'N/A'}</span> el {rootProduct?.lastModifiedAt?.toDate().toLocaleDateString() || 'N/A'}
-                </p>
+                <h1 className="text-3xl font-bold text-gray-800">{rootProduct?.nombre || rootProduct?.descripcion}</h1>
+                <p className="text-sm text-gray-500">Creado por: <span className="font-semibold">{rootProduct?.createdBy || 'N/A'}</span> el {rootProduct?.createdAt?.toDate()?.toLocaleDateString() || 'N/A'}</p>
+                <p className="text-sm text-gray-500">Última mod.: <span className="font-semibold">{rootProduct?.lastModifiedBy || 'N/A'}</span> el {rootProduct?.lastModifiedAt?.toDate()?.toLocaleDateString() || 'N/A'}</p>
               </div>
-
               <div className="border rounded-lg overflow-hidden">
                 {renderHeader()}
                 <div className="divide-y divide-gray-200">
                   {hierarchy.map(node => (
-                    <SinopticoNode
-                      key={node.id}
-                      node={node}
-                      level={0}
-                      editMode={editMode}
-                      onEdit={handleOpenModal}
-                      onOpenAuditLog={handleOpenAuditLogModal}
-                      onUpdateComplete={fetchHierarchy}
-                    />
+                    <SinopticoNode key={node.id} node={node} level={0} editMode={editMode} onEdit={handleOpenModal} onOpenAuditLog={handleOpenAuditLogModal} onQuickUpdate={handleQuickUpdate} />
                   ))}
                 </div>
               </div>
@@ -198,19 +184,8 @@ const SinopticoPage = () => {
           )
         )}
       </div>
-      <SinopticoItemModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onSave={handleSave}
-        item={editingItem}
-        allItems={allItems}
-        {...modalInitialState}
-      />
-      <AuditLogModal
-        isOpen={isAuditLogModalOpen}
-        onClose={handleCloseAuditLogModal}
-        itemId={auditedItemId}
-      />
+      <SinopticoItemModal isOpen={isModalOpen} onClose={handleCloseModal} onSave={handleSave} item={editingItem} allItems={allItems} {...modalInitialState} />
+      <AuditLogModal isOpen={isAuditLogModalOpen} onClose={handleCloseAuditLogModal} itemId={auditedItemId} />
     </div>
   );
 };

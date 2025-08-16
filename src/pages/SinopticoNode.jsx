@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronRightIcon, ChevronDownIcon, PencilIcon, PlusCircleIcon, ClockIcon } from '@heroicons/react/24/solid';
+import React, { useState, useEffect, memo } from 'react';
+import { ChevronRightIcon, ChevronDownIcon, PencilIcon, PlusCircleIcon, ClockIcon, ArrowPathIcon } from '@heroicons/react/24/solid';
 import { useQuickUpdate } from '../hooks/useQuickUpdate';
 
-const SinopticoNode = ({ node, level, editMode, onEdit, onUpdateComplete, onOpenAuditLog }) => {
+const SinopticoNode = ({ node, level, editMode, onEdit, onQuickUpdate, onOpenAuditLog }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [editingField, setEditingField] = useState(null); // 'nombre', 'codigo', or null
   const [editValue, setEditValue] = useState('');
@@ -40,7 +40,7 @@ const SinopticoNode = ({ node, level, editMode, onEdit, onUpdateComplete, onOpen
 
     const success = await updateField(node.id, editingField, editValue.trim());
     if (success) {
-      onUpdateComplete(); // Refetch the hierarchy
+      onQuickUpdate(node.id, editingField, editValue.trim());
     }
     setEditingField(null);
   };
@@ -57,16 +57,23 @@ const SinopticoNode = ({ node, level, editMode, onEdit, onUpdateComplete, onOpen
   const renderEditableCell = (field, value) => {
     if (editingField === field) {
       return (
-        <input
-          type="text"
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          onBlur={handleUpdate}
-          onKeyDown={handleKeyDown}
-          className="w-full px-1 py-0.5 border border-blue-400 rounded-md"
-          autoFocus
-          disabled={isUpdating}
-        />
+        <div className="relative w-full">
+          <input
+            type="text"
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={handleUpdate}
+            onKeyDown={handleKeyDown}
+            className="w-full px-1 py-0.5 border border-blue-400 rounded-md pr-6"
+            autoFocus
+            disabled={isUpdating}
+          />
+          {isUpdating && (
+            <div className="absolute inset-y-0 right-0 flex items-center pr-1">
+              <ArrowPathIcon className="h-4 w-4 text-gray-400 animate-spin" />
+            </div>
+          )}
+        </div>
       );
     }
     return (
@@ -87,8 +94,8 @@ const SinopticoNode = ({ node, level, editMode, onEdit, onUpdateComplete, onOpen
 
   return (
     <div>
-      <div className={`grid grid-cols-7 gap-4 px-4 py-3 items-center border-b border-gray-100 ${editMode ? 'hover:bg-gray-50' : ''}`}>
-        <div className="col-span-2 flex items-center" style={indentation}>
+      <div className={`grid grid-cols-9 gap-4 px-4 py-3 items-center border-b border-gray-100 ${editMode ? 'hover:bg-gray-50' : ''}`}>
+        <div className="col-span-3 flex items-center" style={indentation}>
           {hasChildren ? (
             <button onClick={toggleOpen} className="mr-2 text-gray-500">
               {isOpen ? <ChevronDownIcon className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
@@ -96,7 +103,7 @@ const SinopticoNode = ({ node, level, editMode, onEdit, onUpdateComplete, onOpen
           ) : (
             <span className="w-6 mr-2"></span> // Placeholder for alignment
           )}
-          <div className="font-medium text-gray-800 w-full">{renderEditableCell('nombre', node.nombre)}</div>
+          <div className="font-medium text-gray-800 w-full">{renderEditableCell('nombre', node.nombre || node.descripcion)}</div>
         </div>
         <div className="text-gray-600 w-full">{renderEditableCell('codigo', node.codigo)}</div>
         <div>
@@ -104,10 +111,12 @@ const SinopticoNode = ({ node, level, editMode, onEdit, onUpdateComplete, onOpen
             {node.type || 'N/A'}
           </span>
         </div>
+        <div className="text-gray-600">{node.version || 'N/A'}</div>
+        <div className="text-gray-600">{node.codigo_cliente || 'N/A'}</div>
         <div className="text-gray-600">{node.peso || 'N/A'}</div>
         <div className="text-gray-600">{node.medidas || 'N/A'}</div>
         {editMode && (
-          <div className="flex items-center space-x-2">
+          <div className="col-span-1 flex items-center space-x-2">
             <button onClick={() => onOpenAuditLog(node.id)} className="text-gray-600 hover:text-gray-800" title="Ver Historial">
               <ClockIcon className="h-5 w-5" />
             </button>
@@ -135,7 +144,7 @@ const SinopticoNode = ({ node, level, editMode, onEdit, onUpdateComplete, onOpen
               level={level + 1}
               editMode={editMode}
               onEdit={onEdit}
-              onUpdateComplete={onUpdateComplete}
+              onQuickUpdate={onQuickUpdate}
               onOpenAuditLog={onOpenAuditLog}
             />
           ))}
@@ -145,4 +154,4 @@ const SinopticoNode = ({ node, level, editMode, onEdit, onUpdateComplete, onOpen
   );
 };
 
-export default SinopticoNode;
+export default memo(SinopticoNode);
