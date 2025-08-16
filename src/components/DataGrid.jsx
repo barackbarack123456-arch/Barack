@@ -4,7 +4,7 @@ import { ModuleRegistry } from '@ag-grid-community/core';
 import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-model';
 
 import '@ag-grid-community/styles/ag-grid.css';
-import '@ag-grid-community/styles/ag-theme-balham.css';
+import '@ag-grid-community/styles/ag-theme-quartz.css';
 
 ModuleRegistry.registerModules([ClientSideRowModelModule]);
 
@@ -34,7 +34,7 @@ function DataGrid({
   const getRowId = params => params.data[getRowIdKey];
 
   return (
-    <div className="ag-theme-balham" style={{ height: '100%', width: '100%' }}>
+    <div className="ag-theme-quartz" style={{ height: '100%', width: '100%' }}>
       <AgGridReact
         rowData={rowData}
         columnDefs={columnDefs}
