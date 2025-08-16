@@ -94,3 +94,10 @@ export const createNewChildItem = async (itemData, parentId, rootProductId, type
     };
     return await addSinopticoItem(newItem);
 };
+
+export const moveSinopticoItem = async (itemId, newParentId, rootProductId) => {
+    // Here, you could add more complex logic to handle moving descendants
+    // and updating their rootProductId if necessary.
+    // For now, we'll just update the parentId.
+    await updateSinopticoItem(itemId, { parentId: newParentId, rootProductId });
+};
