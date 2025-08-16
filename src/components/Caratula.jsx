@@ -4,7 +4,18 @@ import { getCaratulaData, saveCaratulaData } from '../services/caratulaService';
 import { PencilIcon, CheckIcon } from '@heroicons/react/24/solid';
 
 function Caratula() {
-  const [caratulaData, setCaratulaData] = useState({ elaboradoPor: '', revisadoPor: '', proyectoId: '' });
+  const [caratulaData, setCaratulaData] = useState({
+    elaboradoPor: '',
+    revisadoPor: '',
+    proyectoId: '',
+    fechaEmision: '',
+    revision: '',
+    nombreParte: '',
+    fechaRevision: '',
+    numeroParte: '',
+    version: '',
+    autor: '',
+  });
   const [projects, setProjects] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -83,9 +94,10 @@ function Caratula() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Row 1 */}
         <div>
-          <label className="block text-sm font-medium text-gray-500 mb-1">Proyecto</label>
+          <label className="block text-sm font-medium text-gray-500 mb-1">PROYECTO</label>
           {isEditing ? (
             <select
               name="proyectoId"
@@ -103,29 +115,79 @@ function Caratula() {
           )}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-500 mb-1">Elaborado por</label>
+          <label className="block text-sm font-medium text-gray-500 mb-1">Fecha de emisión</label>
           {isEditing ? (
-            <input
-              type="text"
-              name="elaboradoPor"
-              value={caratulaData.elaboradoPor}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            />
+            <input type="text" name="fechaEmision" value={caratulaData.fechaEmision} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          ) : (
+            <p className="text-lg font-semibold text-gray-800 p-2 bg-gray-50 rounded-md">{caratulaData.fechaEmision || 'N/A'}</p>
+          )}
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-500 mb-1">Revisión</label>
+          {isEditing ? (
+            <input type="text" name="revision" value={caratulaData.revision} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          ) : (
+            <p className="text-lg font-semibold text-gray-800 p-2 bg-gray-50 rounded-md">{caratulaData.revision || 'N/A'}</p>
+          )}
+        </div>
+        <div></div> {/* Empty cell for spacing */}
+
+        {/* Row 2 */}
+        <div>
+          <label className="block text-sm font-medium text-gray-500 mb-1">NOMBRE DE PARTE</label>
+          {isEditing ? (
+            <input type="text" name="nombreParte" value={caratulaData.nombreParte} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          ) : (
+            <p className="text-lg font-semibold text-gray-800 p-2 bg-gray-50 rounded-md">{caratulaData.nombreParte || 'N/A'}</p>
+          )}
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-500 mb-1">Realizó</label>
+          {isEditing ? (
+            <input type="text" name="elaboradoPor" value={caratulaData.elaboradoPor} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
           ) : (
             <p className="text-lg font-semibold text-gray-800 p-2 bg-gray-50 rounded-md">{caratulaData.elaboradoPor || 'N/A'}</p>
           )}
         </div>
         <div>
+          <label className="block text-sm font-medium text-gray-500 mb-1">Fecha revisión</label>
+          {isEditing ? (
+            <input type="text" name="fechaRevision" value={caratulaData.fechaRevision} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          ) : (
+            <p className="text-lg font-semibold text-gray-800 p-2 bg-gray-50 rounded-md">{caratulaData.fechaRevision || 'N/A'}</p>
+          )}
+        </div>
+        <div></div> {/* Empty cell for spacing */}
+
+        {/* Row 3 */}
+        <div>
+          <label className="block text-sm font-medium text-gray-500 mb-1">NÚMERO DE PARTE</label>
+          {isEditing ? (
+            <input type="text" name="numeroParte" value={caratulaData.numeroParte} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          ) : (
+            <p className="text-lg font-semibold text-gray-800 p-2 bg-gray-50 rounded-md">{caratulaData.numeroParte || 'N/A'}</p>
+          )}
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-500 mb-1">Versión</label>
+          {isEditing ? (
+            <input type="text" name="version" value={caratulaData.version} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          ) : (
+            <p className="text-lg font-semibold text-gray-800 p-2 bg-gray-50 rounded-md">{caratulaData.version || 'N/A'}</p>
+          )}
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-500 mb-1">Autor</label>
+          {isEditing ? (
+            <input type="text" name="autor" value={caratulaData.autor} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          ) : (
+            <p className="text-lg font-semibold text-gray-800 p-2 bg-gray-50 rounded-md">{caratulaData.autor || 'N/A'}</p>
+          )}
+        </div>
+        <div>
           <label className="block text-sm font-medium text-gray-500 mb-1">Revisado por</label>
           {isEditing ? (
-            <input
-              type="text"
-              name="revisadoPor"
-              value={caratulaData.revisadoPor}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            />
+            <input type="text" name="revisadoPor" value={caratulaData.revisadoPor} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
           ) : (
             <p className="text-lg font-semibold text-gray-800 p-2 bg-gray-50 rounded-md">{caratulaData.revisadoPor || 'N/A'}</p>
           )}
