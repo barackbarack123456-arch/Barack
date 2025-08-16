@@ -2,12 +2,22 @@ import React, { useState, useEffect, Fragment, forwardRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
 const InsumoModal = forwardRef(({ open, onClose, onSave, insumo }, ref) => {
-  const [formData, setFormData] = useState({
+  const getInitialFormData = () => ({
     codigo: '',
     descripcion: '',
     unidad: '',
     material: '',
+    numero_de_parte: '',
+    imagen: '',
+    piezas_por_vehiculo: '',
+    proceso: '',
+    aspecto_lc_kd: '',
+    color: '',
+    materia_prima: '',
+    proveedor_materia_prima: '',
   });
+
+  const [formData, setFormData] = useState(getInitialFormData());
 
   useEffect(() => {
     if (insumo) {
@@ -16,14 +26,17 @@ const InsumoModal = forwardRef(({ open, onClose, onSave, insumo }, ref) => {
         descripcion: insumo.descripcion || '',
         unidad: insumo.unidad || '',
         material: insumo.material || '',
+        numero_de_parte: insumo.numero_de_parte || '',
+        imagen: insumo.imagen || '',
+        piezas_por_vehiculo: insumo.piezas_por_vehiculo || '',
+        proceso: insumo.proceso || '',
+        aspecto_lc_kd: insumo.aspecto_lc_kd || '',
+        color: insumo.color || '',
+        materia_prima: insumo.materia_prima || '',
+        proveedor_materia_prima: insumo.proveedor_materia_prima || '',
       });
     } else {
-      setFormData({
-        codigo: '',
-        descripcion: '',
-        unidad: '',
-        material: '',
-      });
+      setFormData(getInitialFormData());
     }
   }, [insumo, open]);
 
@@ -33,12 +46,31 @@ const InsumoModal = forwardRef(({ open, onClose, onSave, insumo }, ref) => {
   };
 
   const handleSave = () => {
-    if (!formData.codigo || !formData.descripcion || !formData.unidad || !formData.material) {
-      alert('Todos los campos son obligatorios.');
-      return;
+    // Basic validation
+    for (const key in formData) {
+      if (formData[key] === '') {
+        alert(`El campo ${key.replace('_', ' ')} es obligatorio.`);
+        return;
+      }
     }
     onSave(formData);
   };
+
+  const renderInput = (name, label, type = 'text') => (
+    <div>
+      <label htmlFor={name} className="block text-sm font-medium text-gray-700 capitalize">
+        {label}
+      </label>
+      <input
+        type={type}
+        name={name}
+        id={name}
+        value={formData[name]}
+        onChange={handleChange}
+        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base p-2"
+      />
+    </div>
+  );
 
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -66,67 +98,29 @@ const InsumoModal = forwardRef(({ open, onClose, onSave, insumo }, ref) => {
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel ref={ref} className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                  <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
+              <Dialog.Panel ref={ref} className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
+                <div className="bg-white px-6 pt-5 pb-4 sm:p-6 sm:pb-4">
+                  <Dialog.Title as="h3" className="text-xl font-semibold leading-6 text-gray-900">
                     {insumo ? 'Editar Insumo' : 'Añadir Nuevo Insumo'}
                   </Dialog.Title>
-                  <div className="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-6">
-                    <div className="sm:col-span-2">
-                      <label htmlFor="codigo" className="block text-sm font-medium text-gray-700">
-                        Código
-                      </label>
-                      <input
-                        type="text"
-                        name="codigo"
-                        id="codigo"
-                        value={formData.codigo}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
+                  <div className="mt-6 grid grid-cols-1 gap-y-6 sm:grid-cols-4 sm:gap-x-6">
+                    {renderInput("codigo", "Código")}
+                    <div className="sm:col-span-3">
+                      {renderInput("descripcion", "Descripción")}
                     </div>
-                    <div className="sm:col-span-2">
-                      <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700">
-                        Descripción
-                      </label>
-                      <input
-                        type="text"
-                        name="descripcion"
-                        id="descripcion"
-                        value={formData.descripcion}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="unidad" className="block text-sm font-medium text-gray-700">
-                        Unidad
-                      </label>
-                      <input
-                        type="text"
-                        name="unidad"
-                        id="unidad"
-                        value={formData.unidad}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="material" className="block text-sm font-medium text-gray-700">
-                        Material
-                      </label>
-                      <input
-                        type="text"
-                        name="material"
-                        id="material"
-                        value={formData.material}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
-                    </div>
+                    {renderInput("unidad", "Unidad")}
+                    {renderInput("numero_de_parte", "Número de Parte")}
+                    {renderInput("imagen", "Imagen (URL)")}
+                    {renderInput("piezas_por_vehiculo", "Piezas/Vh", "number")}
+                    {renderInput("proceso", "Proceso")}
+                    {renderInput("aspecto_lc_kd", "Aspecto LC/KD")}
+                    {renderInput("color", "Color")}
+                    {renderInput("material", "Material")}
+                    {renderInput("materia_prima", "Materia Prima")}
+                    {renderInput("proveedor_materia_prima", "Proveedor Materia Prima")}
                   </div>
                 </div>
-                <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                <div className="bg-gray-100 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
                   <button
                     type="button"
                     className="inline-flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"

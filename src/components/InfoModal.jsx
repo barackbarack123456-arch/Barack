@@ -7,10 +7,14 @@ const InfoModal = ({ open, onClose, item, title }) => {
   const renderItemDetails = () => {
     return Object.entries(item).map(([key, value]) => {
       if (key === 'id') return null; // Don't show the id
+
+      // Format key for display (handles snake_case and camelCase)
+      const formattedKey = key.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim();
+
       return (
-        <div key={key} className="py-2 sm:grid sm:grid-cols-3 sm:gap-4">
-          <dt className="text-sm font-medium text-gray-500 capitalize">{key.replace(/([A-Z])/g, ' $1')}</dt>
-          <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{value.toString()}</dd>
+        <div key={key} className="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
+          <dt className="text-sm font-medium text-gray-600 capitalize">{formattedKey}</dt>
+          <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{String(value)}</dd>
         </div>
       );
     });
