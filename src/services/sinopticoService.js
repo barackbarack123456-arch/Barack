@@ -1,13 +1,18 @@
-import { getSinopticoItems, updateSinopticoItem, addSinopticoItem } from './modules/sinopticoItemsService';
+import { updateSinopticoItem, addSinopticoItem } from './modules/sinopticoItemsService';
+import { db, collection, query, where, getDocs, doc, getDoc } from '../services/firebase';
+
+const SINOPTICO_ITEMS_COLLECTION = 'productos';
 
 /**
  * Fetches only the top-level products for the initial selection screen.
  * Top-level items are those with no parent.
  */
 export const getTopLevelProducts = async () => {
-  const allItems = await getSinopticoItems();
-  // In the new model, top-level items are those with a null/undefined parentId.
-  return allItems.filter(item => !item.parentId);
+  const itemsCollection = collection(db, SINOPTICO_ITEMS_COLLECTION);
+  // Top-level items are those with a null/undefined parentId.
+  const q = query(itemsCollection, where('parentId', '==', null));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
 /**
@@ -15,13 +20,20 @@ export const getTopLevelProducts = async () => {
  * @param {string} rootProductId The ID of the root product to fetch the hierarchy for.
  */
 export const getHierarchyForProduct = async (rootProductId) => {
-  const allItems = await getSinopticoItems();
-
-  // Filter for the root product and all its descendants.
-  // This assumes every item in a hierarchy will have a 'rootProductId' field.
-  const familyItems = allItems.filter(item => item.rootProductId === rootProductId);
+  const itemsCollection = collection(db, SINOPTICO_ITEMS_COLLECTION);
+  const q = query(itemsCollection, where('rootProductId', '==', rootProductId));
+  const snapshot = await getDocs(q);
+  const familyItems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
   if (familyItems.length === 0) {
+    // It's possible only the root product exists and has no `rootProductId` pointing to itself yet.
+    // Let's try to fetch it directly.
+    const rootDocRef = doc(db, SINOPTICO_ITEMS_COLLECTION, rootProductId);
+    const rootDocSnap = await getDoc(rootDocRef);
+    if (rootDocSnap.exists()) {
+      const rootItem = { id: rootDocSnap.id, ...rootDocSnap.data(), children: [] };
+      return [rootItem];
+    }
     return null; // No hierarchy found
   }
 

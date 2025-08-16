@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { getProductos, addProducto, updateProducto, deleteProducto } from '../services/modules/productosService';
+import { getSinopticoItems as getProductos, addSinopticoItem as addProducto, updateSinopticoItem as updateProducto, deleteSinopticoItem as deleteProducto } from '../services/modules/sinopticoItemsService';
 import ProductoModal from '../components/ProductoModal';
 import InfoModal from '../components/InfoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
