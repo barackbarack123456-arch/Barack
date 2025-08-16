@@ -3,7 +3,6 @@ import { ChevronRightIcon, ChevronDownIcon, PencilIcon, PlusCircleIcon, ClockIco
 import { useQuickUpdate } from '../hooks/useQuickUpdate';
 
 const SinopticoNode = ({ node, level, isLastChild, editMode, onEdit, onQuickUpdate, onOpenAuditLog }) => {
-  const [isOpen, setIsOpen] = useState(true);
   const [editingField, setEditingField] = useState(null); // 'nombre', 'codigo', or null
   const [editValue, setEditValue] = useState('');
   const { updateField, loading: isUpdating } = useQuickUpdate();
@@ -15,12 +14,6 @@ const SinopticoNode = ({ node, level, isLastChild, editMode, onEdit, onQuickUpda
       setEditingField(null);
     }
   }, [editMode]);
-
-  const toggleOpen = () => {
-    if (hasChildren) {
-      setIsOpen(!isOpen);
-    }
-  };
 
   const handleDoubleClick = (field, currentValue) => {
     if (editMode) {
@@ -97,9 +90,9 @@ const SinopticoNode = ({ node, level, isLastChild, editMode, onEdit, onQuickUpda
       <div className={`grid grid-cols-9 gap-4 px-4 py-3 items-center ${editMode ? 'hover:bg-gray-50' : ''}`}>
         <div className="col-span-3 flex items-center relative" style={indentation}>
           {hasChildren ? (
-            <button onClick={toggleOpen} className="mr-2 text-gray-500 z-10">
-              {isOpen ? <ChevronDownIcon className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
-            </button>
+            <span className="w-6 mr-2 text-gray-500 z-10">
+              <ChevronDownIcon className="h-4 w-4" />
+            </span>
           ) : (
             <span className="w-6 mr-2"></span> // Placeholder for alignment
           )}
@@ -135,22 +128,6 @@ const SinopticoNode = ({ node, level, isLastChild, editMode, onEdit, onQuickUpda
           </div>
         )}
       </div>
-      {isOpen && hasChildren && (
-        <div>
-          {node.children.map((childNode, index) => (
-            <SinopticoNode
-              key={childNode.id}
-              node={childNode}
-              level={level + 1}
-              isLastChild={index === node.children.length - 1}
-              editMode={editMode}
-              onEdit={onEdit}
-              onQuickUpdate={onQuickUpdate}
-              onOpenAuditLog={onOpenAuditLog}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 };
