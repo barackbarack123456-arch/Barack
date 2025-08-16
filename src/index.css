@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+/* AG Grid Quartz Theme Customizations */
+.ag-theme-quartz {
+  --ag-header-background-color: theme(colors.white);
+  --ag-border-color: transparent;
+  --ag-row-border-color: theme(colors.gray.200);
+}
+
+/* Add a subtle transition for a smoother hover effect */
+.ag-theme-quartz .ag-row {
+  transition: background-color 0.2s ease-in-out;
+}
+
+/* Apply a light background color on row hover for better interactivity */
+.ag-theme-quartz .ag-row:hover .ag-cell {
+  background-color: theme(colors.gray.50);
+}

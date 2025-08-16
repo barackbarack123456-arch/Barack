@@ -4,22 +4,11 @@ import ProyectoModal from '../components/ProyectoModal';
 import InfoModal from '../components/InfoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataGrid from '../components/DataGrid';
-import { PlusIcon, PencilIcon, TrashIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { PlusIcon } from '@heroicons/react/24/outline';
 import { Transition } from '@headlessui/react';
-
-const ActionsCellRenderer = ({ data, onInfo, onEdit, onDelete }) => (
-  <div className="flex items-center justify-end space-x-2">
-    <button data-testid="info-button" onClick={() => onInfo(data)} className="text-blue-600 hover:text-blue-900 transition-colors duration-200">
-      <InformationCircleIcon className="h-5 w-5" />
-    </button>
-    <button data-testid="edit-button" onClick={() => onEdit(data)} className="text-indigo-600 hover:text-indigo-900 transition-colors duration-200">
-      <PencilIcon className="h-5 w-5" />
-    </button>
-    <button data-testid="delete-button" onClick={() => onDelete(data.id)} className="text-red-600 hover:text-red-900 transition-colors duration-200">
-      <TrashIcon className="h-5 w-5" />
-    </button>
-  </div>
-);
+import ActionsCellRenderer from '../components/ActionsCellRenderer';
+import GridSkeletonLoader from '../components/GridSkeletonLoader';
+import EmptyState from '../components/EmptyState';
 
 function ProyectosPage() {
   const [proyectos, setProyectos] = useState([]);
@@ -124,15 +113,29 @@ function ProyectosPage() {
         </button>
       </div>
 
-      <div className="flex-grow bg-white shadow-lg rounded-lg overflow-hidden">
-        <DataGrid
-          rowData={proyectos}
-          columnDefs={columnDefs}
-          loading={loading}
-          components={{
-            actionsCellRenderer: ActionsCellRenderer,
-          }}
-        />
+      <div className="flex-grow flex flex-col">
+        {loading ? (
+          <div className="bg-white shadow-lg rounded-lg overflow-hidden flex-grow">
+            <GridSkeletonLoader />
+          </div>
+        ) : proyectos.length === 0 ? (
+          <EmptyState
+            title="No hay proyectos"
+            message="Empieza por añadir tu primer proyecto para empezar a gestionarlos."
+            actionText="Añadir Proyecto"
+            onAction={() => handleOpenModal()}
+          />
+        ) : (
+          <div className="bg-white shadow-lg rounded-lg overflow-hidden flex-grow">
+            <DataGrid
+              rowData={proyectos}
+              columnDefs={columnDefs}
+              components={{
+                actionsCellRenderer: ActionsCellRenderer,
+              }}
+            />
+          </div>
+        )}
       </div>
 
       <Transition
