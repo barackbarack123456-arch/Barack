@@ -1,188 +1,177 @@
-import React, { useState, useMemo } from 'react';
-import { getSinopticoItems, addSinopticoItem, updateSinopticoItem, deleteSinopticoItem } from '../services/sinopticoService';
-import { getProveedores, updateProveedor } from '../services/modules/proveedoresService';
-import { getClientes, updateCliente } from '../services/modules/clientesService';
-import { getInsumos, updateInsumo } from '../services/modules/insumosService';
-import { getProductos, updateProducto } from '../services/modules/productosService';
+import React, { useState, useMemo, useCallback } from 'react';
+import { getSinopticoItems } from '../services/sinopticoService';
 import useData from '../hooks/useData';
-import SinopticoItemModal from '../components/SinopticoItemModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataGrid from '../components/DataGrid';
+import Caratula from '../components/Caratula';
+import ProductoModal from '../components/ProductoModal';
+import SubproductoModal from '../components/SubproductoModal';
+import InsumoModal from '../components/InsumoModal';
+import { addProducto, updateProducto, deleteProducto } from '../services/modules/productosService';
+import { addSubproducto, updateSubproducto, deleteSubproducto } from '../services/modules/subproductosService';
+import { addInsumo, updateInsumo, deleteInsumo } from '../services/modules/insumosService';
+import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 // AG Grid Module Registration
 import { ModuleRegistry } from '@ag-grid-community/core';
 import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-model';
-// Enterprise modules have been removed to prevent watermarks and build errors.
-// The Sinoptico tree view functionality will be disabled until a proper Community-based solution is implemented.
+import { RowGroupingModule } from '@ag-grid-community/row-grouping';
+import 'ag-grid-community/styles/ag-theme-balham.css';
 
 ModuleRegistry.registerModules([
   ClientSideRowModelModule,
+  RowGroupingModule,
 ]);
-
-// Helper function to calculate the level of each node for the sinoptico view
-const calculateLevels = (items) => {
-  // This functionality is temporarily disabled as it depends on enterprise features.
-  return items.map(item => ({ ...item, level: 1 }));
-};
-
-const VIEW_CONFIG = {
-  sinoptico: {
-    title: 'Sinóptico de Productos (Vista Plana)',
-    fetcher: getSinopticoItems,
-    updater: updateSinopticoItem,
-    isTree: false, // Disabled tree view
-    colDefs: [
-      { field: 'nombre', headerName: 'Nombre', editable: true, flex: 1 },
-      { field: 'comentarios', headerName: 'Comentarios', editable: true, flex: 1 },
-      { field: 'cantidad', headerName: 'Cantidad', editable: true, valueParser: params => Number(params.newValue) || 0 },
-      { field: 'unidad_medida', headerName: 'Unidad' },
-    ]
-  },
-  clientes: {
-    title: 'Clientes',
-    fetcher: getClientes,
-    updater: updateCliente,
-    isTree: false,
-    colDefs: [
-      { field: 'nombre', headerName: 'Nombre', editable: true, flex: 1 },
-      { field: 'email', headerName: 'Email', editable: true, flex: 1 },
-      { field: 'telefono', headerName: 'Teléfono', editable: true, flex: 1 },
-    ]
-  },
-  proveedores: {
-    title: 'Proveedores',
-    fetcher: getProveedores,
-    updater: updateProveedor,
-    isTree: false,
-    colDefs: [
-        { field: 'nombre', headerName: 'Nombre', editable: true, flex: 1 },
-        { field: 'contacto', headerName: 'Contacto', editable: true, flex: 1 },
-        { field: 'telefono', headerName: 'Teléfono', editable: true, flex: 1 },
-    ]
-  },
-  insumos: {
-    title: 'Insumos',
-    fetcher: getInsumos,
-    updater: updateInsumo,
-    isTree: false,
-    colDefs: [
-        { field: 'nombre', headerName: 'Nombre', editable: true, flex: 1 },
-        { field: 'proveedor', headerName: 'Proveedor', editable: true, flex: 1 },
-        { field: 'stock', headerName: 'Stock', editable: true, type: 'numericColumn' },
-    ]
-  },
-  productos: {
-    title: 'Productos',
-    fetcher: getProductos,
-    updater: updateProducto,
-    isTree: false,
-    colDefs: [
-        { field: 'nombre', headerName: 'Nombre', editable: true, flex: 1 },
-        { field: 'descripcion', headerName: 'Descripción', editable: true, flex: 2 },
-        { field: 'precio', headerName: 'Precio', editable: true, type: 'numericColumn' },
-    ]
-  },
-};
-
 
 function SinopticoPage() {
   const [selectedItem, setSelectedItem] = useState(null);
+  const [editingItem, setEditingItem] = useState(null);
+  const [itemType, setItemType] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [gridApi, setGridApi] = useState(null);
-  const [levelFilter, setLevelFilter] = useState('all');
-  const [currentView, setCurrentView] = useState('sinoptico');
 
-  const config = useMemo(() => VIEW_CONFIG[currentView], [currentView]);
+  const { data: rowData, loading, refetch } = useData(getSinopticoItems);
 
-  // Use the custom hook for data fetching
-  const { data: rawData, loading, refetch } = useData(config.fetcher, [currentView]);
-
-  // Process data (e.g., calculate levels for tree view)
-  const rowData = useMemo(() => {
-    if (config.isTree) {
-      return calculateLevels(rawData);
-    }
-    return rawData;
-  }, [rawData, config.isTree]);
-
-  const onGridReady = (params) => {
-    setGridApi(params.api);
+  const handleOpenModal = (item = null, type) => {
+    setEditingItem(item);
+    setItemType(type);
+    setIsModalOpen(true);
   };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingItem(null);
+    setItemType(null);
+  };
+
+  const handleSave = async (formData) => {
+    const data = { ...formData, id_padre: itemType !== 'producto' ? selectedItem?.id : null };
+    try {
+      if (editingItem) {
+        switch (itemType) {
+          case 'producto': await updateProducto(editingItem.id, data); break;
+          case 'subproducto': await updateSubproducto(editingItem.id, data); break;
+          case 'insumo': await updateInsumo(editingItem.id, data); break;
+          default: break;
+        }
+      } else {
+        switch (itemType) {
+          case 'producto': await addProducto(data); break;
+          case 'subproducto': await addSubproducto(data); break;
+          case 'insumo': await addInsumo(data); break;
+          default: break;
+        }
+      }
+      handleCloseModal();
+      refetch();
+    } catch (error) {
+      console.error(`Error saving ${itemType}:`, error);
+    }
+  };
+
+  const handleDeleteClick = (item) => {
+    setSelectedItem(item);
+    setIsConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedItem) return;
+    try {
+      switch (selectedItem.type) {
+        case 'producto': await deleteProducto(selectedItem.id); break;
+        case 'subproducto': await deleteSubproducto(selectedItem.id); break;
+        case 'insumo': await deleteInsumo(selectedItem.id); break;
+        default: break;
+      }
+      setIsConfirmOpen(false);
+      setSelectedItem(null);
+      refetch();
+    } catch (error) {
+      console.error(`Error deleting ${selectedItem.type}:`, error);
+    }
+  };
+
+  const ActionsCellRenderer = ({ data }) => (
+    <div className="flex items-center justify-end space-x-2">
+      <button onClick={() => handleOpenModal(data, data.type)} className="text-indigo-600 hover:text-indigo-900">
+        <PencilIcon className="h-5 w-5" />
+      </button>
+      <button onClick={() => handleDeleteClick(data)} className="text-red-600 hover:text-red-900">
+        <TrashIcon className="h-5 w-5" />
+      </button>
+    </div>
+  );
+
+  const columnDefs = useMemo(() => [
+    { field: 'codigo', headerName: 'Código', valueGetter: p => p.data.codigo || 'N/A' },
+    { field: 'descripcion', headerName: 'Descripción', valueGetter: p => p.data.descripcion || 'N/A' },
+    { field: 'peso', headerName: 'Peso', valueGetter: p => p.data.peso || 'N/A' },
+    { field: 'medidas', headerName: 'Medidas', valueGetter: p => p.data.medidas || 'N/A' },
+    { field: 'unidad_medida', headerName: 'Unidad', valueGetter: p => p.data.unidad_medida || 'N/A' },
+    {
+      headerName: "Acciones",
+      cellRenderer: ActionsCellRenderer,
+      pinned: 'right',
+      width: 100,
+    }
+  ], []);
+
+  const autoGroupColumnDef = useMemo(() => ({
+    headerName: 'Nombre',
+    minWidth: 300,
+    cellRendererParams: { suppressCount: true },
+    valueGetter: p => p.data.nombre,
+  }), []);
+
+  const getDataPath = useCallback((data) => data.dataPath, []);
+
+  const onGridReady = (params) => setGridApi(params.api);
 
   const onSelectionChanged = (event) => {
     const selectedNodes = event.api.getSelectedNodes();
     setSelectedItem(selectedNodes.length > 0 ? selectedNodes[0].data : null);
   };
 
-  const handleAddRootItem = () => {
-    if (gridApi) gridApi.deselectAll();
-    setSelectedItem(null);
-    setIsModalOpen(true);
-  };
-
-  const handleAddSubItem = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleSaveItem = async (formData) => {
-    const itemData = { ...formData, id_padre: selectedItem ? selectedItem.id : null };
-    await addSinopticoItem(itemData).catch(err => console.error("Failed to add item:", err));
-    refetch(); // Refetch data for the current view
-    setIsModalOpen(false);
-  };
-
-  const handleDeleteItem = async () => {
-    if (!selectedItem) return;
-    await deleteSinopticoItem(selectedItem.id).catch(err => console.error("Failed to delete item:", err));
-    refetch(); // Refetch data for the current view
-    setIsConfirmOpen(false);
-    setSelectedItem(null);
+  const renderModal = () => {
+    if (!isModalOpen) return null;
+    switch (itemType) {
+      case 'producto': return <ProductoModal open={isModalOpen} onClose={handleCloseModal} onSave={handleSave} producto={editingItem} />;
+      case 'subproducto': return <SubproductoModal open={isModalOpen} onClose={handleCloseModal} onSave={handleSave} subproducto={editingItem} />;
+      case 'insumo': return <InsumoModal open={isModalOpen} onClose={handleCloseModal} onSave={handleSave} insumo={editingItem} />;
+      default: return null;
+    }
   };
 
   return (
-    <div>
-        <div className="flex justify-between items-center mb-4">
-            <h1 className="text-3xl font-bold text-gray-800">{config.title}</h1>
-            <div className="flex items-center gap-2">
-                <span className="font-medium">Vistas:</span>
-                {Object.keys(VIEW_CONFIG).map(view => (
-                    <button key={view} onClick={() => setCurrentView(view)} className={`px-3 py-1 rounded-md capitalize ${currentView === view ? 'bg-indigo-600 text-white' : 'bg-gray-200'}`}>
-                        {view}
-                    </button>
-                ))}
-            </div>
-        </div>
-
-      {currentView === 'sinoptico' && (
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-            <button onClick={handleAddRootItem} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Añadir Producto</button>
-            <button onClick={handleAddSubItem} disabled={!selectedItem} className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed">Añadir Sub-componente</button>
-            <button onClick={() => setIsConfirmOpen(true)} disabled={!selectedItem} className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed">Eliminar Seleccionado</button>
-
-            <div className="flex items-center gap-2 ml-auto">
-              <span className="font-medium">Filtrar por Nivel:</span>
-              <button onClick={() => setLevelFilter('all')} className={`px-3 py-1 rounded-md ${levelFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200'}`}>Todos</button>
-              <button onClick={() => setLevelFilter(1)} className={`px-3 py-1 rounded-md ${levelFilter === 1 ? 'bg-indigo-600 text-white' : 'bg-gray-200'}`}>1</button>
-              <button onClick={() => setLevelFilter(2)} className={`px-3 py-1 rounded-md ${levelFilter === 2 ? 'bg-indigo-600 text-white' : 'bg-gray-200'}`}>2</button>
-              <button onClick={() => setLevelFilter('3+')} className={`px-3 py-1 rounded-md ${levelFilter === '3+' ? 'bg-indigo-600 text-white' : 'bg-gray-200'}`}>3+</button>
-            </div>
-        </div>
-      )}
-
-      <DataGrid
-        rowData={loading ? [] : rowData}
-        columnDefs={config.colDefs}
-        onGridReady={onGridReady}
-        onSelectionChanged={onSelectionChanged}
+    <div className="flex flex-col h-full">
+      <Caratula />
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <button onClick={() => handleOpenModal(null, 'producto')} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Añadir Producto</button>
+        <button onClick={() => handleOpenModal(null, 'subproducto')} disabled={!selectedItem || selectedItem.type === 'insumo'} className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400">Añadir Subproducto</button>
+        <button onClick={() => handleOpenModal(null, 'insumo')} disabled={!selectedItem || selectedItem.type === 'insumo'} className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 disabled:bg-gray-400">Añadir Insumo</button>
+      </div>
+      <div className="flex-grow bg-white shadow-lg rounded-lg overflow-hidden">
+        <DataGrid
+          rowData={rowData}
+          loading={loading}
+          columnDefs={columnDefs}
+          onGridReady={onGridReady}
+          onSelectionChanged={onSelectionChanged}
+          treeData={true}
+          getDataPath={getDataPath}
+          autoGroupColumnDef={autoGroupColumnDef}
+          components={{ ActionsCellRenderer }}
+        />
+      </div>
+      {renderModal()}
+      <ConfirmDialog
+        open={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={confirmDelete}
+        title="Confirmar Eliminación"
+        message={`¿Estás seguro de que quieres eliminar "${selectedItem?.nombre}"? Esta acción no se puede deshacer.`}
       />
-
-      {currentView === 'sinoptico' && (
-        <>
-          <SinopticoItemModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSaveItem} item={null} />
-          <ConfirmDialog open={isConfirmOpen} onClose={() => setIsConfirmOpen(false)} onConfirm={handleDeleteItem} title="Confirmar Eliminación" message={`¿Estás seguro de que quieres eliminar "${selectedItem?.nombre}"? Esta acción no se puede deshacer.`}/>
-        </>
-      )}
     </div>
   );
 }

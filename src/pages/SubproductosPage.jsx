@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { getProductos, addProducto, updateProducto, deleteProducto } from '../services/modules/productosService';
-import ProductoModal from '../components/ProductoModal';
+import { getSubproductos, addSubproducto, updateSubproducto, deleteSubproducto } from '../services/modules/subproductosService';
+import SubproductoModal from '../components/SubproductoModal';
 import InfoModal from '../components/InfoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataGrid from '../components/DataGrid';
@@ -21,82 +21,84 @@ const ActionsCellRenderer = ({ data, onInfo, onEdit, onDelete }) => (
   </div>
 );
 
-function ProductosPage() {
-  const [productos, setProductos] = useState([]);
+function SubproductosPage() {
+  const [subproductos, setSubproductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingProducto, setEditingProducto] = useState(null);
+  const [editingSubproducto, setEditingSubproducto] = useState(null);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
-  const [selectedProducto, setSelectedProducto] = useState(null);
+  const [selectedSubproducto, setSelectedSubproducto] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [deletingProductoId, setDeletingProductoId] = useState(null);
+  const [deletingSubproductoId, setDeletingSubproductoId] = useState(null);
 
-  const fetchProductos = useCallback(async () => {
+  const fetchSubproductos = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getProductos();
-      setProductos(data);
+      const data = await getSubproductos();
+      setSubproductos(data);
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error("Error fetching subproducts:", error);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchProductos();
-  }, [fetchProductos]);
+    fetchSubproductos();
+  }, [fetchSubproductos]);
 
-  const handleOpenModal = (producto = null) => {
-    setEditingProducto(producto);
+  const handleOpenModal = (subproducto = null) => {
+    setEditingSubproducto(subproducto);
     setModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
-    setEditingProducto(null);
+    setEditingSubproducto(null);
   };
 
-  const handleSaveProducto = async (productoData) => {
+  const handleSaveSubproducto = async (subproductoData) => {
     try {
-      if (editingProducto) {
-        await updateProducto(editingProducto.id, productoData);
+      if (editingSubproducto) {
+        await updateSubproducto(editingSubproducto.id, subproductoData);
       } else {
-        await addProducto(productoData);
+        await addSubproducto(subproductoData);
       }
       handleCloseModal();
-      fetchProductos();
+      fetchSubproductos();
     } catch (error) {
-      console.error("Error saving product:", error);
+      console.error("Error saving subproduct:", error);
     }
   };
 
   const handleDeleteClick = (id) => {
-    setDeletingProductoId(id);
+    setDeletingSubproductoId(id);
     setConfirmOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
     try {
-      await deleteProducto(deletingProductoId);
+      await deleteSubproducto(deletingSubproductoId);
       setConfirmOpen(false);
-      setDeletingProductoId(null);
-      fetchProductos();
+      setDeletingSubproductoId(null);
+      fetchSubproductos();
     } catch (error) {
-      console.error("Error deleting product:", error);
+      console.error("Error deleting subproduct:", error);
     }
   };
 
-  const handleInfo = (producto) => {
-    setSelectedProducto(producto);
+  const handleInfo = (subproducto) => {
+    setSelectedSubproducto(subproducto);
     setInfoModalOpen(true);
   };
 
   const columnDefs = useMemo(() => [
+    { headerName: "Nombre", field: "nombre", flex: 1, sortable: true, filter: true },
     { headerName: "Código", field: "codigo", flex: 1, sortable: true, filter: true },
     { headerName: "Descripción", field: "descripcion", flex: 2, sortable: true, filter: true },
+    { headerName: "Peso", field: "peso", flex: 1, sortable: true, filter: true },
+    { headerName: "Medidas", field: "medidas", flex: 1, sortable: true, filter: true },
     { headerName: "Unidad de Medida", field: "unidad_medida", flex: 1, sortable: true, filter: true },
-    { headerName: "Proyecto", field: "proyecto", flex: 1, sortable: true, filter: true },
     {
       headerName: "Acciones",
       cellRenderer: 'actionsCellRenderer',
@@ -116,19 +118,19 @@ function ProductosPage() {
   return (
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Productos</h1>
+        <h1 className="text-3xl font-bold text-gray-800">Subproductos</h1>
         <button
           onClick={() => handleOpenModal()}
           className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-sm transition-all duration-200 ease-in-out transform hover:scale-105"
         >
           <PlusIcon className="h-5 w-5 mr-2" />
-          Añadir Producto
+          Añadir Subproducto
         </button>
       </div>
 
       <div className="flex-grow bg-white shadow-lg rounded-lg overflow-hidden">
         <DataGrid
-          rowData={productos}
+          rowData={subproductos}
           columnDefs={columnDefs}
           loading={loading}
           components={{
@@ -147,11 +149,11 @@ function ProductosPage() {
         leaveFrom="opacity-100"
         leaveTo="opacity-0"
       >
-        <ProductoModal
+        <SubproductoModal
           open={modalOpen}
           onClose={handleCloseModal}
-          onSave={handleSaveProducto}
-          producto={editingProducto}
+          onSave={handleSaveSubproducto}
+          subproducto={editingSubproducto}
         />
       </Transition>
 
@@ -160,17 +162,17 @@ function ProductosPage() {
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleDeleteConfirm}
         title="Confirmar Eliminación"
-        message="¿Estás seguro de que quieres eliminar este producto? Esta acción no se puede deshacer."
+        message="¿Estás seguro de que quieres eliminar este subproducto? Esta acción no se puede deshacer."
       />
 
       <InfoModal
         open={infoModalOpen}
         onClose={() => setInfoModalOpen(false)}
-        item={selectedProducto}
-        title="Información del Producto"
+        item={selectedSubproducto}
+        title="Información del Subproducto"
       />
     </div>
   );
 }
 
-export default ProductosPage;
+export default SubproductosPage;

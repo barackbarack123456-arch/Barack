@@ -13,6 +13,7 @@ import {
   TruckIcon,
   BriefcaseIcon,
   UserGroupIcon,
+  CubeIcon,
 } from '@heroicons/react/24/outline';
 import { Transition } from '@headlessui/react';
 
@@ -22,6 +23,7 @@ const navItems = [
   { text: 'Proveedores', path: '/proveedores', icon: TruckIcon },
   { text: 'Clientes', path: '/clientes', icon: UsersIcon },
   { text: 'Productos', path: '/productos', icon: ShoppingCartIcon },
+  { text: 'Subproductos', path: '/subproductos', icon: CubeIcon },
   { text: 'Insumos', path: '/insumos', icon: ArchiveBoxIcon },
   { text: 'Sinóptico', path: '/sinoptico', icon: ChartBarIcon },
   { text: 'Usuarios', path: '/usuarios', icon: UserGroupIcon, adminOnly: true },

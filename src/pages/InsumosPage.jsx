@@ -97,7 +97,7 @@ function InsumosPage() {
     { headerName: "Descripción", field: "descripcion", flex: 2, sortable: true, filter: true },
     { headerName: "Número de Parte", field: "numero_de_parte", flex: 1, sortable: true, filter: true },
     { headerName: "Proceso", field: "proceso", flex: 1, sortable: true, filter: true },
-    { headerName: "Unidad", field: "unidad", flex: 1, sortable: true, filter: true },
+    { headerName: "Unidad de Medida", field: "unidad_medida", flex: 1, sortable: true, filter: true },
     { headerName: "Material", field: "material", flex: 1, sortable: true, filter: true },
     {
       headerName: "Acciones",
