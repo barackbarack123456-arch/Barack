@@ -10,7 +10,7 @@ const SkeletonRow = () => (
 
 const GridSkeletonLoader = ({ rows = 5 }) => {
   return (
-    <div className="bg-white shadow-lg rounded-lg animate-pulse">
+    <div className="bg-white shadow-lg rounded-lg animate-pulse" data-testid="grid-skeleton-loader">
       {/* Skeleton Header */}
       <div className="flex items-center justify-between p-4 border-b-2 border-gray-300">
         <div className="h-5 bg-gray-400 rounded w-1/4"></div>

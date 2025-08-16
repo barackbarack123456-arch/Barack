@@ -110,6 +110,7 @@ export const exportToPDF = (hierarchy, fileName = 'sinoptico.pdf') => {
       fontSize: 10,
       cellPadding: 2,
     },
+    // eslint-disable-next-line no-unused-vars
     didParseCell: function (data) {
         // Here we can style specific cells if needed
         // For example, we could try to handle indentation visually
