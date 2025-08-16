@@ -4,7 +4,7 @@ import { CSS } from '@dnd-kit/utilities';
 import SinopticoNode from '../pages/SinopticoNode';
 import TreeLines from './TreeLines';
 
-const DraggableSinopticoNode = (props) => {
+const DraggableSinopticoNode = ({ isOver, ...props }) => {
     const {
         attributes,
         listeners,
@@ -20,6 +20,7 @@ const DraggableSinopticoNode = (props) => {
         opacity: isDragging ? 0.5 : 1,
         position: 'relative',
         zIndex: isDragging ? 1 : 'auto',
+        backgroundColor: isOver ? '#e0f2fe' : 'transparent',
     };
 
     return (

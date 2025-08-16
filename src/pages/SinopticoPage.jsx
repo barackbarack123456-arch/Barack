@@ -6,6 +6,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  DragOverlay,
 } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -35,6 +36,8 @@ const SinopticoPage = () => {
   const [modalInitialState, setModalInitialState] = useState({});
   const [isAuditLogModalOpen, setIsAuditLogModalOpen] = useState(false);
   const [auditedItemId, setAuditedItemId] = useState(null);
+  const [activeId, setActiveId] = useState(null);
+  const [overId, setOverId] = useState(null);
 
   const flattenedTree = useFlattenedTree(hierarchy);
   const flattenedTreeIds = useMemo(() => flattenedTree.map(item => item.id), [flattenedTree]);
@@ -42,6 +45,19 @@ const SinopticoPage = () => {
   const sensors = useSensors(
     useSensor(PointerSensor)
   );
+
+  const handleDragStart = (event) => {
+    setActiveId(event.active.id);
+  };
+
+  const handleDragOver = (event) => {
+    setOverId(event.over?.id);
+  };
+
+  const handleDragCancel = () => {
+    setActiveId(null);
+    setOverId(null);
+  };
 
   const fetchHierarchy = useCallback(async () => {
     try {
@@ -130,29 +146,77 @@ const SinopticoPage = () => {
   }, []);
 
   const handleDragEnd = async (event) => {
+    setActiveId(null);
+    setOverId(null);
     const { active, over } = event;
 
     if (!over || active.id === over.id) {
       return;
     }
 
-    const activeNode = flattenedTree.find(item => item.id === active.id);
-    const overNode = flattenedTree.find(item => item.id === over.id);
-
-    if (!activeNode || !overNode) {
-      return;
-    }
+    const previousHierarchy = hierarchy;
+    const activeId = active.id;
+    const overId = over.id;
 
     // For simplicity, we'll only allow re-parenting for now.
     // A more complex logic would handle re-ordering as well.
-    const newParentId = overNode.id;
+    const newParentId = overId;
+
+    // Optimistically update the UI
+    setHierarchy(oldHierarchy => {
+      const newHierarchy = JSON.parse(JSON.stringify(oldHierarchy));
+      let nodeToMove = null;
+
+      // Find and remove the node from its current position
+      const findAndRemove = (nodes, nodeId) => {
+        for (let i = 0; i < nodes.length; i++) {
+          const node = nodes[i];
+          if (node.id === nodeId) {
+            nodeToMove = nodes.splice(i, 1)[0];
+            return true;
+          }
+          if (node.children && findAndRemove(node.children, nodeId)) {
+            return true;
+          }
+        }
+        return false;
+      };
+
+      findAndRemove(newHierarchy, activeId);
+
+      if (!nodeToMove) return oldHierarchy; // Should not happen
+
+      // Find the new parent and add the node
+      const findAndAdd = (nodes, parentId, nodeToAdd) => {
+        for (const node of nodes) {
+          if (node.id === parentId) {
+            if (!node.children) {
+              node.children = [];
+            }
+            node.children.push(nodeToAdd);
+            return true;
+          }
+          if (node.children && findAndAdd(node.children, parentId, nodeToAdd)) {
+            return true;
+          }
+        }
+        return false;
+      };
+
+      findAndAdd(newHierarchy, newParentId, nodeToMove);
+
+      return newHierarchy;
+    });
 
     try {
-      await moveSinopticoItem(activeNode.id, newParentId, rootProduct.id);
-      fetchHierarchy(); // Re-fetch to show the change
+      await moveSinopticoItem(activeId, newParentId, rootProduct.id);
+      // On success, we can refetch to be in sync, but for now we trust the optimistic update
+      // fetchHierarchy();
     } catch (err) {
-      setError('Error al mover el item. Por favor, inténtelo de nuevo.');
+      setError('Error al mover el item. La jerarquía ha sido restaurada.');
       console.error(err);
+      // If the API call fails, revert to the previous state
+      setHierarchy(previousHierarchy);
     }
   };
 
@@ -215,7 +279,10 @@ const SinopticoPage = () => {
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
               onDragEnd={handleDragEnd}
+              onDragCancel={handleDragCancel}
             >
               <SortableContext items={flattenedTreeIds} strategy={verticalListSortingStrategy}>
                 <div className="bg-white p-8 rounded-lg shadow-md">
@@ -237,12 +304,20 @@ const SinopticoPage = () => {
                           onEdit={handleOpenModal}
                           onOpenAuditLog={handleOpenAuditLogModal}
                           onQuickUpdate={handleQuickUpdate}
+                          isOver={overId === node.id}
                         />
                       ))}
                     </div>
                   </div>
                 </div>
               </SortableContext>
+              <DragOverlay>
+                {activeId ? (
+                  <div className="bg-white p-2 shadow-lg rounded-md">
+                    {flattenedTree.find(item => item.id === activeId)?.nombre || 'Moviendo...'}
+                  </div>
+                ) : null}
+              </DragOverlay>
             </DndContext>
           )
         )}
