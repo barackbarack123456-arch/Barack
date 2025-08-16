@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronRightIcon, ChevronDownIcon, PencilIcon, PlusCircleIcon } from '@heroicons/react/24/solid';
+import { ChevronRightIcon, ChevronDownIcon, PencilIcon, PlusCircleIcon, ClockIcon } from '@heroicons/react/24/solid';
 import { useQuickUpdate } from '../hooks/useQuickUpdate';
 
-const SinopticoNode = ({ node, level, editMode, onEdit, onUpdateComplete }) => {
+const SinopticoNode = ({ node, level, editMode, onEdit, onUpdateComplete, onOpenAuditLog }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [editingField, setEditingField] = useState(null); // 'nombre', 'codigo', or null
   const [editValue, setEditValue] = useState('');
@@ -108,6 +108,9 @@ const SinopticoNode = ({ node, level, editMode, onEdit, onUpdateComplete }) => {
         <div className="text-gray-600">{node.medidas || 'N/A'}</div>
         {editMode && (
           <div className="flex items-center space-x-2">
+            <button onClick={() => onOpenAuditLog(node.id)} className="text-gray-600 hover:text-gray-800" title="Ver Historial">
+              <ClockIcon className="h-5 w-5" />
+            </button>
             <button onClick={() => onEdit(node)} className="text-blue-600 hover:text-blue-800" title="Editar Item Completo">
               <PencilIcon className="h-5 w-5" />
             </button>
@@ -133,6 +136,7 @@ const SinopticoNode = ({ node, level, editMode, onEdit, onUpdateComplete }) => {
               editMode={editMode}
               onEdit={onEdit}
               onUpdateComplete={onUpdateComplete}
+              onOpenAuditLog={onOpenAuditLog}
             />
           ))}
         </div>
