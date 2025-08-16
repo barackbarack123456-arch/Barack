@@ -15,7 +15,7 @@ import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 // AG Grid Module Registration
 import { ModuleRegistry } from '@ag-grid-community/core';
 import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-model';
-import { RowGroupingModule } from '@ag-grid-community/row-grouping';
+import { RowGroupingModule } from 'ag-grid-enterprise';
 import 'ag-grid-community/styles/ag-theme-balham.css';
 
 ModuleRegistry.registerModules([
