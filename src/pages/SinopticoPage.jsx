@@ -7,6 +7,7 @@ import EmptyState from '../components/EmptyState';
 import GridSkeletonLoader from '../components/GridSkeletonLoader';
 import SinopticoNode from './SinopticoNode';
 import SinopticoItemModal from '../components/SinopticoItemModal';
+import AuditLogModal from '../components/AuditLogModal'; // Importar el nuevo modal
 
 const SinopticoPage = () => {
   const { productId } = useParams();
@@ -20,26 +21,28 @@ const SinopticoPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [modalInitialState, setModalInitialState] = useState({});
-
+  const [isAuditLogModalOpen, setIsAuditLogModalOpen] = useState(false);
+  const [auditedItemId, setAuditedItemId] = useState(null);
 
   const fetchHierarchy = useCallback(async () => {
     try {
       setLoading(true);
       const [tree, allItemsData] = await Promise.all([
         getHierarchyForProduct(productId),
-        getSinopticoItems() // For the parent dropdown
+        getSinopticoItems()
       ]);
 
       setHierarchy(tree);
       setAllItems(allItemsData);
 
-      if (tree && tree.length > 0) {
-        setRootProduct(tree[0]);
-      } else {
-        // If there's no hierarchy, maybe the product exists as a top-level item
-        const rootItem = allItemsData.find(item => item.id === productId);
-        setRootProduct(rootItem);
+      const rootItem = allItemsData.find(item => item.id === productId);
+      setRootProduct(rootItem);
+
+      if (!tree || tree.length === 0) {
+        // If there is no hierarchy, we still want to show the root product info
+        setHierarchy(null);
       }
+
       setError(null);
     } catch (err) {
       setError('Error al cargar la jerarquía del producto. Por favor, inténtelo de nuevo.');
@@ -51,7 +54,7 @@ const SinopticoPage = () => {
 
   useEffect(() => {
     if (!productId) {
-      navigate('/sinoptico');
+      navigate('/productos'); // Redirect to a more logical page if no ID
       return;
     }
     fetchHierarchy();
@@ -69,14 +72,24 @@ const SinopticoPage = () => {
     setModalInitialState({});
   };
 
+  const handleOpenAuditLogModal = (itemId) => {
+    setAuditedItemId(itemId);
+    setIsAuditLogModalOpen(true);
+  };
+
+  const handleCloseAuditLogModal = () => {
+    setIsAuditLogModalOpen(false);
+    setAuditedItemId(null);
+  };
+
   const handleSave = async (formData, itemId) => {
     try {
-      if (itemId) { // Editing existing item
+      if (itemId) {
         await updateSinopticoItem(itemId, formData);
-      } else { // Adding new item
-        await createNewChildItem(formData, formData.parentId, formData.rootProductId, formData.type, 'currentUserId'); // Replace with actual user ID
+      } else {
+        await createNewChildItem(formData, formData.parentId, formData.rootProductId, formData.type);
       }
-      fetchHierarchy(); // Refetch data
+      fetchHierarchy();
     } catch (error) {
       console.error("Error saving item", error);
       setError("Error al guardar el item.");
@@ -102,13 +115,12 @@ const SinopticoPage = () => {
     exportToPDF(hierarchy, `sinoptico-${rootProduct?.codigo || 'export'}.pdf`);
   };
 
-
   return (
     <div className="p-6 bg-gray-50 min-h-full">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-4">
-          <button onClick={() => navigate('/sinoptico')} className="text-blue-600 hover:underline">
-            &larr; Volver a la selección
+          <button onClick={() => navigate('/productos')} className="text-blue-600 hover:underline">
+            &larr; Volver a Productos
           </button>
           <div className="flex items-center space-x-2">
             <button
@@ -118,7 +130,7 @@ const SinopticoPage = () => {
             >
               Exportar a CSV
             </button>
-             <button
+            <button
               onClick={handleExportPDF}
               className="px-4 py-2 rounded-md text-white font-semibold bg-red-600 hover:bg-red-700"
               disabled={!hierarchy || hierarchy.length === 0}
@@ -135,33 +147,34 @@ const SinopticoPage = () => {
         </div>
 
         {loading && <GridSkeletonLoader count={10} />}
-
         {error && <p className="text-red-500 text-center">{error}</p>}
 
         {!loading && !error && (
           !hierarchy || hierarchy.length === 0 ? (
             <div className="text-center bg-white p-8 rounded-lg shadow-md">
-               <h1 className="text-2xl font-bold text-gray-800 mb-2">{rootProduct?.nombre || 'Producto'}</h1>
+              <h1 className="text-2xl font-bold text-gray-800 mb-2">{rootProduct?.nombre || 'Producto'}</h1>
               <EmptyState
                 title="Sin Jerarquía"
                 message="Este sinóptico aún no tiene una familia o jerarquía creada."
               />
-              <button
-                onClick={() => handleOpenModal(null, { parentId: rootProduct.id, rootProductId: rootProduct.id, type: 'subproducto'})}
-                className="mt-4 px-6 py-2 text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none"
-              >
-                Añadir Primer Item
-              </button>
+              {rootProduct && (
+                <button
+                  onClick={() => handleOpenModal(null, { parentId: rootProduct.id, rootProductId: rootProduct.id, type: 'subproducto' })}
+                  className="mt-4 px-6 py-2 text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none"
+                >
+                  Añadir Primer Item
+                </button>
+              )}
             </div>
           ) : (
             <div className="bg-white p-8 rounded-lg shadow-md">
               <div className="mb-6 border-b pb-4">
                 <h1 className="text-3xl font-bold text-gray-800">{rootProduct?.nombre}</h1>
                 <p className="text-sm text-gray-500">
-                  Creado por: <span className="font-semibold">{rootProduct?.createdBy || 'N/A'}</span> el {rootProduct?.createdAt ? new Date(rootProduct.createdAt).toLocaleDateString() : 'N/A'}
+                  Creado por: <span className="font-semibold">{rootProduct?.createdBy || 'N/A'}</span> el {rootProduct?.createdAt?.toDate().toLocaleDateString() || 'N/A'}
                 </p>
-                 <p className="text-sm text-gray-500">
-                  Revisado por: <span className="font-semibold">{rootProduct?.reviewedBy || 'N/A'}</span>
+                <p className="text-sm text-gray-500">
+                  Última mod.: <span className="font-semibold">{rootProduct?.lastModifiedBy || 'N/A'}</span> el {rootProduct?.lastModifiedAt?.toDate().toLocaleDateString() || 'N/A'}
                 </p>
               </div>
 
@@ -175,6 +188,7 @@ const SinopticoPage = () => {
                       level={0}
                       editMode={editMode}
                       onEdit={handleOpenModal}
+                      onOpenAuditLog={handleOpenAuditLogModal}
                       onUpdateComplete={fetchHierarchy}
                     />
                   ))}
@@ -191,6 +205,11 @@ const SinopticoPage = () => {
         item={editingItem}
         allItems={allItems}
         {...modalInitialState}
+      />
+      <AuditLogModal
+        isOpen={isAuditLogModalOpen}
+        onClose={handleCloseAuditLogModal}
+        itemId={auditedItemId}
       />
     </div>
   );
