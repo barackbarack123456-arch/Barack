@@ -1,13 +1,25 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getHierarchyForProduct, createNewChildItem } from '../services/sinopticoService';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { getHierarchyForProduct, createNewChildItem, moveSinopticoItem } from '../services/sinopticoService';
 import { updateSinopticoItem, getSinopticoItems } from '../services/modules/sinopticoItemsService';
 import { exportToCSV, exportToPDF } from '../utils/fileExporters';
 import EmptyState from '../components/EmptyState';
 import GridSkeletonLoader from '../components/GridSkeletonLoader';
-import SinopticoNode from './SinopticoNode';
+import DraggableSinopticoNode from '../components/DraggableSinopticoNode';
 import SinopticoItemModal from '../components/SinopticoItemModal';
-import AuditLogModal from '../components/AuditLogModal'; // Importar el nuevo modal
+import AuditLogModal from '../components/AuditLogModal';
+import { useFlattenedTree } from '../hooks/useFlattenedTree';
 
 const SinopticoPage = () => {
   const { productId } = useParams();
@@ -23,6 +35,13 @@ const SinopticoPage = () => {
   const [modalInitialState, setModalInitialState] = useState({});
   const [isAuditLogModalOpen, setIsAuditLogModalOpen] = useState(false);
   const [auditedItemId, setAuditedItemId] = useState(null);
+
+  const flattenedTree = useFlattenedTree(hierarchy);
+  const flattenedTreeIds = useMemo(() => flattenedTree.map(item => item.id), [flattenedTree]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor)
+  );
 
   const fetchHierarchy = useCallback(async () => {
     try {
@@ -110,6 +129,33 @@ const SinopticoPage = () => {
     setHierarchy(prevHierarchy => updateNodeRecursively(prevHierarchy));
   }, []);
 
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const activeNode = flattenedTree.find(item => item.id === active.id);
+    const overNode = flattenedTree.find(item => item.id === over.id);
+
+    if (!activeNode || !overNode) {
+      return;
+    }
+
+    // For simplicity, we'll only allow re-parenting for now.
+    // A more complex logic would handle re-ordering as well.
+    const newParentId = overNode.id;
+
+    try {
+      await moveSinopticoItem(activeNode.id, newParentId, rootProduct.id);
+      fetchHierarchy(); // Re-fetch to show the change
+    } catch (err) {
+      setError('Error al mover el item. Por favor, inténtelo de nuevo.');
+      console.error(err);
+    }
+  };
+
   const renderHeader = () => (
     <div className="grid grid-cols-9 gap-4 px-4 py-2 bg-gray-200 text-gray-700 font-bold rounded-t-lg">
       <div className="col-span-3">Nombre</div>
@@ -166,30 +212,38 @@ const SinopticoPage = () => {
               )}
             </div>
           ) : (
-            <div className="bg-white p-8 rounded-lg shadow-md">
-              <div className="mb-6 border-b pb-4">
-                <h1 className="text-3xl font-bold text-gray-800">{rootProduct?.nombre || rootProduct?.descripcion}</h1>
-                <p className="text-sm text-gray-500">Creado por: <span className="font-semibold">{rootProduct?.createdBy || 'N/A'}</span> el {rootProduct?.createdAt?.toDate()?.toLocaleDateString() || 'N/A'}</p>
-                <p className="text-sm text-gray-500">Última mod.: <span className="font-semibold">{rootProduct?.lastModifiedBy || 'N/A'}</span> el {rootProduct?.lastModifiedAt?.toDate()?.toLocaleDateString() || 'N/A'}</p>
-              </div>
-              <div className="border rounded-lg overflow-hidden">
-                {renderHeader()}
-                <div className="divide-y divide-gray-200">
-                  {hierarchy.map((node, index) => (
-                    <SinopticoNode
-                      key={node.id}
-                      node={node}
-                      level={0}
-                      isLastChild={index === hierarchy.length - 1}
-                      editMode={editMode}
-                      onEdit={handleOpenModal}
-                      onOpenAuditLog={handleOpenAuditLogModal}
-                      onQuickUpdate={handleQuickUpdate}
-                    />
-                  ))}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext items={flattenedTreeIds} strategy={verticalListSortingStrategy}>
+                <div className="bg-white p-8 rounded-lg shadow-md">
+                  <div className="mb-6 border-b pb-4">
+                    <h1 className="text-3xl font-bold text-gray-800">{rootProduct?.nombre || rootProduct?.descripcion}</h1>
+                    <p className="text-sm text-gray-500">Creado por: <span className="font-semibold">{rootProduct?.createdBy || 'N/A'}</span> el {rootProduct?.createdAt?.toDate()?.toLocaleDateString() || 'N/A'}</p>
+                    <p className="text-sm text-gray-500">Última mod.: <span className="font-semibold">{rootProduct?.lastModifiedBy || 'N/A'}</span> el {rootProduct?.lastModifiedAt?.toDate()?.toLocaleDateString() || 'N/A'}</p>
+                  </div>
+                  <div className="border rounded-lg overflow-hidden">
+                    {renderHeader()}
+                    <div className="divide-y divide-gray-200">
+                      {flattenedTree.map((node) => (
+                        <DraggableSinopticoNode
+                          key={node.id}
+                          node={node}
+                          level={node.level}
+                          isLastChild={node.isLastChild}
+                          editMode={editMode}
+                          onEdit={handleOpenModal}
+                          onOpenAuditLog={handleOpenAuditLogModal}
+                          onQuickUpdate={handleQuickUpdate}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </SortableContext>
+            </DndContext>
           )
         )}
       </div>
