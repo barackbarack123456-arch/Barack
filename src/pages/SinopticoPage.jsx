@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getHierarchyForProduct, createNewChildItem } from '../services/sinopticoService';
 import { updateSinopticoItem, getSinopticoItems } from '../services/modules/sinopticoItemsService';
+import { exportToCSV, exportToPDF } from '../utils/fileExporters';
 import EmptyState from '../components/EmptyState';
 import GridSkeletonLoader from '../components/GridSkeletonLoader';
 import SinopticoNode from './SinopticoNode';
@@ -93,6 +94,15 @@ const SinopticoPage = () => {
     </div>
   );
 
+  const handleExportCSV = () => {
+    exportToCSV(hierarchy, `sinoptico-${rootProduct?.codigo || 'export'}.csv`);
+  };
+
+  const handleExportPDF = () => {
+    exportToPDF(hierarchy, `sinoptico-${rootProduct?.codigo || 'export'}.pdf`);
+  };
+
+
   return (
     <div className="p-6 bg-gray-50 min-h-full">
       <div className="max-w-7xl mx-auto">
@@ -100,12 +110,28 @@ const SinopticoPage = () => {
           <button onClick={() => navigate('/sinoptico')} className="text-blue-600 hover:underline">
             &larr; Volver a la selección
           </button>
-          <button
-            onClick={() => setEditMode(!editMode)}
-            className={`px-4 py-2 rounded-md text-white font-semibold ${editMode ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}
-          >
-            {editMode ? 'Salir del Modo Edición' : 'Editar Jerarquía'}
-          </button>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handleExportCSV}
+              className="px-4 py-2 rounded-md text-white font-semibold bg-green-600 hover:bg-green-700"
+              disabled={!hierarchy || hierarchy.length === 0}
+            >
+              Exportar a CSV
+            </button>
+             <button
+              onClick={handleExportPDF}
+              className="px-4 py-2 rounded-md text-white font-semibold bg-red-600 hover:bg-red-700"
+              disabled={!hierarchy || hierarchy.length === 0}
+            >
+              Exportar a PDF
+            </button>
+            <button
+              onClick={() => setEditMode(!editMode)}
+              className={`px-4 py-2 rounded-md text-white font-semibold ${editMode ? 'bg-gray-600 hover:bg-gray-700' : 'bg-blue-600 hover:bg-blue-700'}`}
+            >
+              {editMode ? 'Salir del Modo Edición' : 'Editar Jerarquía'}
+            </button>
+          </div>
         </div>
 
         {loading && <GridSkeletonLoader count={10} />}
