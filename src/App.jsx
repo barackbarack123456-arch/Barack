@@ -16,7 +16,7 @@ const SubproductosPage = lazy(() => import('./pages/SubproductosPage'));
 const InsumosPage = lazy(() => import('./pages/InsumosPage'));
 const ProyectosPage = lazy(() => import('./pages/ProyectosPage'));
 const SinopticoPage = lazy(() => import('./pages/SinopticoPage'));
-const CaratulaPage = lazy(() => import('./pages/CaratulaPage'));
+const SinopticoSelectorPage = lazy(() => import('./pages/SinopticoSelectorPage'));
 const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
 const UsuariosPage = lazy(() => import('./pages/UsuariosPage'));
 const SearchResultsPage = lazy(() => import('./pages/SearchResultsPage'));
@@ -51,7 +51,7 @@ function AppContent() {
           <Route path="subproductos" element={<SubproductosPage />} />
           <Route path="insumos" element={<InsumosPage />} />
           <Route path="proyectos" element={<ProyectosPage />} />
-          <Route path="sinoptico" element={<CaratulaPage />} />
+          <Route path="sinoptico" element={<SinopticoSelectorPage />} />
           <Route path="sinoptico/:productId" element={<SinopticoPage />} />
           <Route path="search" element={<SearchResultsPage />} />
           <Route
