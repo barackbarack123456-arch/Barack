@@ -25,7 +25,8 @@ import {
   serverTimestamp,
   query,
   where,
-  orderBy
+  orderBy,
+  writeBatch
 } from "firebase/firestore";
 
 // Your web app's Firebase configuration, loaded from environment variables
@@ -67,5 +68,6 @@ export {
   serverTimestamp,
   query,
   where,
-  orderBy
+  orderBy,
+  writeBatch
 };
