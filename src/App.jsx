@@ -19,6 +19,7 @@ const SinopticoPage = lazy(() => import('./pages/SinopticoPage'));
 const CaratulaPage = lazy(() => import('./pages/CaratulaPage'));
 const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
 const UsuariosPage = lazy(() => import('./pages/UsuariosPage'));
+const SearchResultsPage = lazy(() => import('./pages/SearchResultsPage'));
 
 function AppContent() {
   const { loading } = useAuth();
@@ -52,6 +53,7 @@ function AppContent() {
           <Route path="proyectos" element={<ProyectosPage />} />
           <Route path="sinoptico" element={<CaratulaPage />} />
           <Route path="sinoptico/:productId" element={<SinopticoPage />} />
+          <Route path="search" element={<SearchResultsPage />} />
           <Route
             path="usuarios"
             element={
