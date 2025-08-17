@@ -49,10 +49,10 @@ function DashboardPage() {
   }, []);
 
   const summaryCards = [
-    { title: "Proveedores Activos", value: stats.proveedores, icon: TruckIcon, color: "bg-primary" },
-    { title: "Clientes Registrados", value: stats.clientes, icon: UsersIcon, color: "bg-accent" },
-    { title: "Productos en Stock", value: stats.productos, icon: ShoppingCartIcon, color: "bg-secondary" },
-    { title: "Insumos Disponibles", value: stats.insumos, icon: ArchiveBoxIcon, color: "bg-red-500" },
+    { title: "Proveedores Activos", value: stats.proveedores, icon: TruckIcon, gradient: "bg-gradient-to-br from-primary to-indigo-400" },
+    { title: "Clientes Registrados", value: stats.clientes, icon: UsersIcon, gradient: "bg-gradient-to-br from-accent to-emerald-400" },
+    { title: "Productos en Stock", value: stats.productos, icon: ShoppingCartIcon, gradient: "bg-gradient-to-br from-secondary to-slate-400" },
+    { title: "Insumos Disponibles", value: stats.insumos, icon: ArchiveBoxIcon, gradient: "bg-gradient-to-br from-red-500 to-orange-400" },
   ];
 
   return (
@@ -77,13 +77,13 @@ function DashboardPage() {
             enterTo="opacity-100 scale-100"
             style={{ transitionDelay: `${index * 100}ms` }}
           >
-            <div className="bg-surface p-6 rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center space-x-4">
-              <div className={`p-3 rounded-full text-white ${card.color}`}>
+            <div className="bg-surface p-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center space-x-4">
+              <div className={`p-3 rounded-full text-white ${card.gradient}`}>
                 <card.icon className="h-8 w-8" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-secondary">{card.title}</h3>
-                <p className="text-3xl font-bold text-primary mt-1">{card.value}</p>
+                <p className="text-4xl font-bold text-primary mt-1">{card.value}</p>
               </div>
             </div>
           </Transition>
