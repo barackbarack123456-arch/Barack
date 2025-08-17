@@ -2,7 +2,7 @@
 
 /* AG Grid Quartz Theme Customizations */
 .ag-theme-quartz {
-  --ag-header-background-color: theme(colors.white);
+  --ag-header-background-color: theme(colors.background);
   --ag-border-color: transparent;
   --ag-row-border-color: theme(colors.gray.200);
 }
@@ -14,7 +14,7 @@
 
 /* Apply a light background color on row hover for better interactivity */
 .ag-theme-quartz .ag-row:hover .ag-cell {
-  background-color: theme(colors.gray.50);
+  background-color: theme(colors.gray.100);
 }
 
 body {

@@ -132,7 +132,7 @@ function CrudPage({
         </button>
       </div>
 
-      <div className="flex-grow bg-white shadow-lg rounded-lg overflow-hidden">
+      <div className="flex-grow bg-surface rounded-xl shadow-md p-4">
         <DataGrid
           rowData={items}
           columnDefs={columnDefs}
