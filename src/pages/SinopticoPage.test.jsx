@@ -77,9 +77,9 @@ const mockAllItems = [
 ];
 
 const mockHierarchy = [
-  { id: 'root1', nombre: 'Root Product', level: 0, children: [
-    { id: 'child1', nombre: 'Child 1', level: 1, isLastChild: false, children: [] },
-    { id: 'child2', nombre: 'Child 2', level: 1, isLastChild: true, children: [] },
+  { id: 'root1', nombre: 'Root Product', codigo: 'P-001', level: 0, children: [
+    { id: 'child1', nombre: 'Child 1', codigo: 'S-001', level: 1, isLastChild: false, children: [] },
+    { id: 'child2', nombre: 'Child 2', codigo: 'S-002', level: 1, isLastChild: true, children: [] },
   ]}
 ];
 
@@ -219,4 +219,33 @@ describe('SinopticoPage', () => {
     });
   });
 
+  it('allows inline editing of the code field on double click', async () => {
+    renderComponent();
+    const hierarchyContainer = await screen.findByRole('heading', { name: 'Root Product' });
+    const hierarchyList = hierarchyContainer.closest('div.shadow-md').querySelector('div.divide-y');
+
+    // Wait for the specific item to be there, finding it by its code
+    const nodeCode = await within(hierarchyList).findByText('S-002');
+
+    // Enter edit mode
+    fireEvent.click(screen.getByText('Editar Jerarquía'));
+
+    // Double click the node code
+    fireEvent.doubleClick(nodeCode);
+
+    const input = await screen.findByDisplayValue('S-002');
+    expect(input).toBeInTheDocument();
+
+    // Change value and press enter
+    fireEvent.change(input, { target: { value: 'S-002-UPDATED' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+    // The input should disappear and the service should be called
+    await waitFor(() => {
+      expect(sinopticoItemsService.updateSinopticoItem).toHaveBeenCalledWith('child2', { codigo: 'S-002-UPDATED' });
+    });
+
+    // UI should update optimistically
+    expect(within(hierarchyList).getByText('S-002-UPDATED')).toBeInTheDocument();
+  });
 });
