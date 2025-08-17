@@ -16,3 +16,15 @@
 .ag-theme-quartz .ag-row:hover .ag-cell {
   background-color: theme(colors.gray.50);
 }
+
+body {
+  @apply antialiased;
+}
+
+h1 {
+  @apply tracking-tight;
+}
+
+h2 {
+  @apply tracking-tight;
+}
