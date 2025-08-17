@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getTopLevelProducts } from '../services/sinopticoService';
 import EmptyState from '../components/EmptyState';
 
-const CaratulaPage = () => {
+const SinopticoSelectorPage = () => {
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState('');
   const [loading, setLoading] = useState(true);
@@ -60,7 +60,7 @@ const CaratulaPage = () => {
                 <option value="" disabled>-- Seleccione un producto --</option>
                 {products.map((product) => (
                   <option key={product.id} value={product.id}>
-                    {product.nombre}
+                    {`${product.nombre} (${product.codigo})`}
                   </option>
                 ))}
               </select>
@@ -84,4 +84,4 @@ const CaratulaPage = () => {
   );
 };
 
-export default CaratulaPage;
+export default SinopticoSelectorPage;
