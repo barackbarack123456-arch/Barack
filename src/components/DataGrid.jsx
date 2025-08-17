@@ -47,6 +47,7 @@ function DataGrid({
         getRowId={getRowId}
         loading={loading}
         components={components}
+        reactiveCustomComponents={false}
         overlayLoadingTemplate={overlayLoadingTemplate}
         overlayNoRowsTemplate={overlayNoRowsTemplate}
         domLayout='autoHeight'
