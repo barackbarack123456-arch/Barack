@@ -17,6 +17,7 @@ import { updateSinopticoItem, getSinopticoItems } from '../services/modules/sino
 import { exportToCSV, exportToPDF } from '../utils/fileExporters';
 import EmptyState from '../components/EmptyState';
 import GridSkeletonLoader from '../components/GridSkeletonLoader';
+import SinopticoNode from '../components/SinopticoNode';
 import DraggableSinopticoNode from '../components/DraggableSinopticoNode';
 import SinopticoItemModal from '../components/SinopticoItemModal';
 import AuditLogModal from '../components/AuditLogModal';
@@ -340,8 +341,21 @@ const SinopticoPage = () => {
               </SortableContext>
               <DragOverlay>
                 {activeId ? (
-                  <div className="bg-white p-2 shadow-lg rounded-md">
-                    {flattenedTree.find(item => item.id === activeId)?.nombre || 'Moviendo...'}
+                  <div style={{
+                    '--tw-ring-color': 'rgba(59, 130, 246, 0.5)',
+                    boxShadow: '0 0 0 calc(1px + var(--tw-ring-offset-width, 0px)) var(--tw-ring-color), 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)',
+                    opacity: 0.9,
+                    borderRadius: '0.5rem',
+                    pointerEvents: 'none',
+                  }}>
+                    <SinopticoNode
+                      node={flattenedTree.find(item => item.id === activeId)}
+                      level={0}
+                      editMode={false}
+                      onEdit={() => {}}
+                      onQuickUpdate={() => {}}
+                      onOpenAuditLog={() => {}}
+                    />
                   </div>
                 ) : null}
               </DragOverlay>
