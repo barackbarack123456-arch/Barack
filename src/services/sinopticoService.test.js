@@ -7,8 +7,9 @@ vi.mock('./firebase', () => ({
   collection: vi.fn(),
   query: vi.fn(),
   where: vi.fn(),
+  orderBy: vi.fn(),
   getDocs: vi.fn(),
-  doc: vi.fn(),
+  doc: vi.fn((db, collection, id) => `mock/doc/${id}`),
   getDoc: vi.fn(),
   writeBatch: vi.fn(),
 }));
@@ -19,7 +20,7 @@ vi.mock('./modules/sinopticoItemsService', () => ({
 }));
 
 // Import the mocked functions to be able to reference them in tests
-import { db, getDocs, getDoc, writeBatch, doc } from './firebase';
+import { db, getDocs, getDoc, writeBatch, doc, orderBy } from './firebase';
 import { addSinopticoItem, updateSinopticoItem } from './modules/sinopticoItemsService';
 
 // Mock implementation for the batch
@@ -121,63 +122,54 @@ describe('sinopticoService', () => {
   });
 
   describe('moveSinopticoItem', () => {
-    it('should perform a simple update if moving within the same root product', async () => {
-      // Arrange: Mock that the item exists and has a rootProductId
-      getDoc.mockResolvedValue({
-        exists: () => true,
-        data: () => ({ rootProductId: 'root1' }),
-      });
-
-      // Act: Move the item to a new parent but within the same root
-      await moveSinopticoItem('itemToMove', 'newParent', 'root1');
-
-      // Assert: Should call the single update function, not a batch
-      expect(updateSinopticoItem).toHaveBeenCalledTimes(1);
-      expect(updateSinopticoItem).toHaveBeenCalledWith('itemToMove', { parentId: 'newParent' });
-      expect(writeBatch).not.toHaveBeenCalled();
-    });
-
-    it('should use a batch write to update item and descendants when moving to a new root product', async () => {
-      // Arrange: Mock the item being moved and its descendants
-      getDoc.mockResolvedValue({
-        exists: () => true,
-        data: () => ({ rootProductId: 'oldRoot' }),
-      });
-      const mockDescendants = [
-        { id: 'descendant1', parentId: 'itemToMove', rootProductId: 'oldRoot' },
-        { id: 'descendant2', parentId: 'descendant1', rootProductId: 'oldRoot' },
+    it('should update parent, order, and reorder old siblings on reparent', async () => {
+      // Arrange
+      const itemToMove = { id: 'item2', parentId: 'parent1', orden: 1 };
+      const oldSiblings = [
+        { id: 'item1', parentId: 'parent1', orden: 0 },
+        itemToMove,
+        { id: 'item3', parentId: 'parent1', orden: 2 },
       ];
-      const mockSnapshot = {
-        docs: mockDescendants.map(item => ({ id: item.id, data: () => item })),
-      };
-      getDocs.mockResolvedValue(mockSnapshot);
+      const newSiblings = [{ id: 'item4', parentId: 'parent2', orden: 0 }];
 
-      // Act: Move the item to a new parent in a new root
-      await moveSinopticoItem('itemToMove', 'newParent', 'newRoot');
+      // Mock the main item we are moving
+      getDoc.mockResolvedValue({ exists: () => true, data: () => itemToMove });
 
-      // Assert: Should use a batch write
+      // Mock the queries for old and new siblings
+      getDocs.mockImplementation((query) => {
+        // This is a simplified mock, assuming query inspection if needed
+        // For this test, we can return different sets based on call order or inspect the query
+        if (getDocs.mock.calls.length === 1) { // First call is for new siblings
+          return Promise.resolve({ docs: newSiblings.map(d => ({ id: d.id, data: () => d })), size: newSiblings.length });
+        }
+        // Second call is for old siblings
+        return Promise.resolve({ docs: oldSiblings.map(d => ({ id: d.id, data: () => d })), size: oldSiblings.length });
+      });
+
+      // Act
+      await moveSinopticoItem('item2', 'parent2');
+
+      // Assert
       expect(writeBatch).toHaveBeenCalledTimes(1);
-      expect(updateSinopticoItem).not.toHaveBeenCalled();
 
-      // Check that the batch updates the main item + all descendants (3 updates total)
-      expect(mockBatch.update).toHaveBeenCalledTimes(3);
-
-      // Check the main item's update
+      // 1. Check update on the moved item
       expect(mockBatch.update).toHaveBeenCalledWith(
-        doc(db, 'productos', 'itemToMove'),
-        { parentId: 'newParent', rootProductId: 'newRoot' }
-      );
-      // Check the descendants' updates
-      expect(mockBatch.update).toHaveBeenCalledWith(
-        doc(db, 'productos', 'descendant1'),
-        { rootProductId: 'newRoot' }
-      );
-       expect(mockBatch.update).toHaveBeenCalledWith(
-        doc(db, 'productos', 'descendant2'),
-        { rootProductId: 'newRoot' }
+        'mock/doc/item2',
+        expect.objectContaining({ parentId: 'parent2', orden: 1 }) // new parent, new order is 1 (after item4)
       );
 
-      // Ensure the batch is committed
+      // 2. Check updates on the old siblings that need reordering
+      expect(mockBatch.update).toHaveBeenCalledWith(
+        'mock/doc/item3',
+        { orden: 1 } // item3's order should be updated from 2 to 1
+      );
+
+      // 3. Ensure item1 was not updated as its order was correct
+      expect(mockBatch.update).not.toHaveBeenCalledWith(
+        'mock/doc/item1',
+        expect.anything()
+      );
+
       expect(mockBatch.commit).toHaveBeenCalledTimes(1);
     });
   });

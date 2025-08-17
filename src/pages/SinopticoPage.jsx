@@ -11,8 +11,9 @@ import {
 import {
   SortableContext,
   verticalListSortingStrategy,
+  arrayMove,
 } from '@dnd-kit/sortable';
-import { getHierarchyForProduct, createNewChildItem, moveSinopticoItem } from '../services/sinopticoService';
+import { getHierarchyForProduct, createNewChildItem, moveSinopticoItem, updateItemsOrder } from '../services/sinopticoService';
 import { updateSinopticoItem, getSinopticoItems } from '../services/modules/sinopticoItemsService';
 import { exportToCSV, exportToPDF } from '../utils/fileExporters';
 import EmptyState from '../components/EmptyState';
@@ -154,15 +155,13 @@ const SinopticoPage = () => {
       return;
     }
 
-    const previousHierarchy = hierarchy;
-    const activeId = active.id;
-    const overId = over.id;
+    const previousHierarchy = JSON.parse(JSON.stringify(hierarchy));
 
-    // For simplicity, we'll only allow re-parenting for now.
-    // A more complex logic would handle re-ordering as well.
-    const newParentId = overId;
+    const activeNode = flattenedTree.find(item => item.id === active.id);
+    const overNode = flattenedTree.find(item => item.id === over.id);
 
-    // --- Start of change: Cycle detection ---
+    if (!activeNode || !overNode) return;
+
     const findNode = (nodes, nodeId) => {
       for (const node of nodes) {
         if (node.id === nodeId) return node;
@@ -174,75 +173,129 @@ const SinopticoPage = () => {
       return null;
     };
 
-    const isDescendant = (ancestor, descendantId) => {
-      if (!ancestor.children) return false;
-      if (ancestor.children.some(child => child.id === descendantId)) return true;
-      return ancestor.children.some(child => isDescendant(child, descendantId));
-    };
+    // Scenario 1: Reordering within the same parent
+    if (activeNode.parentId === overNode.parentId) {
+      setHierarchy(currentHierarchy => {
+        const findSiblingsAndParent = (nodes, parentId) => {
+          if (parentId === null) return { siblings: nodes, parent: null };
+          for (const node of nodes) {
+            if (node.id === parentId) return { siblings: node.children, parent: node };
+            if (node.children) {
+              const found = findSiblingsAndParent(node.children, parentId);
+              if (found.siblings) return found;
+            }
+          }
+          return { siblings: null, parent: null };
+        };
 
-    const nodeToMoveData = findNode(hierarchy, activeId);
+        const newHierarchy = JSON.parse(JSON.stringify(currentHierarchy));
+        const { siblings, parent } = findSiblingsAndParent(newHierarchy, activeNode.parentId);
 
-    if (nodeToMoveData && (isDescendant(nodeToMoveData, newParentId) || newParentId === activeId)) {
+        if (!siblings) return currentHierarchy;
+
+        const oldIndex = siblings.findIndex(item => item.id === active.id);
+        const newIndex = siblings.findIndex(item => item.id === over.id);
+
+        const reorderedSiblings = arrayMove(siblings, oldIndex, newIndex);
+
+        if (parent) {
+          parent.children = reorderedSiblings;
+        } else {
+          // This means we are reordering root nodes
+          return reorderedSiblings;
+        }
+        return newHierarchy;
+      });
+
+      const siblings = findNode(hierarchy, activeNode.parentId)?.children || hierarchy;
+      const oldIndex = siblings.findIndex(item => item.id === active.id);
+      const newIndex = siblings.findIndex(item => item.id === over.id);
+      const reordered = arrayMove(siblings, oldIndex, newIndex);
+      const itemsToUpdate = reordered.map((item, index) => ({ id: item.id, orden: index }));
+
+      try {
+        await updateItemsOrder(itemsToUpdate);
+        // Maybe refetch to ensure consistency
+        // fetchHierarchy();
+      } catch (err) {
+        setError('Error al reordenar. Se restauró el orden anterior.');
+        console.error(err);
+        setHierarchy(previousHierarchy);
+      }
+    } else { // Scenario 2: Reparenting
+      const newParentId = over.id;
+
+      const findNode = (nodes, nodeId) => {
+        for (const node of nodes) {
+          if (node.id === nodeId) return node;
+          if (node.children) {
+            const found = findNode(node.children, nodeId);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+
+      const isDescendant = (ancestor, descendantId) => {
+        if (!ancestor.children) return false;
+        if (ancestor.children.some(child => child.id === descendantId)) return true;
+        return ancestor.children.some(child => isDescendant(child, descendantId));
+      };
+
+      const nodeToMoveData = findNode(hierarchy, active.id);
+
+      if (nodeToMoveData && (isDescendant(nodeToMoveData, newParentId) || newParentId === active.id)) {
         setError("Operación no válida: no se puede mover un elemento para que sea descendiente de sí mismo.");
         return;
-    }
-    // --- End of change: Cycle detection ---
+      }
 
-    // Optimistically update the UI
-    setHierarchy(oldHierarchy => {
-      const newHierarchy = JSON.parse(JSON.stringify(oldHierarchy));
-      let nodeToMove = null;
+      // Optimistic UI Update
+      setHierarchy(oldHierarchy => {
+        const newHierarchy = JSON.parse(JSON.stringify(oldHierarchy));
+        let nodeToMove = null;
 
-      // Find and remove the node from its current position
-      const findAndRemove = (nodes, nodeId) => {
-        for (let i = 0; i < nodes.length; i++) {
-          const node = nodes[i];
-          if (node.id === nodeId) {
-            nodeToMove = nodes.splice(i, 1)[0];
-            return true;
-          }
-          if (node.children && findAndRemove(node.children, nodeId)) {
-            return true;
-          }
-        }
-        return false;
-      };
-
-      findAndRemove(newHierarchy, activeId);
-
-      if (!nodeToMove) return oldHierarchy; // Should not happen
-
-      // Find the new parent and add the node
-      const findAndAdd = (nodes, parentId, nodeToAdd) => {
-        for (const node of nodes) {
-          if (node.id === parentId) {
-            if (!node.children) {
-              node.children = [];
+        const findAndRemove = (nodes, nodeId) => {
+          for (let i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === nodeId) {
+              nodeToMove = nodes.splice(i, 1)[0];
+              return true;
             }
-            node.children.push(nodeToAdd);
-            return true;
+            if (nodes[i].children && findAndRemove(nodes[i].children, nodeId)) {
+              return true;
+            }
           }
-          if (node.children && findAndAdd(node.children, parentId, nodeToAdd)) {
-            return true;
+          return false;
+        };
+
+        findAndRemove(newHierarchy, active.id);
+        if (!nodeToMove) return oldHierarchy;
+
+        const findAndAdd = (nodes, parentId, nodeToAdd) => {
+          for (const node of nodes) {
+            if (node.id === parentId) {
+              if (!node.children) node.children = [];
+              node.children.push(nodeToAdd);
+              return true;
+            }
+            if (node.children && findAndAdd(node.children, parentId, nodeToAdd)) {
+              return true;
+            }
           }
-        }
-        return false;
-      };
+          return false;
+        };
 
-      findAndAdd(newHierarchy, newParentId, nodeToMove);
+        findAndAdd(newHierarchy, newParentId, nodeToMove);
+        return newHierarchy;
+      });
 
-      return newHierarchy;
-    });
-
-    try {
-      await moveSinopticoItem(activeId, newParentId, rootProduct.id);
-      // On success, we can refetch to be in sync, but for now we trust the optimistic update
-      // fetchHierarchy();
-    } catch (err) {
-      setError('Error al mover el item. La jerarquía ha sido restaurada.');
-      console.error(err);
-      // If the API call fails, revert to the previous state
-      setHierarchy(previousHierarchy);
+      try {
+        await moveSinopticoItem(active.id, newParentId, rootProduct.id);
+        // fetchHierarchy(); // Refetch to ensure data consistency after complex operation
+      } catch (err) {
+        setError('Error al mover el item. La jerarquía ha sido restaurada.');
+        console.error(err);
+        setHierarchy(previousHierarchy);
+      }
     }
   };
 

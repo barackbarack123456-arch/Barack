@@ -1,5 +1,5 @@
 import { updateSinopticoItem, addSinopticoItem } from './modules/sinopticoItemsService';
-import { db, collection, query, where, getDocs, doc, getDoc, writeBatch } from '../services/firebase';
+import { db, collection, query, where, getDocs, doc, getDoc, writeBatch, orderBy } from '../services/firebase';
 
 const SINOPTICO_ITEMS_COLLECTION = 'productos';
 
@@ -48,6 +48,14 @@ export const getHierarchyForProduct = async (rootProductId) => {
     }
   }
 
+  // Sort children for every node based on the 'orden' field
+  for (const item of itemsById.values()) {
+    if (item.children.length > 1) {
+      item.children.sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
+    }
+  }
+  tree.sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
+
   // Find nodes that are part of a cycle (i.e., not in any valid tree)
   const nodesInTree = new Set();
   const findChildren = (node) => {
@@ -84,12 +92,18 @@ export const getHierarchyForProduct = async (rootProductId) => {
  * @param {string} userId The user creating the product.
  */
 export const createNewProduct = async (productData, userId) => {
+  const itemsCollection = collection(db, SINOPTICO_ITEMS_COLLECTION);
+  const q = query(itemsCollection, where('parentId', '==', null));
+  const snapshot = await getDocs(q);
+  const orden = snapshot.size;
+
   const newItem = {
     ...productData,
     parentId: null,
     type: 'producto',
     createdAt: new Date().toISOString(),
     createdBy: userId,
+    orden,
     // rootProductId will be set to its own ID after creation
   };
   const newId = await addSinopticoItem(newItem);
@@ -110,6 +124,12 @@ export const createNewChildItem = async (itemData, parentId, rootProductId, type
     if (!parentId || !rootProductId) {
         throw new Error('A child item must have a parent and a root product ID.');
     }
+
+    const itemsCollection = collection(db, SINOPTICO_ITEMS_COLLECTION);
+    const q = query(itemsCollection, where('parentId', '==', parentId));
+    const snapshot = await getDocs(q);
+    const orden = snapshot.size;
+
     const newItem = {
         ...itemData,
         parentId,
@@ -117,6 +137,7 @@ export const createNewChildItem = async (itemData, parentId, rootProductId, type
         type,
         createdAt: new Date().toISOString(),
         createdBy: userId,
+        orden,
     };
     return await addSinopticoItem(newItem);
 };
@@ -153,27 +174,52 @@ export const moveSinopticoItem = async (itemId, newParentId, newRootProductId) =
     if (!itemSnap.exists()) {
         throw new Error("Item to move does not exist.");
     }
-
+    const oldParentId = itemSnap.data().parentId;
     const oldRootProductId = itemSnap.data().rootProductId;
 
-    // If the root product ID is not changing, it's a simple parent update.
-    if (oldRootProductId === newRootProductId || !newRootProductId) {
-        await updateSinopticoItem(itemId, { parentId: newParentId });
-        return;
-    }
-
-    // If the root is changing, we need to update the item and all its descendants.
-    const descendantIds = await getAllDescendantIds(itemId, oldRootProductId);
     const batch = writeBatch(db);
 
-    // 1. Update the main item's parent and root
-    batch.update(itemRef, { parentId: newParentId, rootProductId: newRootProductId });
+    // --- Reparenting Logic ---
+    const newSiblingsQuery = query(collection(db, 'productos'), where('parentId', '==', newParentId));
+    const newSiblingsSnapshot = await getDocs(newSiblingsQuery);
+    const newOrder = newSiblingsSnapshot.size;
 
-    // 2. Update all descendants to point to the new root
-    for (const id of descendantIds) {
-        const descendantRef = doc(db, 'productos', id);
-        batch.update(descendantRef, { rootProductId: newRootProductId });
+    const effectiveRootProductId = newRootProductId || oldRootProductId;
+    batch.update(itemRef, { parentId: newParentId, orden: newOrder, rootProductId: effectiveRootProductId });
+
+    // --- Update old siblings order ---
+    if (oldParentId !== newParentId) {
+        const oldSiblingsQuery = query(collection(db, 'productos'), where('parentId', '==', oldParentId), orderBy('orden'));
+        const oldSiblingsSnapshot = await getDocs(oldSiblingsQuery);
+        const oldSiblings = oldSiblingsSnapshot.docs
+            .map(d => ({ id: d.id, ...d.data() }))
+            .filter(item => item.id !== itemId);
+
+        oldSiblings.forEach((sibling, index) => {
+            if (sibling.orden !== index) {
+                const siblingRef = doc(db, 'productos', sibling.id);
+                batch.update(siblingRef, { orden: index });
+            }
+        });
     }
 
+    // --- Root Change Logic ---
+    if (oldRootProductId !== effectiveRootProductId) {
+        const descendantIds = await getAllDescendantIds(itemId, oldRootProductId);
+        for (const id of descendantIds) {
+            const descendantRef = doc(db, 'productos', id);
+            batch.update(descendantRef, { rootProductId: effectiveRootProductId });
+        }
+    }
+
+    await batch.commit();
+};
+
+export const updateItemsOrder = async (itemsToUpdate) => {
+    const batch = writeBatch(db);
+    itemsToUpdate.forEach(item => {
+        const itemRef = doc(db, SINOPTICO_ITEMS_COLLECTION, item.id);
+        batch.update(itemRef, { orden: item.orden });
+    });
     await batch.commit();
 };
