@@ -39,8 +39,9 @@ const SinopticoPage = () => {
   const [auditedItemId, setAuditedItemId] = useState(null);
   const [activeId, setActiveId] = useState(null);
   const [overId, setOverId] = useState(null);
+  const [collapsedNodes, setCollapsedNodes] = useState(new Set());
 
-  const flattenedTree = useFlattenedTree(hierarchy);
+  const flattenedTree = useFlattenedTree(hierarchy, collapsedNodes);
   const flattenedTreeIds = useMemo(() => flattenedTree.map(item => item.id), [flattenedTree]);
 
   const sensors = useSensors(
@@ -144,6 +145,18 @@ const SinopticoPage = () => {
       });
     };
     setHierarchy(prevHierarchy => updateNodeRecursively(prevHierarchy));
+  }, []);
+
+  const handleToggleNode = useCallback((nodeId) => {
+    setCollapsedNodes(prevCollapsed => {
+      const newSet = new Set(prevCollapsed);
+      if (newSet.has(nodeId)) {
+        newSet.delete(nodeId);
+      } else {
+        newSet.add(nodeId);
+      }
+      return newSet;
+    });
   }, []);
 
   const handleDragEnd = async (event) => {
@@ -333,6 +346,8 @@ const SinopticoPage = () => {
                           onQuickUpdate={handleQuickUpdate}
                           isOver={overId === node.id}
                           disabled={!editMode}
+                          isCollapsed={collapsedNodes.has(node.id)}
+                          onToggleNode={handleToggleNode}
                         />
                       ))}
                     </div>
