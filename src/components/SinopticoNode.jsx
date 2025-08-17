@@ -55,7 +55,6 @@ const SinopticoNode = ({ node, level, editMode, onEdit, onQuickUpdate, onOpenAud
             type="text"
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
-            onBlur={handleUpdate}
             onKeyDown={handleKeyDown}
             className="w-full px-1 py-0.5 border border-blue-400 rounded-md pr-6"
             autoFocus

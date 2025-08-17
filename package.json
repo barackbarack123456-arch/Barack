@@ -11,10 +11,10 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@ag-grid-community/client-side-row-model": "^31.3.4",
-    "@ag-grid-community/core": "^31.3.4",
-    "@ag-grid-community/react": "^31.3.4",
-    "@ag-grid-community/styles": "^31.3.4",
+    "@ag-grid-community/client-side-row-model": "^32.2.0",
+    "@ag-grid-community/core": "^32.2.0",
+    "@ag-grid-community/react": "^32.2.0",
+    "@ag-grid-community/styles": "^32.2.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",

@@ -162,6 +162,32 @@ const SinopticoPage = () => {
     // A more complex logic would handle re-ordering as well.
     const newParentId = overId;
 
+    // --- Start of change: Cycle detection ---
+    const findNode = (nodes, nodeId) => {
+      for (const node of nodes) {
+        if (node.id === nodeId) return node;
+        if (node.children) {
+          const found = findNode(node.children, nodeId);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+
+    const isDescendant = (ancestor, descendantId) => {
+      if (!ancestor.children) return false;
+      if (ancestor.children.some(child => child.id === descendantId)) return true;
+      return ancestor.children.some(child => isDescendant(child, descendantId));
+    };
+
+    const nodeToMoveData = findNode(hierarchy, activeId);
+
+    if (nodeToMoveData && (isDescendant(nodeToMoveData, newParentId) || newParentId === activeId)) {
+        setError("Operación no válida: no se puede mover un elemento para que sea descendiente de sí mismo.");
+        return;
+    }
+    // --- End of change: Cycle detection ---
+
     // Optimistically update the UI
     setHierarchy(oldHierarchy => {
       const newHierarchy = JSON.parse(JSON.stringify(oldHierarchy));
@@ -305,6 +331,7 @@ const SinopticoPage = () => {
                           onOpenAuditLog={handleOpenAuditLogModal}
                           onQuickUpdate={handleQuickUpdate}
                           isOver={overId === node.id}
+                          disabled={!editMode}
                         />
                       ))}
                     </div>

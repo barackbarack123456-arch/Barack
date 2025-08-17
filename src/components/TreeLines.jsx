@@ -6,7 +6,7 @@ const TreeLines = ({ level, isLastChild }) => {
     return (
         <div
             className="absolute top-0 h-full"
-            style={{ left: `${(level - 1) * 1.5 + 0.75}rem`, width: '1.5rem' }}
+            style={{ left: `${(level - 1) * 1.5 + 0.75}rem`, width: '2.25rem' }}
             aria-hidden="true"
         >
             <div
