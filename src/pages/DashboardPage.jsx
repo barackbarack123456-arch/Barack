@@ -49,15 +49,15 @@ function DashboardPage() {
   }, []);
 
   const summaryCards = [
-    { title: "Proveedores Activos", value: stats.proveedores, icon: TruckIcon, color: "bg-blue-500" },
-    { title: "Clientes Registrados", value: stats.clientes, icon: UsersIcon, color: "bg-green-500" },
-    { title: "Productos en Stock", value: stats.productos, icon: ShoppingCartIcon, color: "bg-yellow-500" },
+    { title: "Proveedores Activos", value: stats.proveedores, icon: TruckIcon, color: "bg-primary" },
+    { title: "Clientes Registrados", value: stats.clientes, icon: UsersIcon, color: "bg-accent" },
+    { title: "Productos en Stock", value: stats.productos, icon: ShoppingCartIcon, color: "bg-secondary" },
     { title: "Insumos Disponibles", value: stats.insumos, icon: ArchiveBoxIcon, color: "bg-red-500" },
   ];
 
   return (
     <div className="space-y-8">
-      <div className="p-6 rounded-lg shadow-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+      <div className="p-6 rounded-lg shadow-lg bg-gradient-to-r from-primary to-accent text-white">
         <h1 className="text-3xl font-bold">¡Bienvenido de nuevo!</h1>
         <p className="mt-2 text-lg">
           Sesión iniciada como <span className="font-semibold">{currentUser?.email}</span>.
@@ -77,13 +77,13 @@ function DashboardPage() {
             enterTo="opacity-100 scale-100"
             style={{ transitionDelay: `${index * 100}ms` }}
           >
-            <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center space-x-4">
+            <div className="bg-surface p-6 rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center space-x-4">
               <div className={`p-3 rounded-full text-white ${card.color}`}>
                 <card.icon className="h-8 w-8" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-700">{card.title}</h3>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{card.value}</p>
+                <h3 className="text-lg font-semibold text-secondary">{card.title}</h3>
+                <p className="text-3xl font-bold text-primary mt-1">{card.value}</p>
               </div>
             </div>
           </Transition>

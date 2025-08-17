@@ -60,11 +60,11 @@ function Layout() {
   }, [currentUser]);
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-background">
       {/* Sidebar */}
-      <div className="hidden md:flex flex-col w-64 bg-gray-800 shadow-lg">
-        <div className="flex items-center justify-center h-20 border-b border-gray-700">
-          <span className="text-white font-bold text-2xl tracking-wider">INVICTUS</span>
+      <div className="hidden md:flex flex-col w-64 bg-surface shadow-lg">
+        <div className="flex items-center justify-center h-20 border-b">
+          <span className="text-primary font-bold text-2xl tracking-wider">INVICTUS</span>
         </div>
         <div className="flex flex-col flex-1 overflow-y-auto">
           <nav className="flex-1 px-4 py-4">
@@ -72,8 +72,8 @@ function Layout() {
               <Link
                 key={item.text}
                 to={item.path}
-                className={`flex items-center px-4 py-3 my-1 text-gray-200 rounded-lg transition-all duration-200 ease-in-out transform hover:bg-gray-700 hover:text-white hover:scale-105 ${
-                  location.pathname === item.path ? 'bg-indigo-600 text-white shadow-inner' : 'hover:bg-gray-700'
+                className={`flex items-center px-4 py-3 my-1 text-secondary rounded-lg transition-all duration-200 ease-in-out transform hover:bg-background hover:text-primary hover:scale-105 ${
+                  location.pathname === item.path ? 'bg-primary text-white shadow-inner' : 'hover:bg-background'
                 }`}
               >
                 <item.icon className="h-6 w-6 mr-3" />
@@ -86,13 +86,13 @@ function Layout() {
 
       {/* Main content */}
       <div className="flex flex-col flex-1">
-        <header className="flex justify-between items-center h-20 bg-white border-b px-6">
+        <header className="flex justify-between items-center h-20 bg-surface border-b px-6">
           <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-secondary" />
             <input
               type="text"
               placeholder="Buscar..."
-              className="pl-10 pr-4 py-2 w-full md:w-64 border rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="pl-10 pr-4 py-2 w-full md:w-64 border rounded-md text-sm text-secondary focus:outline-none focus:ring-2 focus:ring-primary"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleSearch}
@@ -101,11 +101,11 @@ function Layout() {
           <div className="flex items-center relative">
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 focus:outline-none"
+              className="flex items-center space-x-2 p-2 rounded-full hover:bg-background transition-colors duration-200 focus:outline-none"
             >
-              <UserCircleIcon className="h-9 w-9 text-gray-500" />
-              <span className="text-gray-700 text-sm font-medium hidden md:block">{currentUser?.email}</span>
-              <ChevronDownIcon className={`h-5 w-5 text-gray-500 transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : ''}`} />
+              <UserCircleIcon className="h-9 w-9 text-secondary" />
+              <span className="text-secondary text-sm font-medium hidden md:block">{currentUser?.email}</span>
+              <ChevronDownIcon className={`h-5 w-5 text-secondary transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : ''}`} />
             </button>
             <Transition
               as={Fragment}
@@ -117,15 +117,15 @@ function Layout() {
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <div className="absolute right-0 mt-2 w-56 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none top-full z-10">
+              <div className="absolute right-0 mt-2 w-56 origin-top-right bg-surface rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none top-full z-10">
                 <div className="py-1">
                   <div className="px-4 py-3 border-b">
-                    <p className="text-sm text-gray-500">Sesión iniciada como</p>
-                    <p className="font-medium text-gray-800 truncate">{currentUser?.email}</p>
+                    <p className="text-sm text-secondary">Sesión iniciada como</p>
+                    <p className="font-medium text-primary truncate">{currentUser?.email}</p>
                   </div>
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-red-600 transition-colors duration-200"
+                    className="w-full text-left flex items-center px-4 py-3 text-sm text-secondary hover:bg-background hover:text-red-600 transition-colors duration-200"
                   >
                     <ArrowRightOnRectangleIcon className="h-5 w-5 mr-2" />
                     Cerrar Sesión
@@ -135,7 +135,7 @@ function Layout() {
             </Transition>
           </div>
         </header>
-        <main className="flex-1 p-8 overflow-y-auto">
+        <main className="flex-1 p-8 overflow-y-auto bg-background">
           <div className="max-w-7xl mx-auto">
             <Outlet />
           </div>
