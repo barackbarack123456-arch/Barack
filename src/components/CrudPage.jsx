@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useNotification } from '../hooks/useNotification';
 import InfoModal from './InfoModal';
 import ConfirmDialog from './ConfirmDialog';
 import DataGrid from './DataGrid';
@@ -36,6 +37,7 @@ function CrudPage({
   const [selectedItem, setSelectedItem] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deletingItemId, setDeletingItemId] = useState(null);
+  const { addNotification } = useNotification();
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -43,6 +45,7 @@ function CrudPage({
       const data = await services.get();
       setItems(data);
     } catch (error) {
+      addNotification(`Error al cargar ${entityNamePlural.toLowerCase()}: ${error.message}`, 'error');
       console.error(`Error fetching ${entityNamePlural.toLowerCase()}:`, error);
     } finally {
       setLoading(false);
@@ -67,12 +70,15 @@ function CrudPage({
     try {
       if (editingItem) {
         await services.update(editingItem.id, itemData);
+        addNotification(`${entityName} actualizado con éxito`, 'success');
       } else {
         await services.add(itemData);
+        addNotification(`${entityName} añadido con éxito`, 'success');
       }
       handleCloseModal();
       fetchData();
     } catch (error) {
+      addNotification(`Error al guardar ${entityName.toLowerCase()}: ${error.message}`, 'error');
       console.error(`Error saving ${entityName.toLowerCase()}:`, error);
     }
   };
@@ -85,10 +91,12 @@ function CrudPage({
   const handleDeleteConfirm = async () => {
     try {
       await services.delete(deletingItemId);
+      addNotification(`${entityName} eliminado con éxito`, 'success');
       setConfirmOpen(false);
       setDeletingItemId(null);
       fetchData();
     } catch (error) {
+      addNotification(`Error al eliminar ${entityName.toLowerCase()}: ${error.message}`, 'error');
       console.error(`Error deleting ${entityName.toLowerCase()}:`, error);
     }
   };
