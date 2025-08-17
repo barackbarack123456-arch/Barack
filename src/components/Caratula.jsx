@@ -94,105 +94,114 @@ function Caratula() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Row 1 */}
-        <div>
-          <label className="block text-sm font-medium text-gray-500 mb-1">PROYECTO</label>
-          {isEditing ? (
+      {isEditing ? (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Row 1 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-500 mb-1">PROYECTO</label>
             <select
-              name="proyectoId"
-              value={caratulaData.proyectoId}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            >
-              <option value="">Seleccione un proyecto</option>
-              {projects.map(p => (
-                <option key={p.id} value={p.id}>{p.nombre}</option>
-              ))}
-            </select>
-          ) : (
-            <p className="text-lg font-semibold text-gray-800 p-2 bg-gray-50 rounded-md">{getProjectName(caratulaData.proyectoId)}</p>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-500 mb-1">Fecha de emisión</label>
-          {isEditing ? (
+                name="proyectoId"
+                value={caratulaData.proyectoId}
+                onChange={handleChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              >
+                <option value="">Seleccione un proyecto</option>
+                {projects.map(p => (
+                  <option key={p.id} value={p.id}>{p.nombre}</option>
+                ))}
+              </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-500 mb-1">Fecha de emisión</label>
             <input type="text" name="fechaEmision" value={caratulaData.fechaEmision} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-          ) : (
-            <p className="text-lg font-semibold text-gray-800 p-2 bg-gray-50 rounded-md">{caratulaData.fechaEmision || 'N/A'}</p>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-500 mb-1">Revisión</label>
-          {isEditing ? (
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-500 mb-1">Revisión</label>
             <input type="text" name="revision" value={caratulaData.revision} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-          ) : (
-            <p className="text-lg font-semibold text-gray-800 p-2 bg-gray-50 rounded-md">{caratulaData.revision || 'N/A'}</p>
-          )}
-        </div>
-        <div></div> {/* Empty cell for spacing */}
+          </div>
+          <div></div> {/* Empty cell for spacing */}
 
-        {/* Row 2 */}
-        <div>
-          <label className="block text-sm font-medium text-gray-500 mb-1">NOMBRE DE PARTE</label>
-          {isEditing ? (
+          {/* Row 2 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-500 mb-1">NOMBRE DE PARTE</label>
             <input type="text" name="nombreParte" value={caratulaData.nombreParte} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-          ) : (
-            <p className="text-lg font-semibold text-gray-800 p-2 bg-gray-50 rounded-md">{caratulaData.nombreParte || 'N/A'}</p>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-500 mb-1">Realizó</label>
-          {isEditing ? (
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-500 mb-1">Realizó</label>
             <input type="text" name="elaboradoPor" value={caratulaData.elaboradoPor} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-          ) : (
-            <p className="text-lg font-semibold text-gray-800 p-2 bg-gray-50 rounded-md">{caratulaData.elaboradoPor || 'N/A'}</p>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-500 mb-1">Fecha revisión</label>
-          {isEditing ? (
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-500 mb-1">Fecha revisión</label>
             <input type="text" name="fechaRevision" value={caratulaData.fechaRevision} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-          ) : (
-            <p className="text-lg font-semibold text-gray-800 p-2 bg-gray-50 rounded-md">{caratulaData.fechaRevision || 'N/A'}</p>
-          )}
-        </div>
-        <div></div> {/* Empty cell for spacing */}
+          </div>
+          <div></div> {/* Empty cell for spacing */}
 
-        {/* Row 3 */}
-        <div>
-          <label className="block text-sm font-medium text-gray-500 mb-1">NÚMERO DE PARTE</label>
-          {isEditing ? (
+          {/* Row 3 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-500 mb-1">NÚMERO DE PARTE</label>
             <input type="text" name="numeroParte" value={caratulaData.numeroParte} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-          ) : (
-            <p className="text-lg font-semibold text-gray-800 p-2 bg-gray-50 rounded-md">{caratulaData.numeroParte || 'N/A'}</p>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-500 mb-1">Versión</label>
-          {isEditing ? (
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-500 mb-1">Versión</label>
             <input type="text" name="version" value={caratulaData.version} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-          ) : (
-            <p className="text-lg font-semibold text-gray-800 p-2 bg-gray-50 rounded-md">{caratulaData.version || 'N/A'}</p>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-500 mb-1">Autor</label>
-          {isEditing ? (
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-500 mb-1">Autor</label>
             <input type="text" name="autor" value={caratulaData.autor} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-          ) : (
-            <p className="text-lg font-semibold text-gray-800 p-2 bg-gray-50 rounded-md">{caratulaData.autor || 'N/A'}</p>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-500 mb-1">Revisado por</label>
-          {isEditing ? (
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-500 mb-1">Revisado por</label>
             <input type="text" name="revisadoPor" value={caratulaData.revisadoPor} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-          ) : (
-            <p className="text-lg font-semibold text-gray-800 p-2 bg-gray-50 rounded-md">{caratulaData.revisadoPor || 'N/A'}</p>
-          )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <dl className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-8">
+          <div className="sm:col-span-1">
+            <dt className="text-sm font-medium text-gray-500">PROYECTO</dt>
+            <dd className="mt-1 text-lg text-gray-900">{getProjectName(caratulaData.proyectoId)}</dd>
+          </div>
+          <div className="sm:col-span-1">
+            <dt className="text-sm font-medium text-gray-500">Fecha de emisión</dt>
+            <dd className="mt-1 text-lg text-gray-900">{caratulaData.fechaEmision || 'N/A'}</dd>
+          </div>
+          <div className="sm:col-span-1">
+            <dt className="text-sm font-medium text-gray-500">Revisión</dt>
+            <dd className="mt-1 text-lg text-gray-900">{caratulaData.revision || 'N/A'}</dd>
+          </div>
+          <div className="sm:col-span-1"></div>
+
+          <div className="sm:col-span-1">
+            <dt className="text-sm font-medium text-gray-500">NOMBRE DE PARTE</dt>
+            <dd className="mt-1 text-lg text-gray-900">{caratulaData.nombreParte || 'N/A'}</dd>
+          </div>
+          <div className="sm:col-span-1">
+            <dt className="text-sm font-medium text-gray-500">Realizó</dt>
+            <dd className="mt-1 text-lg text-gray-900">{caratulaData.elaboradoPor || 'N/A'}</dd>
+          </div>
+          <div className="sm:col-span-1">
+            <dt className="text-sm font-medium text-gray-500">Fecha revisión</dt>
+            <dd className="mt-1 text-lg text-gray-900">{caratulaData.fechaRevision || 'N/A'}</dd>
+          </div>
+          <div className="sm:col-span-1"></div>
+
+          <div className="sm:col-span-1">
+            <dt className="text-sm font-medium text-gray-500">NÚMERO DE PARTE</dt>
+            <dd className="mt-1 text-lg text-gray-900">{caratulaData.numeroParte || 'N/A'}</dd>
+          </div>
+          <div className="sm:col-span-1">
+            <dt className="text-sm font-medium text-gray-500">Versión</dt>
+            <dd className="mt-1 text-lg text-gray-900">{caratulaData.version || 'N/A'}</dd>
+          </div>
+          <div className="sm:col-span-1">
+            <dt className="text-sm font-medium text-gray-500">Autor</dt>
+            <dd className="mt-1 text-lg text-gray-900">{caratulaData.autor || 'N/A'}</dd>
+          </div>
+          <div className="sm:col-span-1">
+            <dt className="text-sm font-medium text-gray-500">Revisado por</dt>
+            <dd className="mt-1 text-lg text-gray-900">{caratulaData.revisadoPor || 'N/A'}</dd>
+          </div>
+        </dl>
+      )}
     </div>
   );
 }
