@@ -24,7 +24,10 @@ service cloud.firestore {
     // Solo el creador del documento o un administrador puede leer o escribir.
     // Asume que cada documento tiene un campo 'createdBy' con el UID del creador.
     match /clientes/{clienteId} {
-      allow read, write: if request.resource.data.createdBy == request.auth.uid || isAdmin();
+      allow read: if resource.data.createdBy == request.auth.uid || isAdmin();
+      allow write: if (request.resource.data.createdBy == request.auth.uid || isAdmin())
+                      && request.resource.data.nombre is string
+                      && request.resource.data.nombre.size() > 0;
     }
 
     match /insumos/{insumoId} {
