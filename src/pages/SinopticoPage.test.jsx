@@ -248,4 +248,55 @@ describe('SinopticoPage', () => {
     // UI should update optimistically
     expect(within(hierarchyList).getByText('S-002-UPDATED')).toBeInTheDocument();
   });
+
+  it('collapses and expands nodes on click', async () => {
+    const complexHierarchy = [
+      { id: 'root1', nombre: 'Root Product', codigo: 'P-001', children: [
+        { id: 'child1', nombre: 'Child 1', codigo: 'S-001', children: [
+          { id: 'grandchild1', nombre: 'Grandchild 1', codigo: 'GC-001', children: [] }
+        ]},
+        { id: 'child2', nombre: 'Child 2', codigo: 'S-002', children: [] },
+      ]}
+    ];
+    sinopticoService.getHierarchyForProduct.mockResolvedValue(JSON.parse(JSON.stringify(complexHierarchy)));
+
+    renderComponent();
+
+    // Wait for the hierarchy to be fully rendered
+    await screen.findByText('Grandchild 1');
+
+    // Now that we know everything is loaded, let's get the container for our nodes
+    const listContainer = screen.getByTestId('sortable-context').querySelector('.divide-y');
+
+    // All nodes should be visible initially
+    expect(within(listContainer).getByText('Root Product')).toBeInTheDocument();
+    expect(within(listContainer).getByText('Child 1')).toBeInTheDocument();
+    expect(within(listContainer).getByText('Grandchild 1')).toBeInTheDocument();
+    expect(within(listContainer).getByText('Child 2')).toBeInTheDocument();
+
+    // Find the row for 'Child 1'
+    const child1Row = within(listContainer).getByText('Child 1').closest('.grid');
+    const toggleButton = within(child1Row).getAllByRole('button')[0];
+
+    // Collapse 'Child 1'
+    fireEvent.click(toggleButton);
+
+    // 'Grandchild 1' should disappear
+    await waitFor(() => {
+      expect(within(listContainer).queryByText('Grandchild 1')).not.toBeInTheDocument();
+    });
+
+    // Other nodes should still be visible
+    expect(within(listContainer).getByText('Root Product')).toBeInTheDocument();
+    expect(within(listContainer).getByText('Child 1')).toBeInTheDocument();
+    expect(within(listContainer).getByText('Child 2')).toBeInTheDocument();
+
+    // Expand 'Child 1' again
+    fireEvent.click(toggleButton);
+
+    // 'Grandchild 1' should reappear
+    await waitFor(() => {
+      expect(within(listContainer).getByText('Grandchild 1')).toBeInTheDocument();
+    });
+  });
 });

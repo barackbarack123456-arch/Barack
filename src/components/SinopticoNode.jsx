@@ -2,7 +2,7 @@ import React, { useState, useEffect, memo } from 'react';
 import { ChevronRightIcon, ChevronDownIcon, PencilIcon, PlusCircleIcon, ClockIcon, ArrowPathIcon } from '@heroicons/react/24/solid';
 import { useQuickUpdate } from '../hooks/useQuickUpdate';
 
-const SinopticoNode = ({ node, level, editMode, onEdit, onQuickUpdate, onOpenAuditLog }) => {
+const SinopticoNode = ({ node, level, editMode, onEdit, onQuickUpdate, onOpenAuditLog, isCollapsed, onToggleNode }) => {
   const [editingField, setEditingField] = useState(null); // 'nombre', 'codigo', or null
   const [editValue, setEditValue] = useState('');
   const { updateField, loading: isUpdating } = useQuickUpdate();
@@ -89,9 +89,9 @@ const SinopticoNode = ({ node, level, editMode, onEdit, onQuickUpdate, onOpenAud
       <div className={`grid grid-cols-9 gap-4 px-4 py-3 items-center ${editMode ? 'hover:bg-gray-50' : ''}`}>
         <div className="col-span-3 flex items-center relative" style={indentation}>
           {hasChildren ? (
-            <span className="w-6 mr-2 text-gray-500 z-10">
-              <ChevronDownIcon className="h-4 w-4" />
-            </span>
+            <button onClick={() => onToggleNode(node.id)} className="w-6 mr-2 text-gray-500 z-10 focus:outline-none">
+              {isCollapsed ? <ChevronRightIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />}
+            </button>
           ) : (
             <span className="w-6 mr-2"></span> // Placeholder for alignment
           )}

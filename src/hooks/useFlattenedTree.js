@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-export const useFlattenedTree = (tree) => {
+export const useFlattenedTree = (tree, collapsedNodes = new Set()) => {
     return useMemo(() => {
         if (!tree) {
             return [];
@@ -16,7 +16,7 @@ export const useFlattenedTree = (tree) => {
                     isLastChild: index === nodes.length - 1,
                 });
 
-                if (node.children && node.children.length > 0) {
+                if (!collapsedNodes.has(node.id) && node.children && node.children.length > 0) {
                     flattened = flattened.concat(
                         flatten(node.children, level + 1, node.id)
                     );
@@ -26,5 +26,5 @@ export const useFlattenedTree = (tree) => {
         };
 
         return flatten(tree);
-    }, [tree]);
+    }, [tree, collapsedNodes]);
 };
