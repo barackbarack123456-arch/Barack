@@ -1,10 +1,10 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import SinopticoNode from '../pages/SinopticoNode';
+import SinopticoNode from './SinopticoNode';
 import TreeLines from './TreeLines';
 
-const DraggableSinopticoNode = ({ isOver, ...props }) => {
+const DraggableSinopticoNode = ({ isOver, disabled, ...props }) => {
     const {
         attributes,
         listeners,
@@ -12,7 +12,7 @@ const DraggableSinopticoNode = ({ isOver, ...props }) => {
         transform,
         transition,
         isDragging,
-    } = useSortable({ id: props.node.id });
+    } = useSortable({ id: props.node.id, disabled });
 
     const style = {
         transform: CSS.Transform.toString(transform),
