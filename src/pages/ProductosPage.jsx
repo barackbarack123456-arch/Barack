@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { getSinopticoItems as getProductos, addSinopticoItem as addProducto, updateSinopticoItem as updateProducto, deleteSinopticoItem as deleteProducto } from '../services/modules/sinopticoItemsService';
+import { getTopLevelProducts as getProductos, createNewProduct } from '../services/sinopticoService';
+import { updateSinopticoItem as updateProducto, deleteSinopticoItem as deleteProducto } from '../services/modules/sinopticoItemsService';
 import ProductoModal from '../components/ProductoModal';
 import InfoModal from '../components/InfoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataGrid from '../components/DataGrid';
 import { PlusIcon, PencilIcon, TrashIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import { Transition } from '@headlessui/react';
+import { useAuth } from '../hooks/useAuth';
 
 const ActionsCellRenderer = ({ data, onInfo, onEdit, onDelete }) => (
   <div className="flex items-center justify-end space-x-2">
@@ -30,8 +32,9 @@ function ProductosPage() {
   const [selectedProducto, setSelectedProducto] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deletingProductoId, setDeletingProductoId] = useState(null);
+  const { user } = useAuth();
 
-  const fetchProductos = useCallback(async () => {
+  const fetchTopLevelProducts = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getProductos();
@@ -44,8 +47,8 @@ function ProductosPage() {
   }, []);
 
   useEffect(() => {
-    fetchProductos();
-  }, [fetchProductos]);
+    fetchTopLevelProducts();
+  }, [fetchTopLevelProducts]);
 
   const handleOpenModal = (producto = null) => {
     setEditingProducto(producto);
@@ -62,10 +65,10 @@ function ProductosPage() {
       if (editingProducto) {
         await updateProducto(editingProducto.id, productoData);
       } else {
-        await addProducto(productoData);
+        await createNewProduct(productoData, user.uid);
       }
       handleCloseModal();
-      fetchProductos();
+      fetchTopLevelProducts();
     } catch (error) {
       console.error("Error saving product:", error);
     }
@@ -81,7 +84,7 @@ function ProductosPage() {
       await deleteProducto(deletingProductoId);
       setConfirmOpen(false);
       setDeletingProductoId(null);
-      fetchProductos();
+      fetchTopLevelProducts();
     } catch (error) {
       console.error("Error deleting product:", error);
     }
