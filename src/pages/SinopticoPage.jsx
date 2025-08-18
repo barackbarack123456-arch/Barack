@@ -23,10 +23,12 @@ import DraggableSinopticoNode from '../components/DraggableSinopticoNode';
 import SinopticoItemModal from '../components/SinopticoItemModal';
 import AuditLogModal from '../components/AuditLogModal';
 import { useFlattenedTree } from '../hooks/useFlattenedTree';
+import { useNotification } from '../hooks/useNotification';
 
 const SinopticoPage = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
+  const { addNotification } = useNotification();
   const [hierarchy, setHierarchy] = useState(null);
   const [allItems, setAllItems] = useState([]);
   const [rootProduct, setRootProduct] = useState(null);
@@ -327,11 +329,11 @@ const SinopticoPage = () => {
   );
 
   const handleExportCSV = () => {
-    exportToCSV(hierarchy, `sinoptico-${rootProduct?.codigo || 'export'}.csv`);
+    exportToCSV(hierarchy, `sinoptico-${rootProduct?.codigo || 'export'}.csv`, addNotification);
   };
 
   const handleExportPDF = () => {
-    exportToPDF(hierarchy, `sinoptico-${rootProduct?.codigo || 'export'}.pdf`);
+    exportToPDF(hierarchy, `sinoptico-${rootProduct?.codigo || 'export'}.pdf`, addNotification);
   };
 
   return (

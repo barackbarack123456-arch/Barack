@@ -30,9 +30,16 @@ const flattenHierarchy = (nodes, flattened = [], level = 0) => {
 };
 
 // Main function to export to CSV
-export const exportToCSV = (hierarchy, fileName = 'sinoptico.csv') => {
+export const exportToCSV = (hierarchy, fileName = 'sinoptico.csv', addNotification) => {
   if (!hierarchy || hierarchy.length === 0) {
-    alert('No hay datos para exportar.');
+    if (addNotification) {
+      addNotification({
+        message: 'No hay datos para exportar.',
+        type: 'warning',
+      });
+    } else {
+      alert('No hay datos para exportar.');
+    }
     return;
   }
 
@@ -74,9 +81,16 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
 // Main function to export to PDF
-export const exportToPDF = (hierarchy, fileName = 'sinoptico.pdf') => {
+export const exportToPDF = (hierarchy, fileName = 'sinoptico.pdf', addNotification) => {
   if (!hierarchy || hierarchy.length === 0) {
-    alert('No hay datos para exportar.');
+    if (addNotification) {
+      addNotification({
+        message: 'No hay datos para exportar.',
+        type: 'warning',
+      });
+    } else {
+      alert('No hay datos para exportar.');
+    }
     return;
   }
 

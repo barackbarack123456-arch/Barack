@@ -1,8 +1,10 @@
 import React, { useState, useEffect, Fragment, forwardRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { UNITS } from '../constants/units';
+import { useNotification } from '../hooks/useNotification';
 
 const InsumoModal = forwardRef(({ open, onClose, onSave, insumo }, ref) => {
+  const { addNotification } = useNotification();
   const getInitialFormData = () => ({
     codigo: '',
     descripcion: '',
@@ -50,7 +52,10 @@ const InsumoModal = forwardRef(({ open, onClose, onSave, insumo }, ref) => {
     // Basic validation
     for (const key in formData) {
       if (formData[key] === '') {
-        alert(`El campo ${key.replace('_', ' ')} es obligatorio.`);
+        addNotification({
+          message: `El campo ${key.replace('_', ' ')} es obligatorio.`,
+          type: 'error',
+        });
         return;
       }
     }

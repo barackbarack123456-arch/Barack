@@ -83,13 +83,23 @@ const mockHierarchy = [
   ]}
 ];
 
+import { NotificationProvider } from '../contexts/NotificationProvider';
+
+const TestWrapper = ({ children }) => (
+  <MemoryRouter initialEntries={['/sinoptico/root1']}>
+    <NotificationProvider>
+      <Routes>
+        <Route path="/sinoptico/:productId" element={children} />
+      </Routes>
+    </NotificationProvider>
+  </MemoryRouter>
+);
+
 const renderComponent = () => {
   return render(
-    <MemoryRouter initialEntries={['/sinoptico/root1']}>
-      <Routes>
-        <Route path="/sinoptico/:productId" element={<SinopticoPage />} />
-      </Routes>
-    </MemoryRouter>
+    <TestWrapper>
+      <SinopticoPage />
+    </TestWrapper>
   );
 };
 
