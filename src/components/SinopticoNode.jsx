@@ -88,8 +88,8 @@ const SinopticoNode = ({ node, level, editMode, onEdit, onQuickUpdate, onOpenAud
 
   return (
     <div className={`relative ${editMode ? 'border border-gray-200 rounded-md' : ''}`}>
-      <div className={`grid grid-cols-9 gap-4 px-4 py-3 items-center ${editMode ? 'hover:bg-gray-50' : ''}`}>
-        <div className="col-span-3 flex items-center relative" style={indentation}>
+      <div className={`grid grid-cols-12 gap-4 px-4 py-3 items-center ${editMode ? 'hover:bg-gray-50' : ''}`}>
+        <div className="col-span-2 flex items-center relative" style={indentation}>
           {hasChildren ? (
             <button onClick={() => onToggleNode(node.id)} className="w-6 mr-2 text-gray-500 z-10 focus:outline-none">
               {isCollapsed ? <ChevronRightIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />}
@@ -100,6 +100,9 @@ const SinopticoNode = ({ node, level, editMode, onEdit, onQuickUpdate, onOpenAud
           <div className="font-medium text-gray-800 w-full">{renderEditableCell('nombre', node.nombre || node.descripcion)}</div>
         </div>
         <div className="text-gray-600 w-full">{renderEditableCell('codigo', node.codigo)}</div>
+        <div className="text-gray-600">{renderEditableCell('cantidad', node.cantidad)}</div>
+        <div className="text-gray-600">{node.unidadDeMedida || 'N/A'}</div>
+        <div className="text-gray-600 col-span-2">{renderEditableCell('comentarios', node.comentarios)}</div>
         <div>
           <span className={`px-2 py-1 text-xs font-semibold rounded-full ${typeColor[node.type] || 'bg-gray-100 text-gray-800'}`}>
             {node.type || 'N/A'}

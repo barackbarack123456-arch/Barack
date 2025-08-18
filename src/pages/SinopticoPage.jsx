@@ -321,9 +321,12 @@ const SinopticoPage = () => {
   };
 
   const renderHeader = () => (
-    <div className="grid grid-cols-9 gap-4 px-4 py-2 bg-gray-200 text-gray-700 font-bold rounded-t-lg">
-      <div className="col-span-3">Nombre</div>
+    <div className="grid grid-cols-12 gap-4 px-4 py-2 bg-gray-200 text-gray-700 font-bold rounded-t-lg">
+      <div className="col-span-2">Nombre</div>
       <div>Código</div>
+      <div>Cantidad</div>
+      <div>Unidad de Medida</div>
+      <div className="col-span-2">Comentarios</div>
       <div>Tipo</div>
       <div>Version</div>
       <div>Cód. Cliente</div>
