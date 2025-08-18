@@ -9,7 +9,10 @@ import {
   signOut,
   sendEmailVerification,
   createUserWithEmailAndPassword,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword
 } from "firebase/auth";
 
 // Firestore imports
@@ -22,6 +25,7 @@ import {
   updateDoc,
   deleteDoc,
   doc,
+  setDoc,
   serverTimestamp,
   query,
   where,
@@ -57,6 +61,9 @@ export {
   sendEmailVerification,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword,
   // Firestore functions
   collection,
   getDocs,
@@ -65,6 +72,7 @@ export {
   updateDoc,
   deleteDoc,
   doc,
+  setDoc,
   serverTimestamp,
   query,
   where,
