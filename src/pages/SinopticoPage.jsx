@@ -342,13 +342,13 @@ const SinopticoPage = () => {
             &larr; Volver a Productos
           </button>
           <div className="flex items-center space-x-2">
-            <button onClick={handleExportCSV} className="px-4 py-2 rounded-md text-white font-semibold bg-green-600 hover:bg-green-700">
+            <button onClick={handleExportCSV} className="px-4 py-2 rounded-md text-white font-semibold bg-green-600 hover:bg-green-700" disabled={loading || error || !hierarchy || hierarchy.length === 0}>
               Exportar a CSV
             </button>
-            <button onClick={handleExportPDF} className="px-4 py-2 rounded-md text-white font-semibold bg-red-600 hover:bg-red-700">
+            <button onClick={handleExportPDF} className="px-4 py-2 rounded-md text-white font-semibold bg-red-600 hover:bg-red-700" disabled={loading || error || !hierarchy || hierarchy.length === 0}>
               Exportar a PDF
             </button>
-            <button onClick={() => setEditMode(!editMode)} className={`px-4 py-2 rounded-md text-white font-semibold ${editMode ? 'bg-gray-600 hover:bg-gray-700' : 'bg-blue-600 hover:bg-blue-700'}`}>
+            <button onClick={() => setEditMode(!editMode)} className={`px-4 py-2 rounded-md text-white font-semibold ${editMode ? 'bg-gray-600 hover:bg-gray-700' : 'bg-blue-600 hover:bg-blue-700'}`} disabled={loading || error}>
               {editMode ? 'Salir del Modo Edición' : 'Editar Jerarquía'}
             </button>
           </div>
@@ -362,11 +362,6 @@ const SinopticoPage = () => {
             <div className="text-center bg-white p-8 rounded-lg shadow-md">
               <h1 className="text-2xl font-bold text-gray-800 mb-2">{rootProduct?.nombre || rootProduct?.descripcion || 'Producto'}</h1>
               <EmptyState title="Sin Jerarquía" message="Este sinóptico aún no tiene una familia o jerarquía creada." />
-              {rootProduct && (
-                <button onClick={() => handleOpenModal(null, { parentId: rootProduct.id, rootProductId: rootProduct.id, type: 'subproducto' })} className="mt-4 px-6 py-2 text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none">
-                  Añadir Primer Item
-                </button>
-              )}
             </div>
           ) : (
             <DndContext
@@ -384,6 +379,16 @@ const SinopticoPage = () => {
                     <p className="text-sm text-gray-500">Creado por: <span className="font-semibold">{rootProduct?.createdBy || 'N/A'}</span> el {rootProduct?.createdAt?.toDate()?.toLocaleDateString() || 'N/A'}</p>
                     <p className="text-sm text-gray-500">Última mod.: <span className="font-semibold">{rootProduct?.lastModifiedBy || 'N/A'}</span> el {rootProduct?.lastModifiedAt?.toDate()?.toLocaleDateString() || 'N/A'}</p>
                   </div>
+                  {editMode && (
+                    <div className="mb-4">
+                      <button
+                        onClick={() => handleOpenModal(null, { parentId: rootProduct.id, rootProductId: rootProduct.id, type: 'subproducto' })}
+                        className="px-4 py-2 rounded-md text-white font-semibold bg-blue-600 hover:bg-blue-700"
+                      >
+                        Añadir Item Hijo al Producto Principal
+                      </button>
+                    </div>
+                  )}
                   <div className="border rounded-lg overflow-hidden">
                     {renderHeader()}
                     <div className="divide-y divide-gray-200">
