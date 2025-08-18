@@ -28,3 +28,9 @@ h1 {
 h2 {
   @apply tracking-tight;
 }
+
+@layer components {
+  .form-input {
+    @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm;
+  }
+}
