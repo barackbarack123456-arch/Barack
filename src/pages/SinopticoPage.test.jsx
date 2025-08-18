@@ -10,6 +10,19 @@ import * as sinopticoItemsService from '../services/modules/sinopticoItemsServic
 vi.mock('../services/sinopticoService');
 vi.mock('../services/modules/sinopticoItemsService');
 vi.mock('../utils/fileExporters');
+vi.mock('../services/firebase', async (importOriginal) => {
+    const actual = await importOriginal();
+    return {
+        ...actual,
+        auth: {},
+        onAuthStateChanged: (auth, callback) => {
+            callback({ uid: 'test-user-id', email: 'test@example.com', emailVerified: true });
+            return () => {}; // Return an unsubscribe function
+        },
+        doc: () => ({}),
+        getDoc: () => Promise.resolve({ exists: () => true, data: () => ({ role: 'admin' }) }),
+    };
+});
 
 // Mock child components
 vi.mock('../components/SinopticoItemModal', () => ({
@@ -27,6 +40,17 @@ vi.mock('../components/SinopticoItemModal', () => ({
 vi.mock('../components/AuditLogModal', () => ({
   __esModule: true,
   default: ({ isOpen }) => isOpen ? <div data-testid="audit-log-modal">Audit Log Modal</div> : null,
+}));
+
+vi.mock('../components/AddItemFromDBModal', () => ({
+    __esModule: true,
+    default: ({ isOpen, onClose, onAddItems }) => isOpen ? (
+        <div data-testid="add-item-from-db-modal">
+            <h2>Añadir Items desde la Base de Datos</h2>
+            <button onClick={() => onAddItems(['item1', 'item2'])}>Add Selected</button>
+            <button onClick={onClose}>Close</button>
+        </div>
+    ) : null,
 }));
 
 // Mock DndContext to prevent warnings and allow testing logic
@@ -84,14 +108,17 @@ const mockHierarchy = [
 ];
 
 import { NotificationProvider } from '../contexts/NotificationProvider';
+import { AuthProvider } from '../contexts/AuthContext';
 
 const TestWrapper = ({ children }) => (
   <MemoryRouter initialEntries={['/sinoptico/root1']}>
-    <NotificationProvider>
-      <Routes>
-        <Route path="/sinoptico/:productId" element={children} />
-      </Routes>
-    </NotificationProvider>
+    <AuthProvider>
+      <NotificationProvider>
+        <Routes>
+          <Route path="/sinoptico/:productId" element={children} />
+        </Routes>
+      </NotificationProvider>
+    </AuthProvider>
   </MemoryRouter>
 );
 
@@ -211,22 +238,24 @@ describe('SinopticoPage', () => {
     });
   });
 
-   it('opens the new item modal when the add child button is clicked', async () => {
+  it('opens the AddItemFromDB modal when "Añadir Item Hijo al Producto Principal" is clicked', async () => {
     renderComponent();
-    const hierarchyContainer = await screen.findByRole('heading', { name: 'Root Product' });
-    const hierarchyList = hierarchyContainer.closest('div.shadow-md').querySelector('div.divide-y');
+    await screen.findByRole('heading', { name: 'Root Product', level: 1 });
 
+    // Enter edit mode
     fireEvent.click(screen.getByText('Editar Jerarquía'));
 
-    const child1Row = (await within(hierarchyList).findByText('Child 1')).closest('.grid');
-    const addButton = within(child1Row).getByTitle('Añadir Item Hijo');
+    // Click the main "add child" button
+    const addButton = screen.getByText('Añadir Item Hijo al Producto Principal');
     fireEvent.click(addButton);
 
+    // Assert that the new modal opens
     await waitFor(() => {
-        const modal = screen.getByTestId('sinoptico-item-modal');
-        expect(modal).toBeInTheDocument();
-        expect(within(modal).getByText('Creating new item for parent: child1')).toBeInTheDocument();
+        expect(screen.getByTestId('add-item-from-db-modal')).toBeInTheDocument();
     });
+
+    // Also check that the old modal is not there
+    expect(screen.queryByTestId('sinoptico-item-modal')).not.toBeInTheDocument();
   });
 
   it('allows inline editing of the code field on double click', async () => {

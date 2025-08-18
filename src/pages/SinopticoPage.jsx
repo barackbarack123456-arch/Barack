@@ -13,7 +13,7 @@ import {
   verticalListSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable';
-import { getHierarchyForProduct, createNewChildItem, moveSinopticoItem, updateItemsOrder } from '../services/sinopticoService';
+import { getHierarchyForProduct, createNewChildItem, moveSinopticoItem, updateItemsOrder, addExistingItemsAsChildren } from '../services/sinopticoService';
 import { updateSinopticoItem, getSinopticoItems } from '../services/modules/sinopticoItemsService';
 import { exportToCSV, exportToPDF } from '../utils/fileExporters';
 import EmptyState from '../components/EmptyState';
@@ -21,14 +21,17 @@ import GridSkeletonLoader from '../components/GridSkeletonLoader';
 import SinopticoNode from '../components/SinopticoNode';
 import DraggableSinopticoNode from '../components/DraggableSinopticoNode';
 import SinopticoItemModal from '../components/SinopticoItemModal';
+import AddItemFromDBModal from '../components/AddItemFromDBModal';
 import AuditLogModal from '../components/AuditLogModal';
 import { useFlattenedTree } from '../hooks/useFlattenedTree';
 import { useNotification } from '../hooks/useNotification';
+import { useAuth } from '../hooks/useAuth';
 
 const SinopticoPage = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
   const { addNotification } = useNotification();
+  const { currentUser } = useAuth();
   const [hierarchy, setHierarchy] = useState(null);
   const [allItems, setAllItems] = useState([]);
   const [rootProduct, setRootProduct] = useState(null);
@@ -36,6 +39,7 @@ const SinopticoPage = () => {
   const [error, setError] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [modalInitialState, setModalInitialState] = useState({});
   const [isAuditLogModalOpen, setIsAuditLogModalOpen] = useState(false);
@@ -384,7 +388,7 @@ const SinopticoPage = () => {
                   {editMode && (
                     <div className="mb-4">
                       <button
-                        onClick={() => handleOpenModal(null, { parentId: rootProduct.id, rootProductId: rootProduct.id, type: 'subproducto' })}
+                        onClick={() => setIsAddItemModalOpen(true)}
                         className="px-4 py-2 rounded-md text-white font-semibold bg-blue-600 hover:bg-blue-700"
                       >
                         Añadir Item Hijo al Producto Principal
@@ -439,6 +443,22 @@ const SinopticoPage = () => {
         )}
       </div>
       <SinopticoItemModal isOpen={isModalOpen} onClose={handleCloseModal} onSave={handleSave} item={editingItem} allItems={allItems} {...modalInitialState} />
+      <AddItemFromDBModal
+        isOpen={isAddItemModalOpen}
+        onClose={() => setIsAddItemModalOpen(false)}
+        onAddItems={async (selectedIds) => {
+          try {
+            await addExistingItemsAsChildren(selectedIds, rootProduct.id, rootProduct.id, currentUser.uid);
+            addNotification('Items añadidos correctamente.', 'success');
+            fetchHierarchy();
+          } catch (error) {
+            addNotification('Error al añadir los items.', 'error');
+            console.error("Error adding items as children:", error);
+          }
+        }}
+        parentId={rootProduct?.id}
+        rootProductId={rootProduct?.id}
+      />
       <AuditLogModal isOpen={isAuditLogModalOpen} onClose={handleCloseAuditLogModal} itemId={auditedItemId} />
     </div>
   );
