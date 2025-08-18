@@ -1,7 +1,9 @@
 import React, { useState, useEffect, Fragment, forwardRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
+import { useNotification } from '../hooks/useNotification';
 
 const SubproductoModal = forwardRef(({ open, onClose, onSave, subproducto }, ref) => {
+  const { addNotification } = useNotification();
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
@@ -41,7 +43,10 @@ const SubproductoModal = forwardRef(({ open, onClose, onSave, subproducto }, ref
   const handleSave = () => {
     // Basic validation
     if (!formData.nombre || !formData.codigo) {
-      alert('Nombre y Código son campos obligatorios.');
+      addNotification({
+        message: 'Nombre y Código son obligatorios.',
+        type: 'error',
+      });
       return;
     }
     onSave({ ...formData, unidad_medida: 'un' });

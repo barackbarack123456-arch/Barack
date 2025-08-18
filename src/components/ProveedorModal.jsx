@@ -1,7 +1,9 @@
 import React, { useState, useEffect, Fragment, forwardRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
+import { useNotification } from '../hooks/useNotification';
 
 const ProveedorModal = forwardRef(({ open, onClose, onSave, proveedor }, ref) => {
+  const { addNotification } = useNotification();
   const [formData, setFormData] = useState({
     razonSocial: '',
     direccion: '',
@@ -37,7 +39,10 @@ const ProveedorModal = forwardRef(({ open, onClose, onSave, proveedor }, ref) =>
 
   const handleSave = () => {
     if (!formData.razonSocial) {
-      alert('Razón Social es obligatoria.');
+      addNotification({
+        message: 'Razón Social es obligatoria.',
+        type: 'error',
+      });
       return;
     }
     onSave(formData);

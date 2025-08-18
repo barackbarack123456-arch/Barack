@@ -1,8 +1,10 @@
 import React, { useState, useEffect, Fragment, forwardRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { getProyectos } from '../services/modules/proyectosService';
+import { useNotification } from '../hooks/useNotification';
 
 const ProductoModal = forwardRef(({ open, onClose, onSave, producto }, ref) => {
+  const { addNotification } = useNotification();
   const [formData, setFormData] = useState({
     codigo: '',
     descripcion: '',
@@ -47,8 +49,11 @@ const ProductoModal = forwardRef(({ open, onClose, onSave, producto }, ref) => {
   };
 
   const handleSave = () => {
-    if (!formData.codigo || !formData.descripcion || !formData.proyecto) {
-      alert('Todos los campos son obligatorios.');
+    if (!formData.codigo || !formData.descripcion) {
+      addNotification({
+        message: 'Código y Descripción son obligatorios.',
+        type: 'error',
+      });
       return;
     }
     onSave({ ...formData, unidad_medida: 'un' });

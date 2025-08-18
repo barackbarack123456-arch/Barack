@@ -1,8 +1,10 @@
 import React, { useState, useEffect, Fragment, forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import { Dialog, Transition } from '@headlessui/react';
+import { useNotification } from '../hooks/useNotification';
 
 const ClienteModal = forwardRef(({ open, onClose, onSave, cliente }, ref) => {
+  const { addNotification } = useNotification();
   const [formData, setFormData] = useState({
     nombre: '',
     direccion: '',
@@ -35,7 +37,10 @@ const ClienteModal = forwardRef(({ open, onClose, onSave, cliente }, ref) => {
 
   const handleSave = () => {
     if (!formData.nombre) {
-      alert('Nombre es obligatorio.');
+      addNotification({
+        message: 'Nombre es obligatorio.',
+        type: 'error',
+      });
       return;
     }
     onSave(formData);
