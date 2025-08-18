@@ -49,15 +49,12 @@ const InsumoModal = forwardRef(({ open, onClose, onSave, insumo }, ref) => {
   };
 
   const handleSave = () => {
-    // Basic validation
-    for (const key in formData) {
-      if (formData[key] === '') {
-        addNotification({
-          message: `El campo ${key.replace('_', ' ')} es obligatorio.`,
-          type: 'error',
-        });
-        return;
-      }
+    if (!formData.codigo || !formData.descripcion) {
+      addNotification({
+        message: 'Código y Descripción son obligatorios.',
+        type: 'error',
+      });
+      return;
     }
     onSave(formData);
   };

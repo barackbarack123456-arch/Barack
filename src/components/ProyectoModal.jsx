@@ -1,7 +1,9 @@
 import React, { useState, useEffect, Fragment, forwardRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
+import { useNotification } from '../hooks/useNotification';
 
 const ProyectoModal = forwardRef(({ open, onClose, onSave, proyecto }, ref) => {
+  const { addNotification } = useNotification();
   const [formData, setFormData] = useState({
     codigo: '',
     nombre: '',
@@ -28,7 +30,10 @@ const ProyectoModal = forwardRef(({ open, onClose, onSave, proyecto }, ref) => {
 
   const handleSave = () => {
     if (!formData.codigo || !formData.nombre) {
-      alert('Código y Nombre son obligatorios.');
+      addNotification({
+        message: 'Código y Nombre son obligatorios.',
+        type: 'error',
+      });
       return;
     }
     onSave(formData);
