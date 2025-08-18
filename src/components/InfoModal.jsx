@@ -4,20 +4,66 @@ import { Dialog, Transition } from '@headlessui/react';
 const InfoModal = ({ open, onClose, item, title }) => {
   if (!item) return null;
 
+  const translationMap = {
+    type: 'Tipo',
+    createdBy: 'Creado Por',
+    lastModifiedAt: 'Última Modificación',
+    name: 'Nombre',
+    description: 'Descripción',
+    price: 'Precio',
+    category: 'Categoría',
+    code: 'Código',
+    unidad_medida: 'Unidad de Medida',
+    cost: 'Costo',
+    supplier: 'Proveedor',
+    quantity: 'Cantidad',
+    createdAt: 'Creado en',
+    stock: 'Inventario',
+    minStock: 'Inventario Mínimo',
+    location: 'Ubicación',
+    status: 'Estado',
+    notes: 'Notas',
+    contact: 'Contacto',
+    email: 'Correo Electrónico',
+    phone: 'Teléfono',
+    address: 'Dirección',
+    website: 'Sitio Web',
+    tax: 'Impuesto',
+    discount: 'Descuento'
+  };
+
+  const ignoredKeys = ['id', 'orden', 'parentId', 'rootProductId'];
+
+  const formatValue = (key, value) => {
+    if (value === null || value === undefined) {
+      return 'N/A';
+    }
+
+    if (value.toDate && typeof value.toDate === 'function') {
+      return new Date(value.toDate()).toLocaleString('es-ES');
+    }
+
+    if (key === 'unidad_medida' && value === 'un') {
+      return 'Unidades';
+    }
+
+    return String(value);
+  };
+
   const renderItemDetails = () => {
-    return Object.entries(item).map(([key, value]) => {
-      if (key === 'id') return null; // Don't show the id
+    return Object.entries(item)
+      .filter(([key]) => !ignoredKeys.includes(key))
+      .map(([key, value]) => {
+        const translatedKey = translationMap[key] || key.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim();
+        const formattedValue = formatValue(key, value);
 
-      // Format key for display (handles snake_case and camelCase)
-      const formattedKey = key.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim();
-
-      return (
-        <div key={key} className="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
-          <dt className="text-sm font-medium text-gray-600 capitalize">{formattedKey}</dt>
-          <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{String(value)}</dd>
-        </div>
-      );
-    });
+        return (
+          <div key={key} className="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
+            <dt className="text-sm font-medium text-gray-600 capitalize">{translatedKey}</dt>
+            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{formattedValue}</dd>
+          </div>
+        );
+      });
   };
 
   return (
