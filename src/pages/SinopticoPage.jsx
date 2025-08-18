@@ -398,7 +398,7 @@ const SinopticoPage = () => {
                           onOpenAuditLog={handleOpenAuditLogModal}
                           onQuickUpdate={handleQuickUpdate}
                           isOver={overId === node.id}
-                          disabled={!editMode}
+                          disabled={node.level === 0 || !editMode}
                           isCollapsed={collapsedNodes.has(node.id)}
                           onToggleNode={handleToggleNode}
                         />
