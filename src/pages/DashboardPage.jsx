@@ -6,6 +6,7 @@ import { getProveedoresCount } from '../services/modules/proveedoresService';
 import { getClientesCount } from '../services/modules/clientesService';
 import { getSinopticoItemsCount as getProductosCount } from '../services/modules/sinopticoItemsService';
 import { getInsumosCount } from '../services/modules/insumosService';
+import { seedDatabase } from '../services/seed';
 
 function DashboardPage() {
   const { currentUser } = useAuth();
@@ -58,13 +59,23 @@ function DashboardPage() {
   return (
     <div className="space-y-8">
       <div className="p-6 rounded-lg shadow-lg bg-gradient-to-r from-primary to-accent text-white">
-        <h1 className="text-3xl font-bold">¡Bienvenido de nuevo!</h1>
-        <p className="mt-2 text-lg">
-          Sesión iniciada como <span className="font-semibold">{currentUser?.email}</span>.
-        </p>
-        <p className="mt-1 text-indigo-200">
-          Explora las secciones para gestionar la información de tu negocio.
-        </p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold">¡Bienvenido de nuevo!</h1>
+            <p className="mt-2 text-lg">
+              Sesión iniciada como <span className="font-semibold">{currentUser?.email}</span>.
+            </p>
+            <p className="mt-1 text-indigo-200">
+              Explora las secciones para gestionar la información de tu negocio.
+            </p>
+          </div>
+          <button
+            onClick={seedDatabase}
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Seed Database
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
