@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Link } from 'react-router-dom';
+import { useNotification } from '../hooks/useNotification';
 
 function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -8,8 +9,8 @@ function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
   const { register } = useAuth();
+  const { addNotification } = useNotification();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,11 +18,10 @@ function RegisterPage() {
       return setError('Las contraseñas no coinciden');
     }
     setError('');
-    setMessage('');
     setLoading(true);
     try {
       await register(email, password);
-      setMessage('¡Registro exitoso! Se ha enviado un correo de verificación a tu bandeja de entrada. Por favor, verifica tu correo antes de iniciar sesión.');
+      addNotification('¡Registro exitoso! Se ha enviado un correo de verificación a tu bandeja de entrada. Por favor, verifica tu correo antes de iniciar sesión.', 'success');
       // Keep user on this page to see the message
     } catch (err) {
       setError(err.message);
@@ -42,7 +42,6 @@ function RegisterPage() {
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {message && <p className="text-green-500 text-sm text-center">{message}</p>}
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email-address" className="sr-only">E-mail</label>
@@ -93,7 +92,7 @@ function RegisterPage() {
           <div>
             <button
               type="submit"
-              disabled={loading || message}
+              disabled={loading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400"
             >
               {loading ? 'Registrando...' : 'Registrarse'}

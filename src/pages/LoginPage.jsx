@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Navigate, Link, useNavigate } from 'react-router-dom';
+import { useNotification } from '../hooks/useNotification';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login, currentUser } = useAuth();
   const navigate = useNavigate();
+  const { addNotification } = useNotification();
 
   if (currentUser) {
     return <Navigate to="/" />;
@@ -16,7 +17,6 @@ function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
     try {
       await login(email, password);
@@ -25,7 +25,7 @@ function LoginPage() {
       if (err.message.includes("verifica tu correo")) {
         navigate('/verify-email');
       }
-      setError(err.message);
+      addNotification(err.message, 'error');
       console.error(err);
     }
     setLoading(false);
@@ -42,7 +42,7 @@ function LoginPage() {
             Inicia sesión en tu cuenta
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit} aria-describedby={error ? 'error-message' : undefined}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <label htmlFor="email-address" className="block text-sm font-medium text-gray-700">E-mail</label>
@@ -57,7 +57,6 @@ function LoginPage() {
                   placeholder="E-mail"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  aria-invalid={!!error}
                 />
               </div>
             </div>
@@ -74,13 +73,10 @@ function LoginPage() {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  aria-invalid={!!error}
                 />
               </div>
             </div>
           </div>
-
-          {error && <p id="error-message" role="alert" aria-live="polite" className="text-red-600 text-sm text-center">{error}</p>}
 
           <div className="flex items-center justify-between">
             <div className="text-sm">
