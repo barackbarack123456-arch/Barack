@@ -20,10 +20,17 @@ export const getTopLevelProducts = async () => {
  * @param {string} rootProductId The ID of the root product to fetch the hierarchy for.
  */
 export const getHierarchyForProduct = async (rootProductId) => {
+  const withDefaults = (item) => ({
+    ...item,
+    cantidad: item.cantidad ?? 1,
+    unidad_medida: item.unidad_medida ?? 'un',
+    comentarios: item.comentarios ?? '',
+  });
+
   const itemsCollection = collection(db, SINOPTICO_ITEMS_COLLECTION);
   const q = query(itemsCollection, where('rootProductId', '==', rootProductId));
   const snapshot = await getDocs(q);
-  const familyItems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const familyItems = snapshot.docs.map(doc => withDefaults({ id: doc.id, ...doc.data() }));
 
   if (familyItems.length === 0) {
     // It's possible only the root product exists and has no `rootProductId` pointing to itself yet.
@@ -31,7 +38,7 @@ export const getHierarchyForProduct = async (rootProductId) => {
     const rootDocRef = doc(db, SINOPTICO_ITEMS_COLLECTION, rootProductId);
     const rootDocSnap = await getDoc(rootDocRef);
     if (rootDocSnap.exists()) {
-      const rootItem = { id: rootDocSnap.id, ...rootDocSnap.data(), children: [] };
+      const rootItem = withDefaults({ id: rootDocSnap.id, ...rootDocSnap.data(), children: [] });
       return [rootItem];
     }
     return null; // No hierarchy found
