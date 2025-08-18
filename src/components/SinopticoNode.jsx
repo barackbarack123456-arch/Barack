@@ -52,6 +52,8 @@ const SinopticoNode = ({ node, level, editMode, onEdit, onQuickUpdate, onOpenAud
       return (
         <div className="relative w-full">
           <input
+            id={field}
+            name={field}
             type="text"
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
@@ -85,7 +87,7 @@ const SinopticoNode = ({ node, level, editMode, onEdit, onQuickUpdate, onOpenAud
   };
 
   return (
-    <div className="relative">
+    <div className={`relative ${editMode ? 'border border-gray-200 rounded-md' : ''}`}>
       <div className={`grid grid-cols-9 gap-4 px-4 py-3 items-center ${editMode ? 'hover:bg-gray-50' : ''}`}>
         <div className="col-span-3 flex items-center relative" style={indentation}>
           {hasChildren ? (
