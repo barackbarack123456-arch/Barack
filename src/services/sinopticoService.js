@@ -223,3 +223,52 @@ export const updateItemsOrder = async (itemsToUpdate) => {
     });
     await batch.commit();
 };
+
+/**
+ * Adds existing items (insumos or subproductos) as new children to a parent item.
+ * It creates copies of the selected items and adds them to the hierarchy.
+ * @param {string[]} itemIds The IDs of the items to add.
+ * @param {string} parentId The ID of the new parent.
+ * @param {string} rootProductId The ID of the root product.
+ * @param {string} userId The ID of the current user.
+ */
+export const addExistingItemsAsChildren = async (itemIds, parentId, rootProductId, userId) => {
+    if (!itemIds || itemIds.length === 0) return;
+    if (!parentId || !rootProductId) throw new Error("Parent and root product ID are required.");
+
+    const batch = writeBatch(db);
+    const itemsCollection = collection(db, SINOPTICO_ITEMS_COLLECTION);
+
+    // Get current children count to determine the 'orden' for new items
+    const q = query(itemsCollection, where('parentId', '==', parentId));
+    const snapshot = await getDocs(q);
+    let currentOrder = snapshot.size;
+
+    for (const itemId of itemIds) {
+        const itemRef = doc(db, SINOPTICO_ITEMS_COLLECTION, itemId);
+        const itemSnap = await getDoc(itemRef);
+
+        if (itemSnap.exists()) {
+            const originalData = itemSnap.data();
+            // Create a new item object, preserving original data but changing hierarchy details
+            const newItemData = {
+                ...originalData,
+                parentId: parentId,
+                rootProductId: rootProductId,
+                orden: currentOrder++,
+                createdAt: new Date().toISOString(),
+                createdBy: userId,
+                // Ensure children are not carried over
+                children: [],
+            };
+
+            // Create a new document reference for the new item
+            const newItemRef = doc(itemsCollection);
+            batch.set(newItemRef, newItemData);
+        } else {
+            console.warn(`Item with ID ${itemId} not found. Skipping.`);
+        }
+    }
+
+    await batch.commit();
+};

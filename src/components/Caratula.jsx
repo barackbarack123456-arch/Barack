@@ -155,52 +155,68 @@ function Caratula() {
           </div>
         </div>
       ) : (
-        <dl className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-8">
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">PROYECTO</dt>
-            <dd className="mt-1 text-lg text-gray-900">{getProjectName(caratulaData.proyectoId)}</dd>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6">
+          {/* Columna 1: Datos del Proyecto */}
+          <div className="p-4 border border-gray-200 rounded-lg">
+            <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Datos del Proyecto</h3>
+            <dl className="space-y-4">
+              <div>
+                <dt className="text-sm font-medium text-gray-500">PROYECTO</dt>
+                <dd className="mt-1 text-md text-gray-900">{getProjectName(caratulaData.proyectoId)}</dd>
+              </div>
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Fecha de emisión</dt>
+                <dd className="mt-1 text-md text-gray-900">{caratulaData.fechaEmision || 'N/A'}</dd>
+              </div>
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Revisión</dt>
+                <dd className="mt-1 text-md text-gray-900">{caratulaData.revision || 'N/A'}</dd>
+              </div>
+            </dl>
           </div>
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">Fecha de emisión</dt>
-            <dd className="mt-1 text-lg text-gray-900">{caratulaData.fechaEmision || 'N/A'}</dd>
-          </div>
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">Revisión</dt>
-            <dd className="mt-1 text-lg text-gray-900">{caratulaData.revision || 'N/A'}</dd>
-          </div>
-          <div className="sm:col-span-1"></div>
 
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">NOMBRE DE PARTE</dt>
-            <dd className="mt-1 text-lg text-gray-900">{caratulaData.nombreParte || 'N/A'}</dd>
+          {/* Columna 2: Datos de la Parte */}
+          <div className="p-4 border border-gray-200 rounded-lg">
+            <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Datos de la Parte</h3>
+            <dl className="space-y-4">
+              <div>
+                <dt className="text-sm font-medium text-gray-500">NOMBRE DE PARTE</dt>
+                <dd className="mt-1 text-md text-gray-900">{caratulaData.nombreParte || 'N/A'}</dd>
+              </div>
+              <div>
+                <dt className="text-sm font-medium text-gray-500">NÚMERO DE PARTE</dt>
+                <dd className="mt-1 text-md text-gray-900">{caratulaData.numeroParte || 'N/A'}</dd>
+              </div>
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Versión</dt>
+                <dd className="mt-1 text-md text-gray-900">{caratulaData.version || 'N/A'}</dd>
+              </div>
+            </dl>
           </div>
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">Realizó</dt>
-            <dd className="mt-1 text-lg text-gray-900">{caratulaData.elaboradoPor || 'N/A'}</dd>
-          </div>
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">Fecha revisión</dt>
-            <dd className="mt-1 text-lg text-gray-900">{caratulaData.fechaRevision || 'N/A'}</dd>
-          </div>
-          <div className="sm:col-span-1"></div>
 
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">NÚMERO DE PARTE</dt>
-            <dd className="mt-1 text-lg text-gray-900">{caratulaData.numeroParte || 'N/A'}</dd>
+          {/* Columna 3: Datos de Revisión */}
+          <div className="p-4 border border-gray-200 rounded-lg">
+            <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Datos de Revisión</h3>
+            <dl className="space-y-4">
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Realizó</dt>
+                <dd className="mt-1 text-md text-gray-900">{caratulaData.elaboradoPor || 'N/A'}</dd>
+              </div>
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Fecha revisión</dt>
+                <dd className="mt-1 text-md text-gray-900">{caratulaData.fechaRevision || 'N/A'}</dd>
+              </div>
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Autor</dt>
+                <dd className="mt-1 text-md text-gray-900">{caratulaData.autor || 'N/A'}</dd>
+              </div>
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Revisado por</dt>
+                <dd className="mt-1 text-md text-gray-900">{caratulaData.revisadoPor || 'N/A'}</dd>
+              </div>
+            </dl>
           </div>
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">Versión</dt>
-            <dd className="mt-1 text-lg text-gray-900">{caratulaData.version || 'N/A'}</dd>
-          </div>
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">Autor</dt>
-            <dd className="mt-1 text-lg text-gray-900">{caratulaData.autor || 'N/A'}</dd>
-          </div>
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">Revisado por</dt>
-            <dd className="mt-1 text-lg text-gray-900">{caratulaData.revisadoPor || 'N/A'}</dd>
-          </div>
-        </dl>
+        </div>
       )}
     </div>
   );
