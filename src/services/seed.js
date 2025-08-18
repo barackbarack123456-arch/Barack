@@ -11,7 +11,7 @@ const seedClientes = async (count = 20) => {
   for (let i = 0; i < count; i++) {
     const cliente = {
       nombre: faker.company.name(),
-      direccion: faker.address.streetAddress(),
+      direccion: faker.location.streetAddress(),
       telefono: faker.phone.number(),
       email: faker.internet.email(),
     };
@@ -25,10 +25,10 @@ const seedProveedores = async (count = 15) => {
   for (let i = 0; i < count; i++) {
     const proveedor = {
       razonSocial: faker.company.name(),
-      direccion: faker.address.streetAddress(),
+      direccion: faker.location.streetAddress(),
       telefono: faker.phone.number(),
       email: faker.internet.email(),
-      contacto: faker.name.fullName(),
+      contacto: faker.person.fullName(),
     };
     await addProveedor(proveedor);
   }
@@ -39,7 +39,7 @@ const seedProyectos = async (count = 5) => {
   console.log('Seeding proyectos...');
   for (let i = 0; i < count; i++) {
     const proyecto = {
-      codigo: faker.random.alphaNumeric(8).toUpperCase(),
+      codigo: faker.string.alphanumeric(8).toUpperCase(),
       nombre: faker.commerce.productName(),
     };
     await addProyecto(proyecto);
@@ -51,13 +51,13 @@ const seedInsumos = async (count = 100) => {
   console.log('Seeding insumos...');
   for (let i = 0; i < count; i++) {
     const insumo = {
-      codigo: faker.random.alphaNumeric(10).toUpperCase(),
+      codigo: faker.string.alphanumeric(10).toUpperCase(),
       descripcion: faker.commerce.productDescription(),
       unidad_medida: faker.helpers.arrayElement(UNITS.map(u => u.id)),
       material: faker.commerce.productMaterial(),
-      codigo_proveedor: faker.random.alphaNumeric(8),
-      imagen: faker.image.imageUrl(640, 480, 'technics', true),
-      piezas_por_vehiculo: faker.datatype.number({ min: 1, max: 100 }),
+      codigo_proveedor: faker.string.alphanumeric(8),
+      imagen: faker.image.url({ width: 640, height: 480, category: 'technics' }),
+      piezas_por_vehiculo: faker.number.int({ min: 1, max: 100 }),
       proceso: faker.lorem.word(),
       aspecto_lc_kd: faker.helpers.arrayElement(['LC', 'KD']),
       color: faker.color.human(),
@@ -77,9 +77,9 @@ const seedSubproductos = async (count = 50) => {
     const subproducto = {
       nombre: faker.commerce.productName(),
       descripcion: faker.commerce.productDescription(),
-      codigo: faker.random.alphaNumeric(10).toUpperCase(),
-      peso: `${faker.datatype.number({ min: 1, max: 1000, precision: 0.1 })} kg`,
-      medidas: `${faker.datatype.number({ min: 10, max: 200 })}x${faker.datatype.number({ min: 10, max: 200 })}x${faker.datatype.number({ min: 10, max: 200 })} cm`,
+      codigo: faker.string.alphanumeric(10).toUpperCase(),
+      peso: `${faker.number.float({ min: 1, max: 1000, precision: 0.1 })} kg`,
+      medidas: `${faker.number.int({ min: 10, max: 200 })}x${faker.number.int({ min: 10, max: 200 })}x${faker.number.int({ min: 10, max: 200 })} cm`,
       id_padre: null,
       unidad_medida: 'un',
     };
