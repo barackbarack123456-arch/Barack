@@ -1,6 +1,5 @@
 import React, { useState, useEffect, Fragment, forwardRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { UNITS } from '../constants/units';
 
 const SubproductoModal = forwardRef(({ open, onClose, onSave, subproducto }, ref) => {
   const [formData, setFormData] = useState({
@@ -9,7 +8,6 @@ const SubproductoModal = forwardRef(({ open, onClose, onSave, subproducto }, ref
     codigo: '',
     peso: '',
     medidas: '',
-    unidad_medida: '',
     id_padre: null, // This can be set from the component that opens the modal
   });
 
@@ -21,7 +19,6 @@ const SubproductoModal = forwardRef(({ open, onClose, onSave, subproducto }, ref
         codigo: subproducto.codigo || '',
         peso: subproducto.peso || '',
         medidas: subproducto.medidas || '',
-        unidad_medida: subproducto.unidad_medida || '',
         id_padre: subproducto.id_padre || null,
       });
     } else {
@@ -31,7 +28,6 @@ const SubproductoModal = forwardRef(({ open, onClose, onSave, subproducto }, ref
         codigo: '',
         peso: '',
         medidas: '',
-        unidad_medida: '',
         id_padre: null,
       });
     }
@@ -48,7 +44,7 @@ const SubproductoModal = forwardRef(({ open, onClose, onSave, subproducto }, ref
       alert('Nombre y Código son campos obligatorios.');
       return;
     }
-    onSave(formData);
+    onSave({ ...formData, unidad_medida: 'un' });
   };
 
   return (
@@ -102,21 +98,6 @@ const SubproductoModal = forwardRef(({ open, onClose, onSave, subproducto }, ref
                     <div>
                       <label htmlFor="medidas" className="block text-sm font-medium text-gray-700">Medidas</label>
                       <input type="text" name="medidas" id="medidas" value={formData.medidas} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-                    </div>
-                    <div>
-                      <label htmlFor="unidad_medida" className="block text-sm font-medium text-gray-700">Unidad de Medida</label>
-                      <select
-                        id="unidad_medida"
-                        name="unidad_medida"
-                        value={formData.unidad_medida}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      >
-                        <option value="">Seleccione una unidad</option>
-                        {UNITS.map(unit => (
-                          <option key={unit.id} value={unit.id}>{unit.nombre} ({unit.abreviatura})</option>
-                        ))}
-                      </select>
                     </div>
                   </div>
                 </div>
