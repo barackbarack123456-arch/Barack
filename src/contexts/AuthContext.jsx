@@ -4,12 +4,16 @@ import {
   db,
   doc,
   getDoc,
+  setDoc,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   sendEmailVerification,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword,
 } from '../services/firebase';
 import { AuthContext } from './AuthContextDef';
 
@@ -24,7 +28,16 @@ export function AuthProvider({ children }) {
       throw new Error("El correo debe ser del dominio @barackmercosul.com");
     }
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    await sendEmailVerification(userCredential.user);
+    const user = userCredential.user;
+
+    // Create a document for the new user in the 'usuarios' collection
+    const userDocRef = doc(db, 'usuarios', user.uid);
+    await setDoc(userDocRef, {
+      email: user.email,
+      role: 'lector',
+    });
+
+    await sendEmailVerification(user);
     // Do not sign out, let the protected route handle the redirect.
     return userCredential;
   }
@@ -51,6 +64,28 @@ export function AuthProvider({ children }) {
   // Logout function
   function logout() {
     return firebaseSignOut(auth);
+  }
+
+  // Change password function
+  async function changePassword(currentPassword, newPassword) {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error("No user is currently signed in.");
+    }
+
+    try {
+      const credential = EmailAuthProvider.credential(user.email, currentPassword);
+      await reauthenticateWithCredential(user, credential);
+      await updatePassword(user, newPassword);
+    } catch (error) {
+        if (error.code === 'auth/wrong-password') {
+            throw new Error('La contraseña actual es incorrecta.');
+        } else if (error.code === 'auth/too-many-requests') {
+            throw new Error('Demasiados intentos fallidos. Inténtalo de nuevo más tarde.');
+        } else {
+            throw new Error('Ocurrió un error al cambiar la contraseña.');
+        }
+    }
   }
 
   // Function to send verification email
@@ -88,6 +123,7 @@ export function AuthProvider({ children }) {
     logout,
     sendPasswordReset,
     sendVerificationEmail,
+    changePassword,
     loading
   };
 

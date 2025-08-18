@@ -16,8 +16,10 @@ import {
   UserGroupIcon,
   CubeIcon,
   MagnifyingGlassIcon,
+  PencilIcon,
 } from '@heroicons/react/24/outline';
 import { Transition } from '@headlessui/react';
+import ProfileModal from './ProfileModal';
 
 const navItems = [
   { text: 'Dashboard', path: '/', icon: HomeIcon },
@@ -37,6 +39,7 @@ function Layout() {
   const { currentUser, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isProfileModalOpen, setProfileModalOpen] = useState(false);
 
   const handleSearch = (e) => {
     if (e.key === 'Enter' && searchQuery.trim() !== '') {
@@ -64,9 +67,9 @@ function Layout() {
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
       <div className="hidden md:flex flex-col w-64 bg-surface shadow-lg">
-        <div className="flex items-center justify-center h-20 border-b">
-          <img src={logo} alt="Invictus Logo" className="h-10 w-auto" />
-        </div>
+        <Link to="/" className="flex items-center justify-center h-20 border-b">
+          <img src={logo} alt="Barack Logo" className="h-10 w-auto" />
+        </Link>
         <div className="flex flex-col flex-1 overflow-y-auto">
           <nav className="flex-1 px-4 py-4">
             {visibleNavItems.map((item) => (
@@ -125,6 +128,16 @@ function Layout() {
                     <p className="font-medium text-primary truncate">{currentUser?.email}</p>
                   </div>
                   <button
+                    onClick={() => {
+                      setProfileModalOpen(true);
+                      setDropdownOpen(false);
+                    }}
+                    className="w-full text-left flex items-center px-4 py-3 text-sm text-secondary hover:bg-background transition-colors duration-200"
+                  >
+                    <PencilIcon className="h-5 w-5 mr-2" />
+                    Mi Perfil
+                  </button>
+                  <button
                     onClick={handleLogout}
                     className="w-full text-left flex items-center px-4 py-3 text-sm text-secondary hover:bg-background hover:text-red-600 transition-colors duration-200"
                   >
@@ -142,6 +155,7 @@ function Layout() {
           </div>
         </main>
       </div>
+      <ProfileModal isOpen={isProfileModalOpen} onClose={() => setProfileModalOpen(false)} />
     </div>
   );
 }
