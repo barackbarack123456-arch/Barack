@@ -120,7 +120,15 @@ function CrudPage({
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <Transition
+      appear
+      show={true}
+      as="div"
+      className="h-full flex flex-col"
+      enter="transition-opacity duration-500"
+      enterFrom="opacity-0"
+      enterTo="opacity-100"
+    >
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">{entityNamePlural}</h1>
         <button
@@ -170,7 +178,7 @@ function CrudPage({
         item={selectedItem}
         title={infoTitle}
       />
-    </div>
+    </Transition>
   );
 }
 

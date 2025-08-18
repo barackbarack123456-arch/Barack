@@ -72,11 +72,11 @@ function Layout() {
               <Link
                 key={item.text}
                 to={item.path}
-                className={`flex items-center px-4 py-3 my-1 text-secondary rounded-lg transition-all duration-200 ease-in-out transform hover:bg-background hover:text-primary hover:scale-105 ${
+                className={`flex items-center px-4 py-3 my-1 text-secondary rounded-lg transition-all duration-200 ease-in-out transform hover:bg-background hover:text-primary hover:scale-105 group ${
                   location.pathname === item.path ? 'bg-primary text-white shadow-inner' : 'hover:bg-background'
                 }`}
               >
-                <item.icon className="h-6 w-6 mr-3" />
+                <item.icon className="h-6 w-6 mr-3 transition-transform duration-200 ease-in-out group-hover:rotate-6" />
                 <span className="font-medium">{item.text}</span>
               </Link>
             ))}
