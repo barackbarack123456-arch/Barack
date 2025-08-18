@@ -97,6 +97,7 @@ function ProductosPage() {
 
   const columnDefs = useMemo(() => [
     { headerName: "Código", field: "codigo", flex: 1, sortable: true, filter: true },
+    { headerName: "Código Cliente", field: "codigo_cliente", flex: 1, sortable: true, filter: true },
     { headerName: "Descripción", field: "descripcion", flex: 2, sortable: true, filter: true },
     { headerName: "Unidad de Medida", field: "unidad_medida", flex: 1, sortable: true, filter: true },
     { headerName: "Proyecto", field: "proyecto", flex: 1, sortable: true, filter: true },

@@ -9,6 +9,7 @@ const ProductoModal = forwardRef(({ open, onClose, onSave, producto }, ref) => {
     descripcion: '',
     unidad_medida: '',
     proyecto: '',
+    codigo_cliente: '',
   });
   const [proyectos, setProyectos] = useState([]);
 
@@ -31,6 +32,7 @@ const ProductoModal = forwardRef(({ open, onClose, onSave, producto }, ref) => {
         descripcion: producto.descripcion || '',
         unidad_medida: producto.unidad_medida || '',
         proyecto: producto.proyecto || '',
+        codigo_cliente: producto.codigo_cliente || '',
       });
     } else {
       setFormData({
@@ -38,6 +40,7 @@ const ProductoModal = forwardRef(({ open, onClose, onSave, producto }, ref) => {
         descripcion: '',
         unidad_medida: '',
         proyecto: '',
+        codigo_cliente: '',
       });
     }
   }, [producto, open]);
@@ -100,6 +103,19 @@ const ProductoModal = forwardRef(({ open, onClose, onSave, producto }, ref) => {
                           name="codigo"
                           id="codigo"
                           value={formData.codigo}
+                          onChange={handleChange}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="codigo_cliente" className="block text-sm font-medium text-gray-700">
+                          Código Cliente
+                        </label>
+                        <input
+                          type="text"
+                          name="codigo_cliente"
+                          id="codigo_cliente"
+                          value={formData.codigo_cliente}
                           onChange={handleChange}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
