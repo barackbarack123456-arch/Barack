@@ -1,6 +1,7 @@
 import React, { useState, Fragment, useMemo } from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import logo from '../assets/logo.png';
 import {
   HomeIcon,
   UsersIcon,
@@ -64,7 +65,7 @@ function Layout() {
       {/* Sidebar */}
       <div className="hidden md:flex flex-col w-64 bg-surface shadow-lg">
         <div className="flex items-center justify-center h-20 border-b">
-          <span className="text-primary font-bold text-2xl tracking-wider">INVICTUS</span>
+          <img src={logo} alt="Invictus Logo" className="h-10 w-auto" />
         </div>
         <div className="flex flex-col flex-1 overflow-y-auto">
           <nav className="flex-1 px-4 py-4">
