@@ -1,36 +1,14 @@
-import {
-  db,
-  collection,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc
-} from '../firebase';
+import { createCrudService } from '../firebaseServiceFactory';
+import { db, collection, getDocs } from '../firebase';
 
 const INSUMOS_COLLECTION = 'insumos';
 
-export const getInsumos = async () => {
-  const insumosCollection = collection(db, INSUMOS_COLLECTION);
-  const snapshot = await getDocs(insumosCollection);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-};
+const insumoCrudService = createCrudService(INSUMOS_COLLECTION);
 
-export const addInsumo = async (insumoData) => {
-  const insumosCollection = collection(db, INSUMOS_COLLECTION);
-  const docRef = await addDoc(insumosCollection, insumoData);
-  return docRef.id;
-};
-
-export const updateInsumo = async (id, insumoData) => {
-  const insumoDoc = doc(db, INSUMOS_COLLECTION, id);
-  await updateDoc(insumoDoc, insumoData);
-};
-
-export const deleteInsumo = async (id) => {
-  const insumoDoc = doc(db, INSUMOS_COLLECTION, id);
-  await deleteDoc(insumoDoc);
-};
+export const getInsumos = insumoCrudService.get;
+export const addInsumo = insumoCrudService.add;
+export const updateInsumo = insumoCrudService.update;
+export const deleteInsumo = insumoCrudService.delete;
 
 export const getInsumosCount = async () => {
   const insumosCollection = collection(db, INSUMOS_COLLECTION);

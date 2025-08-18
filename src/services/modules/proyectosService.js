@@ -1,33 +1,11 @@
-import {
-  db,
-  collection,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc
-} from '../firebase';
+import { createCrudService } from '../firebaseServiceFactory';
+import { db, collection, getDocs } from '../firebase';
 
 const PROYECTOS_COLLECTION = 'proyectos';
 
-export const getProyectos = async () => {
-  const proyectosCollection = collection(db, PROYECTOS_COLLECTION);
-  const snapshot = await getDocs(proyectosCollection);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-};
+const proyectoCrudService = createCrudService(PROYECTOS_COLLECTION);
 
-export const addProyecto = async (proyectoData) => {
-  const proyectosCollection = collection(db, PROYECTOS_COLLECTION);
-  const docRef = await addDoc(proyectosCollection, proyectoData);
-  return docRef.id;
-};
-
-export const updateProyecto = async (id, proyectoData) => {
-  const proyectoDoc = doc(db, PROYECTOS_COLLECTION, id);
-  await updateDoc(proyectoDoc, proyectoData);
-};
-
-export const deleteProyecto = async (id) => {
-  const proyectoDoc = doc(db, PROYECTOS_COLLECTION, id);
-  await deleteDoc(proyectoDoc);
-};
+export const getProyectos = proyectoCrudService.get;
+export const addProyecto = proyectoCrudService.add;
+export const updateProyecto = proyectoCrudService.update;
+export const deleteProyecto = proyectoCrudService.delete;
