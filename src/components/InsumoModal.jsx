@@ -8,7 +8,7 @@ const InsumoModal = forwardRef(({ open, onClose, onSave, insumo }, ref) => {
     descripcion: '',
     unidad_medida: '',
     material: '',
-    numero_de_parte: '',
+    codigo_proveedor: '',
     imagen: '',
     piezas_por_vehiculo: '',
     proceso: '',
@@ -27,7 +27,7 @@ const InsumoModal = forwardRef(({ open, onClose, onSave, insumo }, ref) => {
         descripcion: insumo.descripcion || '',
         unidad_medida: insumo.unidad_medida || '',
         material: insumo.material || '',
-        numero_de_parte: insumo.numero_de_parte || '',
+        codigo_proveedor: insumo.codigo_proveedor || '',
         imagen: insumo.imagen || '',
         piezas_por_vehiculo: insumo.piezas_por_vehiculo || '',
         proceso: insumo.proceso || '',
@@ -124,15 +124,28 @@ const InsumoModal = forwardRef(({ open, onClose, onSave, insumo }, ref) => {
                         ))}
                       </select>
                     </div>
-                    {renderInput("numero_de_parte", "Número de Parte")}
+                    {renderInput("codigo_proveedor", "Código Proveedor")}
                     {renderInput("imagen", "Imagen (URL)")}
                     {renderInput("piezas_por_vehiculo", "Piezas/Vh", "number")}
                     {renderInput("proceso", "Proceso")}
-                    {renderInput("aspecto_lc_kd", "Aspecto LC/KD")}
+                    <div>
+                      <label htmlFor="aspecto_lc_kd" className="block text-sm font-medium text-gray-700">LC/KD</label>
+                      <select
+                        id="aspecto_lc_kd"
+                        name="aspecto_lc_kd"
+                        value={formData.aspecto_lc_kd}
+                        onChange={handleChange}
+                        className="form-input mt-1"
+                      >
+                        <option value="">Seleccione una opción</option>
+                        <option value="LC">LC</option>
+                        <option value="KD">KD</option>
+                      </select>
+                    </div>
                     {renderInput("color", "Color")}
                     {renderInput("material", "Material")}
                     {renderInput("materia_prima", "Materia Prima")}
-                    {renderInput("proveedor_materia_prima", "Proveedor Materia Prima")}
+                    {renderInput("proveedor_materia_prima", "Proveedor")}
                   </div>
                 </div>
                 <div className="bg-gray-100 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
