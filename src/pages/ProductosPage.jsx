@@ -32,7 +32,7 @@ function ProductosPage() {
   const [selectedProducto, setSelectedProducto] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deletingProductoId, setDeletingProductoId] = useState(null);
-  const { user } = useAuth();
+  const { currentUser } = useAuth();
 
   const fetchTopLevelProducts = useCallback(async () => {
     setLoading(true);
@@ -65,7 +65,7 @@ function ProductosPage() {
       if (editingProducto) {
         await updateProducto(editingProducto.id, productoData);
       } else {
-        await createNewProduct(productoData, user.uid);
+        await createNewProduct(productoData, currentUser.uid);
       }
       handleCloseModal();
       fetchTopLevelProducts();
