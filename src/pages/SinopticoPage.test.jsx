@@ -299,4 +299,65 @@ describe('SinopticoPage', () => {
       expect(within(listContainer).getByText('Grandchild 1')).toBeInTheDocument();
     });
   });
+
+  it('shows "Añadir Item Hijo al Producto Principal" button in edit mode and opens modal', async () => {
+    renderComponent();
+    await waitFor(() => expect(screen.getByRole('heading', { name: 'Root Product' })).toBeInTheDocument());
+
+    // Button should not be visible initially
+    expect(screen.queryByText('Añadir Item Hijo al Producto Principal')).not.toBeInTheDocument();
+
+    // Enter edit mode
+    const editModeButton = screen.getByText('Editar Jerarquía');
+    fireEvent.click(editModeButton);
+
+    // The new button should now be visible
+    const addButton = await screen.findByText('Añadir Item Hijo al Producto Principal');
+    expect(addButton).toBeInTheDocument();
+
+    // Click the button to open the modal
+    fireEvent.click(addButton);
+
+    // Check if the modal opens with the correct props (creating a new item for the root product)
+    await waitFor(() => {
+        const modal = screen.getByTestId('sinoptico-item-modal');
+        expect(modal).toBeInTheDocument();
+        // The mock modal shows the parentId in its text content
+        expect(within(modal).getByText('Creating new item for parent: root1')).toBeInTheDocument();
+    });
+  });
+
+  it('shows correct add item buttons in empty state when toggling edit mode', async () => {
+    sinopticoService.getHierarchyForProduct.mockResolvedValue(null);
+    // Ensure rootProduct is defined for the buttons to show
+    sinopticoItemsService.getSinopticoItems.mockResolvedValue([{ id: 'root1', nombre: 'Root Product', codigo: 'P-001' }]);
+    renderComponent();
+
+    // Wait for empty state to render
+    await waitFor(() => {
+        expect(screen.getByText('Sin Jerarquía')).toBeInTheDocument();
+    });
+
+    // Initially, "Añadir Primer Item" should be visible
+    expect(screen.getByText('Añadir Primer Item')).toBeInTheDocument();
+    expect(screen.queryByText('Añadir Item Hijo al Producto Principal')).not.toBeInTheDocument();
+
+    // Enter edit mode
+    fireEvent.click(screen.getByText('Editar Jerarquía'));
+
+    // "Añadir Item Hijo al Producto Principal" should appear, and "Añadir Primer Item" should disappear
+    await waitFor(() => {
+        expect(screen.getByText('Añadir Item Hijo al Producto Principal')).toBeInTheDocument();
+        expect(screen.queryByText('Añadir Primer Item')).not.toBeInTheDocument();
+    });
+
+    // Exit edit mode
+    fireEvent.click(screen.getByText('Salir del Modo Edición'));
+
+    // Should revert to the initial state
+    await waitFor(() => {
+        expect(screen.getByText('Añadir Primer Item')).toBeInTheDocument();
+        expect(screen.queryByText('Añadir Item Hijo al Producto Principal')).not.toBeInTheDocument();
+    });
+  });
 });

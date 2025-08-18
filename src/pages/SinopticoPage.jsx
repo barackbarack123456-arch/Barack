@@ -337,99 +337,122 @@ const SinopticoPage = () => {
   return (
     <div className="p-6 bg-gray-50 min-h-full">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-4">
-          <button onClick={() => navigate('/productos')} className="text-blue-600 hover:underline">
-            &larr; Volver a Productos
-          </button>
-          <div className="flex items-center space-x-2">
-            <button onClick={handleExportCSV} className="px-4 py-2 rounded-md text-white font-semibold bg-green-600 hover:bg-green-700">
-              Exportar a CSV
+        <header>
+          <div className="flex justify-between items-center mb-4">
+            <button onClick={() => navigate('/productos')} className="text-blue-600 hover:underline">
+              &larr; Volver a Productos
             </button>
-            <button onClick={handleExportPDF} className="px-4 py-2 rounded-md text-white font-semibold bg-red-600 hover:bg-red-700">
-              Exportar a PDF
-            </button>
-            <button onClick={() => setEditMode(!editMode)} className={`px-4 py-2 rounded-md text-white font-semibold ${editMode ? 'bg-gray-600 hover:bg-gray-700' : 'bg-blue-600 hover:bg-blue-700'}`}>
-              {editMode ? 'Salir del Modo Edición' : 'Editar Jerarquía'}
-            </button>
-          </div>
-        </div>
-
-        {loading && <GridSkeletonLoader count={10} />}
-        {error && <p className="text-red-500 text-center">{error}</p>}
-
-        {!loading && !error && (
-          !hierarchy || hierarchy.length === 0 ? (
-            <div className="text-center bg-white p-8 rounded-lg shadow-md">
-              <h1 className="text-2xl font-bold text-gray-800 mb-2">{rootProduct?.nombre || rootProduct?.descripcion || 'Producto'}</h1>
-              <EmptyState title="Sin Jerarquía" message="Este sinóptico aún no tiene una familia o jerarquía creada." />
-              {rootProduct && (
-                <button onClick={() => handleOpenModal(null, { parentId: rootProduct.id, rootProductId: rootProduct.id, type: 'subproducto' })} className="mt-4 px-6 py-2 text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none">
-                  Añadir Primer Item
-                </button>
-              )}
+            <div className="flex items-center space-x-2">
+              <button onClick={handleExportCSV} className="px-4 py-2 rounded-md text-white font-semibold bg-green-600 hover:bg-green-700">
+                Exportar a CSV
+              </button>
+              <button onClick={handleExportPDF} className="px-4 py-2 rounded-md text-white font-semibold bg-red-600 hover:bg-red-700">
+                Exportar a PDF
+              </button>
+              <button onClick={() => setEditMode(!editMode)} className={`px-4 py-2 rounded-md text-white font-semibold ${editMode ? 'bg-gray-600 hover:bg-gray-700' : 'bg-blue-600 hover:bg-blue-700'}`}>
+                {editMode ? 'Salir del Modo Edición' : 'Editar Jerarquía'}
+              </button>
             </div>
-          ) : (
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDragEnd={handleDragEnd}
-              onDragCancel={handleDragCancel}
-            >
-              <SortableContext items={flattenedTreeIds} strategy={verticalListSortingStrategy}>
-                <div className="bg-white p-8 rounded-lg shadow-md">
-                  <div className="mb-6 border-b pb-4">
-                    <h1 className="text-3xl font-bold text-gray-800">{rootProduct?.nombre || rootProduct?.descripcion}</h1>
-                    <p className="text-sm text-gray-500">Creado por: <span className="font-semibold">{rootProduct?.createdBy || 'N/A'}</span> el {rootProduct?.createdAt?.toDate()?.toLocaleDateString() || 'N/A'}</p>
-                    <p className="text-sm text-gray-500">Última mod.: <span className="font-semibold">{rootProduct?.lastModifiedBy || 'N/A'}</span> el {rootProduct?.lastModifiedAt?.toDate()?.toLocaleDateString() || 'N/A'}</p>
+          </div>
+        </header>
+        <main>
+          {loading && <GridSkeletonLoader count={10} />}
+          {error && <p className="text-red-500 text-center">{error}</p>}
+
+          {!loading && !error && (
+            !hierarchy || hierarchy.length === 0 ? (
+              <div className="text-center bg-white p-8 rounded-lg shadow-md">
+                <h1 className="text-2xl font-bold text-gray-800 mb-2">{rootProduct?.nombre || rootProduct?.descripcion || 'Producto'}</h1>
+                {editMode && (
+                  <div className="my-4">
+                    <button
+                      onClick={() => handleOpenModal(null, { parentId: rootProduct.id, rootProductId: rootProduct.id, type: 'subproducto' })}
+                      className="px-4 py-2 rounded-md text-white font-semibold bg-blue-600 hover:bg-blue-700"
+                    >
+                      Añadir Item Hijo al Producto Principal
+                    </button>
                   </div>
-                  <div className="border rounded-lg overflow-hidden">
-                    {renderHeader()}
-                    <div className="divide-y divide-gray-200">
-                      {flattenedTree.map((node) => (
-                        <DraggableSinopticoNode
-                          key={node.id}
-                          node={node}
-                          level={node.level}
-                          isLastChild={node.isLastChild}
-                          editMode={editMode}
-                          onEdit={handleOpenModal}
-                          onOpenAuditLog={handleOpenAuditLogModal}
-                          onQuickUpdate={handleQuickUpdate}
-                          isOver={overId === node.id}
-                          disabled={!editMode}
-                          isCollapsed={collapsedNodes.has(node.id)}
-                          onToggleNode={handleToggleNode}
-                        />
-                      ))}
+                )}
+                <EmptyState title="Sin Jerarquía" message="Este sinóptico aún no tiene una familia o jerarquía creada." />
+                {rootProduct && !editMode && (
+                  <button onClick={() => handleOpenModal(null, { parentId: rootProduct.id, rootProductId: rootProduct.id, type: 'subproducto' })} className="mt-4 px-6 py-2 text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none">
+                    Añadir Primer Item
+                  </button>
+                )}
+              </div>
+            ) : (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onDragEnd={handleDragEnd}
+                onDragCancel={handleDragCancel}
+              >
+                <SortableContext items={flattenedTreeIds} strategy={verticalListSortingStrategy}>
+                  <div className="bg-white p-8 rounded-lg shadow-md">
+                    <div className="mb-6 border-b pb-4">
+                      <h1 className="text-3xl font-bold text-gray-800">{rootProduct?.nombre || rootProduct?.descripcion}</h1>
+                      {editMode && (
+                        <div className="mt-4">
+                          <button
+                            onClick={() => handleOpenModal(null, { parentId: rootProduct.id, rootProductId: rootProduct.id, type: 'subproducto' })}
+                            className="px-4 py-2 rounded-md text-white font-semibold bg-blue-600 hover:bg-blue-700"
+                          >
+                            Añadir Item Hijo al Producto Principal
+                          </button>
+                        </div>
+                      )}
+                      <p className="text-sm text-gray-500 mt-4">Creado por: <span className="font-semibold">{rootProduct?.createdBy || 'N/A'}</span> el {rootProduct?.createdAt?.toDate()?.toLocaleDateString() || 'N/A'}</p>
+                      <p className="text-sm text-gray-500">Última mod.: <span className="font-semibold">{rootProduct?.lastModifiedBy || 'N/A'}</span> el {rootProduct?.lastModifiedAt?.toDate()?.toLocaleDateString() || 'N/A'}</p>
+                    </div>
+                    <div className="border rounded-lg overflow-hidden">
+                      {renderHeader()}
+                      <div className="divide-y divide-gray-200">
+                        {flattenedTree.map((node) => (
+                          <DraggableSinopticoNode
+                            key={node.id}
+                            node={node}
+                            level={node.level}
+                            isLastChild={node.isLastChild}
+                            editMode={editMode}
+                            onEdit={handleOpenModal}
+                            onOpenAuditLog={handleOpenAuditLogModal}
+                            onQuickUpdate={handleQuickUpdate}
+                            isOver={overId === node.id}
+                            disabled={!editMode}
+                            isCollapsed={collapsedNodes.has(node.id)}
+                            onToggleNode={handleToggleNode}
+                          />
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </SortableContext>
-              <DragOverlay>
-                {activeId ? (
-                  <div style={{
-                    '--tw-ring-color': 'rgba(59, 130, 246, 0.5)',
-                    boxShadow: '0 0 0 calc(1px + var(--tw-ring-offset-width, 0px)) var(--tw-ring-color), 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)',
-                    opacity: 0.9,
-                    borderRadius: '0.5rem',
-                    pointerEvents: 'none',
-                  }}>
-                    <SinopticoNode
-                      node={flattenedTree.find(item => item.id === activeId)}
-                      level={0}
-                      editMode={false}
-                      onEdit={() => {}}
-                      onQuickUpdate={() => {}}
-                      onOpenAuditLog={() => {}}
-                    />
-                  </div>
-                ) : null}
-              </DragOverlay>
-            </DndContext>
-          )
-        )}
+                </SortableContext>
+                <DragOverlay>
+                  {activeId ? (
+                    <div style={{
+                      '--tw-ring-color': 'rgba(59, 130, 246, 0.5)',
+                      boxShadow: '0 0 0 calc(1px + var(--tw-ring-offset-width, 0px)) var(--tw-ring-color), 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)',
+                      opacity: 0.9,
+                      borderRadius: '0.5rem',
+                      pointerEvents: 'none',
+                    }}>
+                      <SinopticoNode
+                        node={flattenedTree.find(item => item.id === activeId)}
+                        level={0}
+                        editMode={false}
+                        onEdit={() => {}}
+                        onQuickUpdate={() => {}}
+                        onOpenAuditLog={() => {}}
+                      />
+                    </div>
+                  ) : null}
+                </DragOverlay>
+              </DndContext>
+            )
+          )}
+        </main>
       </div>
       <SinopticoItemModal isOpen={isModalOpen} onClose={handleCloseModal} onSave={handleSave} item={editingItem} allItems={allItems} {...modalInitialState} />
       <AuditLogModal isOpen={isAuditLogModalOpen} onClose={handleCloseAuditLogModal} itemId={auditedItemId} />
