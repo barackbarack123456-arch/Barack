@@ -1,44 +1,14 @@
-import {
-  db,
-  collection,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc
-} from '../firebase';
+import { createCrudService } from '../firebaseServiceFactory';
+import { db, collection, getDocs } from '../firebase';
 
 const PROVEEDORES_COLLECTION = 'proveedores';
 
-// Function to get all suppliers
-export const getProveedores = async () => {
-  const proveedoresCollection = collection(db, PROVEEDORES_COLLECTION);
-  const snapshot = await getDocs(proveedoresCollection);
-  const proveedoresList = snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }));
-  return proveedoresList;
-};
+const proveedorCrudService = createCrudService(PROVEEDORES_COLLECTION);
 
-// Function to add a new supplier
-export const addProveedor = async (proveedorData) => {
-  const proveedoresCollection = collection(db, PROVEEDORES_COLLECTION);
-  const docRef = await addDoc(proveedoresCollection, proveedorData);
-  return docRef.id;
-};
-
-// Function to update a supplier
-export const updateProveedor = async (id, proveedorData) => {
-  const proveedorDoc = doc(db, PROVEEDORES_COLLECTION, id);
-  await updateDoc(proveedorDoc, proveedorData);
-};
-
-// Function to delete a supplier
-export const deleteProveedor = async (id) => {
-  const proveedorDoc = doc(db, PROVEEDORES_COLLECTION, id);
-  await deleteDoc(proveedorDoc);
-};
+export const getProveedores = proveedorCrudService.get;
+export const addProveedor = proveedorCrudService.add;
+export const updateProveedor = proveedorCrudService.update;
+export const deleteProveedor = proveedorCrudService.delete;
 
 export const getProveedoresCount = async () => {
   const proveedoresCollection = collection(db, PROVEEDORES_COLLECTION);
