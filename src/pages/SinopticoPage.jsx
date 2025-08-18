@@ -26,6 +26,7 @@ import AuditLogModal from '../components/AuditLogModal';
 import { useFlattenedTree } from '../hooks/useFlattenedTree';
 import { useNotification } from '../hooks/useNotification';
 import { useAuth } from '../hooks/useAuth';
+import Caratula from '../components/Caratula';
 
 const SinopticoPage = () => {
   const { productId } = useParams();
@@ -343,6 +344,7 @@ const SinopticoPage = () => {
   return (
     <div className="p-6 bg-gray-50 min-h-full">
       <div className="max-w-7xl mx-auto">
+        <Caratula />
         <div className="flex justify-between items-center mb-4">
           <button onClick={() => navigate('/productos')} className="text-blue-600 hover:underline">
             &larr; Volver a Productos
