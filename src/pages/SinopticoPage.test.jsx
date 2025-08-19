@@ -4,11 +4,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import SinopticoPage from './SinopticoPage';
 import * as sinopticoService from '../services/sinopticoService';
-import * as sinopticoItemsService from '../services/modules/sinopticoItemsService';
+import { getSinopticoItems, updateSinopticoItem } from '../services/modules/sinopticoItemsService';
 
 // Mock services and utils
 vi.mock('../services/sinopticoService');
-vi.mock('../services/modules/sinopticoItemsService');
+// Mock completo para sinopticoItemsService
+vi.mock('../services/modules/sinopticoItemsService', () => ({
+  getSinopticoItems: vi.fn(),
+  updateSinopticoItem: vi.fn(),
+  addSinopticoItem: vi.fn(),
+  deleteSinopticoItem: vi.fn(),
+  getAuditLogsForItem: vi.fn(() => Promise.resolve([])), // Devuelve un array vacío por defecto
+}));
 vi.mock('../utils/fileExporters');
 vi.mock('../services/firebase', async (importOriginal) => {
     const actual = await importOriginal();
@@ -135,8 +142,8 @@ describe('SinopticoPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     sinopticoService.getHierarchyForProduct.mockResolvedValue(JSON.parse(JSON.stringify(mockHierarchy)));
-    sinopticoItemsService.getSinopticoItems.mockResolvedValue(mockAllItems);
-    sinopticoItemsService.updateSinopticoItem.mockResolvedValue(true);
+    getSinopticoItems.mockResolvedValue({ data: mockAllItems, lastVisible: null });
+    updateSinopticoItem.mockResolvedValue(true);
     sinopticoService.moveSinopticoItem.mockResolvedValue(true);
   });
 
@@ -177,8 +184,8 @@ describe('SinopticoPage', () => {
     const editModeButton = screen.getByText('Editar Jerarquía');
     fireEvent.click(editModeButton);
     await waitFor(() => {
-        expect(screen.getAllByTitle('Editar Item Completo').length).toBeGreaterThan(0);
-        expect(screen.getAllByTitle('Añadir Item Hijo').length).toBeGreaterThan(0);
+        expect(screen.getAllByTitle('Editar este item en el formulario principal').length).toBeGreaterThan(0);
+        expect(screen.getAllByTitle('Añadir un nuevo item como hijo de este').length).toBeGreaterThan(0);
     });
 
     // Exit edit mode
@@ -212,7 +219,7 @@ describe('SinopticoPage', () => {
 
     // The input should disappear and the service should be called
     await waitFor(() => {
-      expect(sinopticoItemsService.updateSinopticoItem).toHaveBeenCalledWith('child1', { nombre: 'Updated Child 1' });
+      expect(updateSinopticoItem).toHaveBeenCalledWith('child1', { nombre: 'Updated Child 1' });
     });
 
     // UI should update optimistically
@@ -228,7 +235,7 @@ describe('SinopticoPage', () => {
 
     // Find the row for Child 1 and click its edit button
     const child1Row = (await within(hierarchyList).findByText('Child 1')).closest('.grid');
-    const editButton = within(child1Row).getByTitle('Editar Item Completo');
+    const editButton = within(child1Row).getByTitle('Editar este item en el formulario principal');
     fireEvent.click(editButton);
 
     await waitFor(() => {
@@ -281,7 +288,7 @@ describe('SinopticoPage', () => {
 
     // The input should disappear and the service should be called
     await waitFor(() => {
-      expect(sinopticoItemsService.updateSinopticoItem).toHaveBeenCalledWith('child2', { codigo: 'S-002-UPDATED' });
+      expect(updateSinopticoItem).toHaveBeenCalledWith('child2', { codigo: 'S-002-UPDATED' });
     });
 
     // UI should update optimistically

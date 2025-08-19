@@ -5,16 +5,30 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
-  doc
+  doc,
+  query,
+  orderBy,
+  limit,
+  startAfter
 } from './firebase';
 
 export const createCrudService = (collectionName) => {
   const dataCollection = collection(db, collectionName);
 
-  const get = async () => {
+  const get = async ({ startAfterDoc, limit: dataLimit } = {}) => {
     try {
-      const snapshot = await getDocs(dataCollection);
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const q = query(
+        dataCollection,
+        orderBy('id'),
+        ...(startAfterDoc ? [startAfter(startAfterDoc)] : []),
+        ...(dataLimit ? [limit(dataLimit)] : [])
+      );
+
+      const snapshot = await getDocs(q);
+      const lastVisible = snapshot.docs[snapshot.docs.length - 1];
+      const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      return { data, lastVisible };
     } catch (error) {
       console.error(`Error al obtener datos de ${collectionName}:`, error);
       throw new Error(`No se pudieron obtener los datos de ${collectionName}.`);
@@ -24,6 +38,7 @@ export const createCrudService = (collectionName) => {
   const add = async (data) => {
     try {
       const docRef = await addDoc(dataCollection, data);
+      await updateDoc(docRef, { id: docRef.id });
       return docRef.id;
     } catch (error) {
       console.error(`Error al añadir dato en ${collectionName}:`, error);

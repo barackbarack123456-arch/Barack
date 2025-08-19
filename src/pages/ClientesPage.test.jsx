@@ -3,11 +3,16 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import ClientesPage from './ClientesPage';
-import * as clientesService from '../services/modules/clientesService';
+import { getClientes } from '../services/modules/clientesService';
 import { NotificationProvider } from '../contexts/NotificationProvider';
 
 // Mock the services
-vi.mock('../services/modules/clientesService');
+vi.mock('../services/modules/clientesService', () => ({
+  getClientes: vi.fn(),
+  addCliente: vi.fn(),
+  updateCliente: vi.fn(),
+  deleteCliente: vi.fn(),
+}));
 
 // Mock the useNotification hook
 vi.mock('../hooks/useNotification', () => ({
@@ -30,7 +35,7 @@ describe('ClientesPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Mock the getClientes service to return some data or an empty array
-    clientesService.getClientes.mockResolvedValue([]);
+    getClientes.mockResolvedValue({ data: [], lastVisible: null });
   });
 
   it('should open the create client modal when "Añadir Cliente" button is clicked', async () => {
