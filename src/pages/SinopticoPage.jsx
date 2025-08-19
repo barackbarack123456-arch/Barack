@@ -48,9 +48,31 @@ const SinopticoPage = () => {
   const [activeId, setActiveId] = useState(null);
   const [overId, setOverId] = useState(null);
   const [collapsedNodes, setCollapsedNodes] = useState(new Set());
+  const [levelFilters, setLevelFilters] = useState([]);
 
   const flattenedTree = useFlattenedTree(hierarchy, collapsedNodes);
-  const flattenedTreeIds = useMemo(() => flattenedTree.map(item => item.id), [flattenedTree]);
+
+  const filteredFlattenedTree = useMemo(() => {
+    if (levelFilters.length === 0) {
+      return flattenedTree;
+    }
+    return flattenedTree.filter(item => levelFilters.includes(item.level));
+  }, [flattenedTree, levelFilters]);
+
+  const flattenedTreeIds = useMemo(() => filteredFlattenedTree.map(item => item.id), [filteredFlattenedTree]);
+
+  const maxLevel = useMemo(() => {
+    if (!flattenedTree || flattenedTree.length === 0) return 0;
+    return Math.max(...flattenedTree.map(item => item.level));
+  }, [flattenedTree]);
+
+  const handleLevelFilterChange = (level) => {
+    setLevelFilters(prev =>
+      prev.includes(level)
+        ? prev.filter(l => l !== level)
+        : [...prev, level]
+    );
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor)
@@ -400,10 +422,26 @@ const SinopticoPage = () => {
                       </button>
                     </div>
                   )}
+                  <div className="mb-4">
+                    <h3 className="text-lg font-semibold mb-2">Filtrar por Nivel</h3>
+                    <div className="flex items-center space-x-4">
+                      {[...Array(maxLevel + 1).keys()].slice(1).map(level => (
+                        <label key={level} className="flex items-center space-x-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            checked={levelFilters.includes(level)}
+                            onChange={() => handleLevelFilterChange(level)}
+                          />
+                          <span>Nivel {level}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
                   <div className="border rounded-lg overflow-hidden">
                     {renderHeader()}
                     <div className="divide-y divide-gray-200">
-                      {flattenedTree.map((node) => (
+                      {filteredFlattenedTree.map((node) => (
                         <DraggableSinopticoNode
                           key={node.id}
                           node={node}
