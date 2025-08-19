@@ -15,6 +15,7 @@ import {
 } from '@dnd-kit/sortable';
 import { getHierarchyForProduct, createNewChildItem, moveSinopticoItem, updateItemsOrder, addExistingItemsAsChildren } from '../services/sinopticoService';
 import { updateSinopticoItem, getSinopticoItems } from '../services/modules/sinopticoItemsService';
+import { getProyectoById } from '../services/modules/proyectosService';
 import { exportToCSV, exportToPDF } from '../utils/fileExporters';
 import EmptyState from '../components/EmptyState';
 import GridSkeletonLoader from '../components/GridSkeletonLoader';
@@ -36,6 +37,7 @@ const SinopticoPage = () => {
   const [hierarchy, setHierarchy] = useState(null);
   const [allItems, setAllItems] = useState([]);
   const [rootProduct, setRootProduct] = useState(null);
+  const [projectData, setProjectData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editMode, setEditMode] = useState(false);
@@ -104,6 +106,11 @@ const SinopticoPage = () => {
 
       const rootItem = allItemsData.find(item => item.id === productId);
       setRootProduct(rootItem);
+
+      if (rootItem && rootItem.proyecto) {
+        const project = await getProyectoById(rootItem.proyecto);
+        setProjectData(project);
+      }
 
       if (!tree || tree.length === 0) {
         setHierarchy(null);
@@ -369,7 +376,7 @@ const SinopticoPage = () => {
   return (
     <div className="p-6 bg-gray-50 min-h-full">
       <div className="max-w-7xl mx-auto">
-        <Caratula />
+        <Caratula rootProduct={rootProduct} projectData={projectData} />
         <div className="flex justify-between items-center mb-4">
           <button onClick={() => navigate('/productos')} className="text-blue-600 hover:underline">
             &larr; Volver a Productos
