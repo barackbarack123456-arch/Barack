@@ -39,22 +39,59 @@ function CrudPage({
   const [deletingItemId, setDeletingItemId] = useState(null);
   const { addNotification } = useNotification();
 
-  const fetchData = useCallback(async () => {
+  const [lastVisibleDoc, setLastVisibleDoc] = useState(null);
+  const [firstVisibleDoc, setFirstVisibleDoc] = useState(null);
+  const [isLastPage, setIsLastPage] = useState(false);
+  const [isFirstPage, setIsFirstPage] = useState(true);
+  const [page, setPage] = useState(1);
+
+  const PAGE_SIZE = 10;
+
+  const fetchData = useCallback(async (direction = 'next') => {
     setLoading(true);
     try {
-      const data = await services.get();
-      setItems(data);
+      const { data, lastVisible } = await services.get({
+        startAfterDoc: direction === 'next' ? lastVisibleDoc : firstVisibleDoc,
+        limit: PAGE_SIZE,
+      });
+
+      if (data.length > 0) {
+        setItems(data);
+        setFirstVisibleDoc(data[0]);
+        setLastVisibleDoc(lastVisible);
+        setIsLastPage(data.length < PAGE_SIZE);
+      } else {
+        setIsLastPage(true);
+      }
     } catch (error) {
       addNotification(`Error al cargar ${entityNamePlural.toLowerCase()}: ${error.message}`, 'error');
       console.error(`Error fetching ${entityNamePlural.toLowerCase()}:`, error);
     } finally {
       setLoading(false);
     }
-  }, [services, entityNamePlural]);
+  }, [services, entityNamePlural, lastVisibleDoc, firstVisibleDoc]);
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, []);
+
+  const handleNextPage = () => {
+    if (!isLastPage) {
+      setPage(prevPage => prevPage + 1);
+      fetchData('next');
+      setIsFirstPage(false);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (page > 1) {
+      setPage(prevPage => prevPage - 1);
+      fetchData('prev');
+      setIsLastPage(false);
+    } else {
+      setIsFirstPage(true);
+    }
+  };
 
   const handleOpenModal = (item = null) => {
     setEditingItem(item);
@@ -76,6 +113,10 @@ function CrudPage({
         addNotification(`${entityName} añadido con éxito`, 'success');
       }
       handleCloseModal();
+      setLastVisibleDoc(null);
+      setFirstVisibleDoc(null);
+      setPage(1);
+      setIsFirstPage(true);
       fetchData();
     } catch (error) {
       addNotification(`Error al guardar ${entityName.toLowerCase()}: ${error.message}`, 'error');
@@ -94,6 +135,10 @@ function CrudPage({
       addNotification(`${entityName} eliminado con éxito`, 'success');
       setConfirmOpen(false);
       setDeletingItemId(null);
+      setLastVisibleDoc(null);
+      setFirstVisibleDoc(null);
+      setPage(1);
+      setIsFirstPage(true);
       fetchData();
     } catch (error) {
       addNotification(`Error al eliminar ${entityName.toLowerCase()}: ${error.message}`, 'error');
@@ -140,7 +185,7 @@ function CrudPage({
         </button>
       </div>
 
-      <div className="flex-grow bg-surface rounded-xl shadow-md p-4">
+      <div className="flex-grow bg-surface rounded-xl shadow-md p-4 flex flex-col">
         <DataGrid
           rowData={items}
           columnDefs={columnDefs}
@@ -149,6 +194,23 @@ function CrudPage({
             actionsCellRenderer: ActionsCellRenderer,
           }}
         />
+        <div className="flex justify-between items-center mt-4">
+          <button
+            onClick={handlePrevPage}
+            disabled={isFirstPage || page === 1}
+            className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md disabled:opacity-50"
+          >
+            Anterior
+          </button>
+          <span className="text-gray-700">Página {page}</span>
+          <button
+            onClick={handleNextPage}
+            disabled={isLastPage}
+            className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md disabled:opacity-50"
+          >
+            Siguiente
+          </button>
+        </div>
       </div>
 
       <Transition
