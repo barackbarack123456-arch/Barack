@@ -37,10 +37,14 @@ const AddItemFromDBModal = ({ isOpen, onClose, onAddItems, parentId, rootProduct
   }, [isOpen]);
 
   const filteredItems = useMemo(() => {
-    return items.filter(item =>
-      item.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.codigo.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    if (!items) return [];
+    return items.filter(item => {
+        const nombre = item.nombre || '';
+        const codigo = item.codigo || '';
+        const term = searchTerm.toLowerCase();
+        return nombre.toLowerCase().includes(term) ||
+               codigo.toLowerCase().includes(term);
+    });
   }, [items, searchTerm]);
 
   const handleToggleSelection = (itemId) => {
