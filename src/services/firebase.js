@@ -30,7 +30,9 @@ import {
   query,
   where,
   orderBy,
-  writeBatch
+  writeBatch,
+  startAfter,
+  limit
 } from "firebase/firestore";
 
 // Your web app's Firebase configuration, loaded from environment variables
@@ -77,5 +79,7 @@ export {
   query,
   where,
   orderBy,
-  writeBatch
+  writeBatch,
+  startAfter,
+  limit
 };
