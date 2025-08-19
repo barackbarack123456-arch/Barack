@@ -87,7 +87,7 @@ const SinopticoNode = ({ node, level, editMode, onEdit, onQuickUpdate, onOpenAud
   };
 
   return (
-    <div className={`relative ${editMode ? 'border border-gray-200 rounded-md' : ''}`}>
+    <div className={`relative sinoptico-node ${editMode ? 'border border-gray-200 rounded-md' : ''}`}>
       <div className={`grid grid-cols-12 gap-4 px-4 py-3 items-center ${editMode ? 'hover:bg-gray-50' : ''}`}>
         <div className="col-span-2 flex items-center relative" style={indentation}>
           {hasChildren ? (
@@ -97,9 +97,9 @@ const SinopticoNode = ({ node, level, editMode, onEdit, onQuickUpdate, onOpenAud
           ) : (
             <span className="w-6 mr-2"></span> // Placeholder for alignment
           )}
-          <div className="font-medium text-gray-800 w-full">{renderEditableCell('nombre', node.nombre || node.descripcion)}</div>
+          <div className="font-semibold text-lg text-gray-900 w-full">{renderEditableCell('nombre', node.nombre || node.descripcion)}</div>
         </div>
-        <div className="text-gray-600 w-full">{renderEditableCell('codigo', node.codigo)}</div>
+        <div className="text-base text-gray-700 w-full">{renderEditableCell('codigo', node.codigo)}</div>
         <div className="text-gray-600">{renderEditableCell('cantidad', node.cantidad)}</div>
         <div className="text-gray-600">{node.unidadDeMedida || 'N/A'}</div>
         <div className="text-gray-600 col-span-2">{renderEditableCell('comentarios', node.comentarios)}</div>
@@ -114,17 +114,17 @@ const SinopticoNode = ({ node, level, editMode, onEdit, onQuickUpdate, onOpenAud
         <div className="text-gray-600">{node.medidas || 'N/A'}</div>
         {editMode && (
           <div className="col-span-1 flex items-center space-x-2">
-            <button onClick={() => onOpenAuditLog(node.id)} className="text-gray-600 hover:text-gray-800" title="Ver Historial">
+            <button onClick={() => onOpenAuditLog(node.id)} className="text-gray-600 hover:text-gray-800" title="Ver historial de cambios de este item">
               <ClockIcon className="h-5 w-5" />
             </button>
-            <button onClick={() => onEdit(node)} className="text-blue-600 hover:text-blue-800" title="Editar Item Completo">
+            <button onClick={() => onEdit(node)} className="text-blue-600 hover:text-blue-800" title="Editar este item en el formulario principal">
               <PencilIcon className="h-5 w-5" />
             </button>
             {node.type !== 'insumo' && (
               <button
                 onClick={() => onEdit(null, { parentId: node.id, rootProductId: node.rootProductId || node.id, type: 'subproducto' })}
-                className="text-green-600 hover:text-green-800"
-                title="Añadir Item Hijo"
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded-full"
+                title="Añadir un nuevo item como hijo de este"
               >
                 <PlusCircleIcon className="h-5 w-5" />
               </button>
