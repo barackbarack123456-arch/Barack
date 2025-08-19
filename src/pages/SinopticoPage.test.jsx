@@ -142,7 +142,7 @@ describe('SinopticoPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     sinopticoService.getHierarchyForProduct.mockResolvedValue(JSON.parse(JSON.stringify(mockHierarchy)));
-    getSinopticoItems.mockResolvedValue({ data: mockAllItems, lastVisible: null });
+    getSinopticoItems.mockResolvedValue(mockAllItems);
     updateSinopticoItem.mockResolvedValue(true);
     sinopticoService.moveSinopticoItem.mockResolvedValue(true);
   });

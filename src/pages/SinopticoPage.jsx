@@ -96,7 +96,7 @@ const SinopticoPage = () => {
   const fetchHierarchy = useCallback(async () => {
     try {
       setLoading(true);
-      const [tree, { data: allItemsData }] = await Promise.all([
+      const [tree, allItemsData] = await Promise.all([
         getHierarchyForProduct(productId),
         getSinopticoItems()
       ]);
