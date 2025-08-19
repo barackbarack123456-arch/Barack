@@ -350,7 +350,7 @@ const SinopticoPage = () => {
   };
 
   const renderHeader = () => (
-    <div className="grid grid-cols-12 gap-4 px-4 py-2 bg-gray-200 text-gray-700 font-bold rounded-t-lg">
+    <div className="sticky top-0 z-10 grid grid-cols-12 gap-4 px-4 py-2 bg-gray-200 text-gray-700 font-bold rounded-t-lg">
       <div className="col-span-2">Nombre</div>
       <div>Código</div>
       <div>Cantidad</div>
@@ -377,20 +377,30 @@ const SinopticoPage = () => {
     <div className="p-6 bg-gray-50 min-h-full">
       <div className="max-w-7xl mx-auto">
         <Caratula rootProduct={rootProduct} projectData={projectData} />
-        <div className="flex justify-between items-center mb-4">
+        <div className="bg-white p-4 rounded-lg shadow-md mb-4 flex justify-between items-center">
           <button onClick={() => navigate('/productos')} className="text-blue-600 hover:underline">
             &larr; Volver a Productos
           </button>
-          <div className="flex items-center space-x-2">
-            <button onClick={handleExportCSV} className="px-4 py-2 rounded-md text-white font-semibold bg-green-600 hover:bg-green-700" disabled={loading || error || !hierarchy || hierarchy.length === 0}>
-              Exportar a CSV
-            </button>
-            <button onClick={handleExportPDF} className="px-4 py-2 rounded-md text-white font-semibold bg-red-600 hover:bg-red-700" disabled={loading || error || !hierarchy || hierarchy.length === 0}>
-              Exportar a PDF
-            </button>
-            <button onClick={() => setEditMode(!editMode)} className={`px-4 py-2 rounded-md text-white font-semibold ${editMode ? 'bg-gray-600 hover:bg-gray-700' : 'bg-blue-600 hover:bg-blue-700'}`} disabled={loading || error}>
-              {editMode ? 'Salir del Modo Edición' : 'Editar Jerarquía'}
-            </button>
+          <div className="flex items-center">
+            {editMode && (
+              <button
+                onClick={() => setIsAddItemModalOpen(true)}
+                className="px-4 py-2 rounded-md text-white font-semibold bg-blue-600 hover:bg-blue-700"
+              >
+                Añadir Componente Existente
+              </button>
+            )}
+            <div className={`flex items-center space-x-2 ${editMode ? 'pl-4 ml-4 border-l border-gray-300' : ''}`}>
+              <button onClick={handleExportCSV} className="px-4 py-2 rounded-md text-white font-semibold bg-green-600 hover:bg-green-700" disabled={loading || error || !hierarchy || hierarchy.length === 0}>
+                Exportar a CSV
+              </button>
+              <button onClick={handleExportPDF} className="px-4 py-2 rounded-md text-white font-semibold bg-red-600 hover:bg-red-700" disabled={loading || error || !hierarchy || hierarchy.length === 0}>
+                Exportar a PDF
+              </button>
+              <button onClick={() => setEditMode(!editMode)} className={`px-4 py-2 rounded-md text-white font-semibold ${editMode ? 'bg-gray-600 hover:bg-gray-700' : 'bg-blue-600 hover:bg-blue-700'}`} disabled={loading || error}>
+                {editMode ? 'Salir del Modo Edición' : 'Editar Jerarquía'}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -419,16 +429,6 @@ const SinopticoPage = () => {
                     <p className="text-sm text-gray-500">Creado por: <span className="font-semibold">{rootProduct?.createdBy || 'N/A'}</span> el {rootProduct?.createdAt?.toDate()?.toLocaleDateString() || 'N/A'}</p>
                     <p className="text-sm text-gray-500">Última mod.: <span className="font-semibold">{rootProduct?.lastModifiedBy || 'N/A'}</span> el {rootProduct?.lastModifiedAt?.toDate()?.toLocaleDateString() || 'N/A'}</p>
                   </div>
-                  {editMode && (
-                    <div className="mb-4">
-                      <button
-                        onClick={() => setIsAddItemModalOpen(true)}
-                        className="px-4 py-2 rounded-md text-white font-semibold bg-blue-600 hover:bg-blue-700"
-                      >
-                        Añadir Item Hijo al Producto Principal
-                      </button>
-                    </div>
-                  )}
                   <div className="mb-4">
                     <h3 className="text-lg font-semibold mb-2">Filtrar por Nivel</h3>
                     <div className="flex items-center space-x-4">
@@ -445,7 +445,12 @@ const SinopticoPage = () => {
                       ))}
                     </div>
                   </div>
-                  <div className="border rounded-lg overflow-hidden">
+                  {editMode && (
+                    <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded-md" role="alert">
+                      <p className="font-bold">Modo Edición Activado</p>
+                    </div>
+                  )}
+                  <div className="border rounded-lg">
                     {renderHeader()}
                     <div className="divide-y divide-gray-200">
                       {filteredFlattenedTree.map((node) => (

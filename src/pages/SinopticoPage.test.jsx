@@ -238,7 +238,7 @@ describe('SinopticoPage', () => {
     });
   });
 
-  it('opens the AddItemFromDB modal when "Añadir Item Hijo al Producto Principal" is clicked', async () => {
+  it('opens the AddItemFromDB modal when "Añadir Componente Existente" is clicked', async () => {
     renderComponent();
     await screen.findByRole('heading', { name: 'Root Product', level: 1 });
 
@@ -246,7 +246,7 @@ describe('SinopticoPage', () => {
     fireEvent.click(screen.getByText('Editar Jerarquía'));
 
     // Click the main "add child" button
-    const addButton = screen.getByText('Añadir Item Hijo al Producto Principal');
+    const addButton = screen.getByText('Añadir Componente Existente');
     fireEvent.click(addButton);
 
     // Assert that the new modal opens
