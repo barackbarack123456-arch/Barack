@@ -9,11 +9,14 @@ const InfoCell = ({ label, value, className = '' }) => (
   </div>
 );
 
-const Caratula = ({ rootProduct }) => {
-  // Static data for demonstration
-  const realizadoPor = "Nombre del Realizador";
-  const fechaRealizacion = new Date().toLocaleDateString();
-  const revisadoPor = "Nombre del Revisor";
+const Caratula = ({ rootProduct, projectData }) => {
+  const getDisplayValue = (value) => value || 'N/A';
+
+  const formatDate = (timestamp) => {
+    if (!timestamp) return 'N/A';
+    // Assuming timestamp is a Firebase Timestamp object
+    return timestamp.toDate ? timestamp.toDate().toLocaleDateString() : new Date(timestamp).toLocaleDateString();
+  };
 
   return (
     <div className="bg-surface shadow-lg border border-gray-200 w-full max-w-5xl mx-auto my-8">
@@ -26,27 +29,25 @@ const Caratula = ({ rootProduct }) => {
         {/* Project Title Section */}
         <div className="col-span-8 flex items-center justify-center p-4 bg-primary text-white">
           <h1 className="text-2xl font-bold text-center">
-            {rootProduct ? rootProduct.nombre : "Nombre del Proyecto"}
+            {getDisplayValue(projectData?.nombre)}
           </h1>
         </div>
 
         {/* Data Grid */}
         <div className="col-span-12 grid grid-cols-4 border-t border-gray-300">
-          <InfoCell label="Realizado por" value={realizadoPor} />
-          <InfoCell label="Fecha de realización" value={fechaRealizacion} />
-          <InfoCell label="Revisado por" value={revisadoPor} />
-          <InfoCell label="Última Modificación" value={new Date().toLocaleDateString()} />
+          <InfoCell label="Realizado por" value={getDisplayValue(rootProduct?.createdBy)} />
+          <InfoCell label="Fecha de realización" value={formatDate(rootProduct?.createdAt)} />
+          <InfoCell label="Revisado por" value={getDisplayValue(projectData?.revisadoPor)} />
+          <InfoCell label="Última Modificación" value={formatDate(rootProduct?.lastModifiedAt)} />
         </div>
 
         {/* Dynamic Project Data */}
-        {rootProduct && (
-          <div className="col-span-12 grid grid-cols-4">
-            <InfoCell label="Código" value={rootProduct.codigo} />
-            <InfoCell label="Descripción" value={rootProduct.descripcion} />
-            <InfoCell label="Cliente" value={rootProduct.cliente} />
-            <InfoCell label="Estado" value={rootProduct.estado} />
-          </div>
-        )}
+        <div className="col-span-12 grid grid-cols-4">
+          <InfoCell label="Código del Proyecto" value={getDisplayValue(projectData?.codigo)} />
+          <InfoCell label="Cliente" value={getDisplayValue(projectData?.cliente)} />
+          <InfoCell label="Código del Producto" value={getDisplayValue(rootProduct?.codigo)} />
+          <InfoCell label="Versión del Producto" value={getDisplayValue(rootProduct?.version)} />
+        </div>
       </div>
     </div>
   );
